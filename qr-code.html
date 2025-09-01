@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code for iPhone Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        .url {
+            font-size: 18px;
+            color: #333;
+            margin: 20px 0;
+            padding: 10px;
+            background: #e9e9e9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Test Your Terminal Site on iPhone</h1>
+        <p>Scan this QR code with your iPhone camera:</p>
+        
+        <div id="qrcode"></div>
+        
+        <div class="url">
+            <strong>URL:</strong> http://192.168.1.35:8000
+        </div>
+        
+        <p><em>Make sure your iPhone is on the same WiFi network!</em></p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // Wait for the library to load
+        window.addEventListener('load', function() {
+            const canvas = document.createElement('canvas');
+            document.getElementById('qrcode').appendChild(canvas);
+            
+            // Generate QR code
+            QRCode.toCanvas(canvas, 'http://192.168.1.35:8000', {
+                width: 256,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            }, function (error) {
+                if (error) {
+                    console.error(error);
+                    document.getElementById('qrcode').innerHTML = '<p style="color: red;">QR Code generation failed. Please use the URL directly.</p>';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
