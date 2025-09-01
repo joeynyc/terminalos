@@ -9,6 +9,11 @@ class Terminal {
         this.currentDirectory = '~';
         this.currentTheme = 'green';
         
+        // Game state management
+        this.gameActive = false;
+        this.currentGame = null;
+        this.gameData = {};
+        
         // Available themes
         this.themes = {
             green: { name: 'Matrix Green', color: '#00ff00', description: 'Classic hacker terminal' },
@@ -44,7 +49,13 @@ class Terminal {
             linkedin: () => this.openLinkedIn(),
             resume: () => this.showResume(),
             theme: (args) => this.themeCommand(args),
-            themes: () => this.showThemes()
+            themes: () => this.showThemes(),
+            games: () => this.showGames(),
+            snake: () => this.playSnake(),
+            guess: () => this.playGuessNumber(),
+            wordle: () => this.playWordGuess(),
+            tictactoe: () => this.playTicTacToe(),
+            rps: () => this.playRockPaperScissors()
         };
 
         this.init();
@@ -84,6 +95,14 @@ class Terminal {
     executeCommand() {
         const command = this.input.value.trim();
         if (!command) return;
+
+        // Handle game states
+        if (this.gameActive && this.currentGame) {
+            this.handleGameInput(command);
+            this.input.value = '';
+            this.scrollToBottom();
+            return;
+        }
 
         this.addToOutput(`${this.getPrompt()}${command}`, 'command-line');
         this.commandHistory.unshift(command);
@@ -140,6 +159,14 @@ Available Commands:
 <span class="warning">Theme Commands:</span>
 <span class="success">themes</span>       - Show available themes
 <span class="success">theme [name]</span> - Change terminal theme
+
+<span class="warning">Games:</span>
+<span class="success">games</span>        - Show available games
+<span class="success">snake</span>        - Play Snake game
+<span class="success">guess</span>        - Number guessing game
+<span class="success">wordle</span>       - Word guessing game
+<span class="success">tictactoe</span>    - Play Tic-Tac-Toe
+<span class="success">rps</span>          - Rock Paper Scissors
 
 <span class="warning">Special Commands:</span>
 <span class="success">sudo su</span>      - Switch to root user (🔓)
@@ -322,6 +349,7 @@ drwxr-xr-x  joey  staff   about_me.txt
 drwxr-xr-x  joey  staff   skills.json
 drwxr-xr-x  joey  staff   projects/
 drwxr-xr-x  joey  staff   contact.info
+drwxr-xr-x  joey  staff   games/
 -rw-r--r--  joey  staff   resume.pdf
 -rw-r--r--  joey  staff   secret.encrypted
 -rwxr-xr-x  root  admin   sudo_access.sh
@@ -632,6 +660,573 @@ Computer Science Degree | University of Code (2020)
         if (savedTheme && this.themes[savedTheme]) {
             this.setTheme(savedTheme);
         }
+    }
+
+    // ========================
+    // GAMES SECTION
+    // ========================
+
+    showGames() {
+        const gamesText = `
+<span class="info">🎮 Terminal Games 🎮</span>
+═══════════════════════
+
+<span class="success">Available Games:</span>
+├── <span class="success">snake</span>      - Classic Snake game with ASCII graphics
+├── <span class="success">guess</span>      - Number guessing game (1-100)
+├── <span class="success">wordle</span>     - Word guessing game (5 letters)
+├── <span class="success">tictactoe</span>  - Tic-Tac-Toe against AI
+└── <span class="success">rps</span>        - Rock Paper Scissors
+
+<span class="warning">Game Controls:</span>
+• Most games use simple text commands
+• Snake uses WASD or arrow key letters (w/a/s/d)
+• Type 'quit' during any game to exit
+• Type 'help' in-game for game-specific commands
+
+<span class="info">High Scores:</span>
+Games will track your best scores during this session!
+
+<span class="success">Ready to play?</span> Just type the game name to start!
+        `;
+        this.addToOutput(gamesText, 'command-output');
+    }
+
+    handleGameInput(input) {
+        if (input.toLowerCase() === 'quit' || input.toLowerCase() === 'exit') {
+            this.endGame();
+            return;
+        }
+
+        switch (this.currentGame) {
+            case 'snake':
+                this.handleSnakeInput(input);
+                break;
+            case 'guess':
+                this.handleGuessInput(input);
+                break;
+            case 'wordle':
+                this.handleWordleInput(input);
+                break;
+            case 'tictactoe':
+                this.handleTicTacToeInput(input);
+                break;
+            case 'rps':
+                this.handleRPSInput(input);
+                break;
+        }
+    }
+
+    endGame() {
+        this.gameActive = false;
+        this.currentGame = null;
+        this.gameData = {};
+        this.addToOutput('<span class="warning">Game ended. Back to terminal.</span>', 'command-output');
+        this.addToOutput('Type \'games\' to see available games or \'help\' for all commands.', 'info');
+    }
+
+    // ========================
+    // SNAKE GAME
+    // ========================
+
+    playSnake() {
+        this.gameActive = true;
+        this.currentGame = 'snake';
+        this.gameData = {
+            board: Array(15).fill().map(() => Array(30).fill(' ')),
+            snake: [{x: 15, y: 7}, {x: 14, y: 7}, {x: 13, y: 7}],
+            direction: {x: 1, y: 0},
+            food: {x: 20, y: 7},
+            score: 0,
+            gameOver: false
+        };
+
+        this.addToOutput('<span class="success">🐍 SNAKE GAME STARTED 🐍</span>', 'command-output');
+        this.addToOutput('<span class="info">Controls: w(up) a(left) s(down) d(right) | Type "quit" to exit</span>', 'command-output');
+        this.updateSnakeDisplay();
+    }
+
+    handleSnakeInput(input) {
+        if (this.gameData.gameOver) {
+            if (input.toLowerCase() === 'r' || input.toLowerCase() === 'restart') {
+                this.playSnake();
+            }
+            return;
+        }
+
+        const direction = input.toLowerCase();
+        switch (direction) {
+            case 'w':
+                if (this.gameData.direction.y !== 1) this.gameData.direction = {x: 0, y: -1};
+                break;
+            case 's':
+                if (this.gameData.direction.y !== -1) this.gameData.direction = {x: 0, y: 1};
+                break;
+            case 'a':
+                if (this.gameData.direction.x !== 1) this.gameData.direction = {x: -1, y: 0};
+                break;
+            case 'd':
+                if (this.gameData.direction.x !== -1) this.gameData.direction = {x: 1, y: 0};
+                break;
+            default:
+                this.addToOutput('<span class="error">Use w/a/s/d to move the snake!</span>', 'command-output');
+                return;
+        }
+
+        this.moveSnake();
+    }
+
+    moveSnake() {
+        const head = {...this.gameData.snake[0]};
+        head.x += this.gameData.direction.x;
+        head.y += this.gameData.direction.y;
+
+        // Check wall collision
+        if (head.x < 0 || head.x >= 30 || head.y < 0 || head.y >= 15) {
+            this.gameData.gameOver = true;
+            this.addToOutput('<span class="error">💥 GAME OVER! Hit the wall!</span>', 'command-output');
+            this.addToOutput(`<span class="info">Final Score: ${this.gameData.score}</span>`, 'command-output');
+            this.addToOutput('<span class="warning">Type "r" to restart or "quit" to exit</span>', 'command-output');
+            return;
+        }
+
+        // Check self collision
+        for (let segment of this.gameData.snake) {
+            if (head.x === segment.x && head.y === segment.y) {
+                this.gameData.gameOver = true;
+                this.addToOutput('<span class="error">💥 GAME OVER! Snake bit itself!</span>', 'command-output');
+                this.addToOutput(`<span class="info">Final Score: ${this.gameData.score}</span>`, 'command-output');
+                this.addToOutput('<span class="warning">Type "r" to restart or "quit" to exit</span>', 'command-output');
+                return;
+            }
+        }
+
+        this.gameData.snake.unshift(head);
+
+        // Check food collision
+        if (head.x === this.gameData.food.x && head.y === this.gameData.food.y) {
+            this.gameData.score += 10;
+            this.generateFood();
+        } else {
+            this.gameData.snake.pop();
+        }
+
+        this.updateSnakeDisplay();
+    }
+
+    generateFood() {
+        do {
+            this.gameData.food = {
+                x: Math.floor(Math.random() * 30),
+                y: Math.floor(Math.random() * 15)
+            };
+        } while (this.gameData.snake.some(segment => 
+            segment.x === this.gameData.food.x && segment.y === this.gameData.food.y
+        ));
+    }
+
+    updateSnakeDisplay() {
+        const board = Array(15).fill().map(() => Array(30).fill('·'));
+        
+        // Place food
+        board[this.gameData.food.y][this.gameData.food.x] = '🍎';
+        
+        // Place snake
+        this.gameData.snake.forEach((segment, index) => {
+            if (index === 0) {
+                board[segment.y][segment.x] = '█'; // Head
+            } else {
+                board[segment.y][segment.x] = '▓'; // Body
+            }
+        });
+
+        const display = board.map(row => row.join('')).join('\n');
+        this.addToOutput(`<span class="success">Score: ${this.gameData.score}</span>\n<pre>${display}</pre>`, 'command-output');
+    }
+
+    // ========================
+    // GUESS THE NUMBER GAME
+    // ========================
+
+    playGuessNumber() {
+        this.gameActive = true;
+        this.currentGame = 'guess';
+        this.gameData = {
+            target: Math.floor(Math.random() * 100) + 1,
+            attempts: 0,
+            maxAttempts: 7,
+            guesses: []
+        };
+
+        const startText = `
+<span class="success">🎯 NUMBER GUESSING GAME 🎯</span>
+
+I'm thinking of a number between 1 and 100.
+You have ${this.gameData.maxAttempts} attempts to guess it!
+
+<span class="info">Type your guess (1-100) or "quit" to exit</span>
+        `;
+        this.addToOutput(startText, 'command-output');
+    }
+
+    handleGuessInput(input) {
+        const guess = parseInt(input);
+        
+        if (isNaN(guess) || guess < 1 || guess > 100) {
+            this.addToOutput('<span class="error">Please enter a valid number between 1 and 100!</span>', 'command-output');
+            return;
+        }
+
+        this.gameData.attempts++;
+        this.gameData.guesses.push(guess);
+
+        if (guess === this.gameData.target) {
+            this.addToOutput(`<span class="success">🎉 CONGRATULATIONS! You guessed it!</span>`, 'command-output');
+            this.addToOutput(`<span class="info">The number was ${this.gameData.target}</span>`, 'command-output');
+            this.addToOutput(`<span class="info">It took you ${this.gameData.attempts} attempts</span>`, 'command-output');
+            this.addToOutput(`<span class="info">Your guesses: ${this.gameData.guesses.join(', ')}</span>`, 'command-output');
+            this.endGame();
+            return;
+        }
+
+        const remaining = this.gameData.maxAttempts - this.gameData.attempts;
+        const hint = guess < this.gameData.target ? 'higher' : 'lower';
+        
+        if (remaining === 0) {
+            this.addToOutput(`<span class="error">💥 GAME OVER! No attempts left!</span>`, 'command-output');
+            this.addToOutput(`<span class="warning">The number was ${this.gameData.target}</span>`, 'command-output');
+            this.addToOutput(`<span class="info">Your guesses: ${this.gameData.guesses.join(', ')}</span>`, 'command-output');
+            this.endGame();
+        } else {
+            this.addToOutput(`<span class="warning">Try ${hint}! (${remaining} attempts left)</span>`, 'command-output');
+            this.addToOutput(`<span class="info">Your guesses so far: ${this.gameData.guesses.join(', ')}</span>`, 'command-output');
+        }
+    }
+
+    // ========================
+    // WORD GUESSING GAME (WORDLE-STYLE)
+    // ========================
+
+    playWordGuess() {
+        this.gameActive = true;
+        this.currentGame = 'wordle';
+        
+        const words = ['REACT', 'SNAKE', 'GAMES', 'CODER', 'LINUX', 'PIXEL', 'BYTES', 'DEBUG', 'LOGIC', 'ARRAY'];
+        this.gameData = {
+            target: words[Math.floor(Math.random() * words.length)],
+            attempts: 0,
+            maxAttempts: 6,
+            guesses: [],
+            letters: new Set()
+        };
+
+        const startText = `
+<span class="success">📝 WORD GUESSING GAME 📝</span>
+
+Guess the 5-letter word! You have ${this.gameData.maxAttempts} attempts.
+
+<span class="info">🟩 = Correct letter in right position</span>
+<span class="warning">🟨 = Correct letter in wrong position</span>
+<span class="error">⬜ = Letter not in word</span>
+
+<span class="info">Type a 5-letter word or "quit" to exit</span>
+        `;
+        this.addToOutput(startText, 'command-output');
+    }
+
+    handleWordleInput(input) {
+        const guess = input.toUpperCase().trim();
+        
+        if (guess.length !== 5 || !/^[A-Z]+$/.test(guess)) {
+            this.addToOutput('<span class="error">Please enter a valid 5-letter word!</span>', 'command-output');
+            return;
+        }
+
+        this.gameData.attempts++;
+        this.gameData.guesses.push(guess);
+
+        // Check each letter
+        let result = '';
+        let feedback = '';
+        for (let i = 0; i < 5; i++) {
+            const letter = guess[i];
+            this.gameData.letters.add(letter);
+            
+            if (letter === this.gameData.target[i]) {
+                result += '🟩';
+                feedback += `<span class="success">${letter}</span>`;
+            } else if (this.gameData.target.includes(letter)) {
+                result += '🟨';
+                feedback += `<span class="warning">${letter}</span>`;
+            } else {
+                result += '⬜';
+                feedback += `<span class="error">${letter}</span>`;
+            }
+        }
+
+        this.addToOutput(`${feedback} ${result}`, 'command-output');
+
+        if (guess === this.gameData.target) {
+            this.addToOutput(`<span class="success">🎉 EXCELLENT! You found the word!</span>`, 'command-output');
+            this.addToOutput(`<span class="info">The word was "${this.gameData.target}"</span>`, 'command-output');
+            this.addToOutput(`<span class="info">Solved in ${this.gameData.attempts} attempts</span>`, 'command-output');
+            this.endGame();
+            return;
+        }
+
+        const remaining = this.gameData.maxAttempts - this.gameData.attempts;
+        if (remaining === 0) {
+            this.addToOutput(`<span class="error">💥 GAME OVER! No attempts left!</span>`, 'command-output');
+            this.addToOutput(`<span class="warning">The word was "${this.gameData.target}"</span>`, 'command-output');
+            this.endGame();
+        } else {
+            this.addToOutput(`<span class="info">${remaining} attempts remaining</span>`, 'command-output');
+        }
+    }
+
+    // ========================
+    // TIC-TAC-TOE GAME
+    // ========================
+
+    playTicTacToe() {
+        this.gameActive = true;
+        this.currentGame = 'tictactoe';
+        this.gameData = {
+            board: Array(9).fill(' '),
+            playerSymbol: 'X',
+            aiSymbol: 'O',
+            gameOver: false
+        };
+
+        const startText = `
+<span class="success">⭕ TIC-TAC-TOE vs AI ❌</span>
+
+You are X, AI is O. Choose your position (1-9):
+
+ 1 | 2 | 3 
+-----------
+ 4 | 5 | 6 
+-----------
+ 7 | 8 | 9 
+
+<span class="info">Type a number (1-9) or "quit" to exit</span>
+        `;
+        this.addToOutput(startText, 'command-output');
+        this.displayTicTacToeBoard();
+    }
+
+    handleTicTacToeInput(input) {
+        if (this.gameData.gameOver) return;
+
+        const position = parseInt(input) - 1;
+        
+        if (isNaN(position) || position < 0 || position > 8) {
+            this.addToOutput('<span class="error">Please enter a number between 1 and 9!</span>', 'command-output');
+            return;
+        }
+
+        if (this.gameData.board[position] !== ' ') {
+            this.addToOutput('<span class="error">That position is already taken!</span>', 'command-output');
+            return;
+        }
+
+        // Player move
+        this.gameData.board[position] = this.gameData.playerSymbol;
+        this.displayTicTacToeBoard();
+
+        if (this.checkTicTacToeWin(this.gameData.playerSymbol)) {
+            this.addToOutput('<span class="success">🎉 YOU WIN! Congratulations!</span>', 'command-output');
+            this.gameData.gameOver = true;
+            this.endGame();
+            return;
+        }
+
+        if (this.gameData.board.every(cell => cell !== ' ')) {
+            this.addToOutput('<span class="warning">🤝 It\'s a tie! Good game!</span>', 'command-output');
+            this.gameData.gameOver = true;
+            this.endGame();
+            return;
+        }
+
+        // AI move
+        const aiMove = this.getAIMove();
+        this.gameData.board[aiMove] = this.gameData.aiSymbol;
+        this.addToOutput(`<span class="info">AI chooses position ${aiMove + 1}</span>`, 'command-output');
+        this.displayTicTacToeBoard();
+
+        if (this.checkTicTacToeWin(this.gameData.aiSymbol)) {
+            this.addToOutput('<span class="error">🤖 AI WINS! Better luck next time!</span>', 'command-output');
+            this.gameData.gameOver = true;
+            this.endGame();
+            return;
+        }
+
+        if (this.gameData.board.every(cell => cell !== ' ')) {
+            this.addToOutput('<span class="warning">🤝 It\'s a tie! Good game!</span>', 'command-output');
+            this.gameData.gameOver = true;
+            this.endGame();
+        }
+    }
+
+    displayTicTacToeBoard() {
+        const board = this.gameData.board;
+        const display = `
+ ${board[0]} | ${board[1]} | ${board[2]} 
+-----------
+ ${board[3]} | ${board[4]} | ${board[5]} 
+-----------
+ ${board[6]} | ${board[7]} | ${board[8]} 
+        `;
+        this.addToOutput(`<pre>${display}</pre>`, 'command-output');
+    }
+
+    checkTicTacToeWin(symbol) {
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        return winPatterns.some(pattern => 
+            pattern.every(index => this.gameData.board[index] === symbol)
+        );
+    }
+
+    getAIMove() {
+        // Simple AI: Try to win, then block player, then take center/corners
+        const board = this.gameData.board;
+        
+        // Check if AI can win
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === ' ') {
+                board[i] = this.gameData.aiSymbol;
+                if (this.checkTicTacToeWin(this.gameData.aiSymbol)) {
+                    board[i] = ' ';
+                    return i;
+                }
+                board[i] = ' ';
+            }
+        }
+
+        // Check if need to block player
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === ' ') {
+                board[i] = this.gameData.playerSymbol;
+                if (this.checkTicTacToeWin(this.gameData.playerSymbol)) {
+                    board[i] = ' ';
+                    return i;
+                }
+                board[i] = ' ';
+            }
+        }
+
+        // Take center if available
+        if (board[4] === ' ') return 4;
+
+        // Take corners
+        const corners = [0, 2, 6, 8];
+        const availableCorners = corners.filter(i => board[i] === ' ');
+        if (availableCorners.length > 0) {
+            return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+        }
+
+        // Take any available spot
+        const available = board.map((cell, index) => cell === ' ' ? index : null).filter(x => x !== null);
+        return available[Math.floor(Math.random() * available.length)];
+    }
+
+    // ========================
+    // ROCK PAPER SCISSORS
+    // ========================
+
+    playRockPaperScissors() {
+        this.gameActive = true;
+        this.currentGame = 'rps';
+        this.gameData = {
+            playerScore: 0,
+            aiScore: 0,
+            rounds: 0,
+            maxRounds: 5
+        };
+
+        const startText = `
+<span class="success">✂️ ROCK PAPER SCISSORS ✂️</span>
+
+Best of ${this.gameData.maxRounds} rounds against the AI!
+
+<span class="info">Commands: rock, paper, scissors, or quit</span>
+<span class="warning">Score: You 0 - 0 AI</span>
+        `;
+        this.addToOutput(startText, 'command-output');
+    }
+
+    handleRPSInput(input) {
+        const choice = input.toLowerCase().trim();
+        const validChoices = ['rock', 'paper', 'scissors'];
+        
+        if (!validChoices.includes(choice)) {
+            this.addToOutput('<span class="error">Choose: rock, paper, or scissors!</span>', 'command-output');
+            return;
+        }
+
+        const aiChoice = validChoices[Math.floor(Math.random() * 3)];
+        const result = this.getRPSResult(choice, aiChoice);
+        
+        this.gameData.rounds++;
+        
+        let resultText = `
+<span class="info">Round ${this.gameData.rounds}</span>
+You: ${this.getRPSEmoji(choice)} ${choice}
+AI:  ${this.getRPSEmoji(aiChoice)} ${aiChoice}
+        `;
+
+        if (result === 'win') {
+            this.gameData.playerScore++;
+            resultText += '<span class="success">🎉 You win this round!</span>';
+        } else if (result === 'lose') {
+            this.gameData.aiScore++;
+            resultText += '<span class="error">🤖 AI wins this round!</span>';
+        } else {
+            resultText += '<span class="warning">🤝 It\'s a tie!</span>';
+        }
+
+        resultText += `\n<span class="info">Score: You ${this.gameData.playerScore} - ${this.gameData.aiScore} AI</span>`;
+        
+        this.addToOutput(resultText, 'command-output');
+
+        if (this.gameData.rounds >= this.gameData.maxRounds) {
+            let finalResult;
+            if (this.gameData.playerScore > this.gameData.aiScore) {
+                finalResult = '<span class="success">🏆 YOU WIN THE GAME! Congratulations!</span>';
+            } else if (this.gameData.aiScore > this.gameData.playerScore) {
+                finalResult = '<span class="error">🤖 AI WINS THE GAME! Better luck next time!</span>';
+            } else {
+                finalResult = '<span class="warning">🤝 OVERALL TIE! Great game!</span>';
+            }
+            
+            this.addToOutput(finalResult, 'command-output');
+            this.addToOutput(`<span class="info">Final Score: You ${this.gameData.playerScore} - ${this.gameData.aiScore} AI</span>`, 'command-output');
+            this.endGame();
+        } else {
+            this.addToOutput(`<span class="info">${this.gameData.maxRounds - this.gameData.rounds} rounds remaining</span>`, 'command-output');
+        }
+    }
+
+    getRPSResult(player, ai) {
+        if (player === ai) return 'tie';
+        if (
+            (player === 'rock' && ai === 'scissors') ||
+            (player === 'paper' && ai === 'rock') ||
+            (player === 'scissors' && ai === 'paper')
+        ) {
+            return 'win';
+        }
+        return 'lose';
+    }
+
+    getRPSEmoji(choice) {
+        const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
+        return emojis[choice] || '';
     }
 }
 
