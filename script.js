@@ -7,6 +7,18 @@ class Terminal {
         this.historyIndex = -1;
         this.isRoot = false;
         this.currentDirectory = '~';
+        this.currentTheme = 'green';
+        
+        // Available themes
+        this.themes = {
+            green: { name: 'Matrix Green', color: '#00ff00', description: 'Classic hacker terminal' },
+            blue: { name: 'Ocean Blue', color: '#00aaff', description: 'Cool and professional' },
+            amber: { name: 'Retro Amber', color: '#ffaa00', description: 'Vintage computer vibes' },
+            purple: { name: 'Cyberpunk Purple', color: '#aa00ff', description: 'Futuristic neon' },
+            red: { name: 'Alert Red', color: '#ff0044', description: 'High-intensity mode' },
+            cyan: { name: 'Aqua Cyan', color: '#00ffaa', description: 'Fresh and modern' },
+            retro: { name: 'Orange Retro', color: '#ff8800', description: 'Classic 80s terminal' }
+        };
         
         this.commands = {
             help: () => this.showHelp(),
@@ -30,10 +42,13 @@ class Terminal {
             projects: () => this.showProjects(),
             github: () => this.openGithub(),
             linkedin: () => this.openLinkedIn(),
-            resume: () => this.showResume()
+            resume: () => this.showResume(),
+            theme: (args) => this.themeCommand(args),
+            themes: () => this.showThemes()
         };
 
         this.init();
+        this.loadTheme();
     }
 
     init() {
@@ -121,6 +136,10 @@ Available Commands:
 <span class="success">uname</span>        - System information
 <span class="success">cat [file]</span>   - Display file contents
 <span class="success">echo [text]</span>  - Display text
+
+<span class="warning">Theme Commands:</span>
+<span class="success">themes</span>       - Show available themes
+<span class="success">theme [name]</span> - Change terminal theme
 
 <span class="warning">Special Commands:</span>
 <span class="success">sudo su</span>      - Switch to root user (🔓)
@@ -551,6 +570,68 @@ Computer Science Degree | University of Code (2020)
 
     scrollToBottom() {
         this.output.scrollTop = this.output.scrollHeight;
+    }
+
+    showThemes() {
+        const themesText = `
+<span class="info">Available Terminal Themes</span>
+═══════════════════════════════
+
+<span class="theme-preview green"></span><span class="success">green</span>    - ${this.themes.green.name} (${this.themes.green.description})
+<span class="theme-preview blue"></span><span class="success">blue</span>     - ${this.themes.blue.name} (${this.themes.blue.description})
+<span class="theme-preview amber"></span><span class="success">amber</span>    - ${this.themes.amber.name} (${this.themes.amber.description})
+<span class="theme-preview purple"></span><span class="success">purple</span>   - ${this.themes.purple.name} (${this.themes.purple.description})
+<span class="theme-preview red"></span><span class="success">red</span>      - ${this.themes.red.name} (${this.themes.red.description})
+<span class="theme-preview cyan"></span><span class="success">cyan</span>     - ${this.themes.cyan.name} (${this.themes.cyan.description})
+<span class="theme-preview retro"></span><span class="success">retro</span>    - ${this.themes.retro.name} (${this.themes.retro.description})
+
+<span class="warning">Current theme:</span> <span class="success">${this.currentTheme}</span> (${this.themes[this.currentTheme].name})
+
+<span class="info">Usage:</span> theme [name]
+<span class="info">Example:</span> theme blue
+        `;
+        this.addToOutput(themesText, 'command-output');
+    }
+
+    themeCommand(args) {
+        if (!args.length) {
+            this.addToOutput('Usage: theme [theme-name]\nType "themes" to see available themes.', 'error');
+            return;
+        }
+
+        const themeName = args[0].toLowerCase();
+        
+        if (!this.themes[themeName]) {
+            this.addToOutput(`Theme "${themeName}" not found. Type "themes" to see available themes.`, 'error');
+            return;
+        }
+
+        this.setTheme(themeName);
+        this.addToOutput(`🎨 Theme changed to "${this.themes[themeName].name}"`, 'success');
+        this.addToOutput('Terminal appearance updated with smooth transitions!', 'info');
+    }
+
+    setTheme(themeName) {
+        if (!this.themes[themeName]) return;
+        
+        this.currentTheme = themeName;
+        document.documentElement.setAttribute('data-theme', themeName);
+        
+        // Save theme preference
+        localStorage.setItem('terminalTheme', themeName);
+        
+        // Add visual feedback
+        document.body.style.animation = 'themeTransition 0.5s ease-in-out';
+        setTimeout(() => {
+            document.body.style.animation = '';
+        }, 500);
+    }
+
+    loadTheme() {
+        const savedTheme = localStorage.getItem('terminalTheme');
+        if (savedTheme && this.themes[savedTheme]) {
+            this.setTheme(savedTheme);
+        }
     }
 }
 

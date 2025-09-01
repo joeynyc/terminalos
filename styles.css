@@ -1,3 +1,151 @@
+/* CSS Custom Properties for Theme System */
+:root {
+    /* Default theme: Matrix Green */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #000;
+    --bg-header: #2d2d2d;
+    --border-color: #333;
+    --text-primary: #00ff00;
+    --text-secondary: #ccc;
+    --accent-color: #00ff00;
+    --glow-color: rgba(0, 255, 0, 0.3);
+    --glow-color-intense: rgba(0, 255, 0, 0.5);
+    --scrollbar-thumb: #00ff00;
+    --scrollbar-thumb-hover: #00cc00;
+    
+    /* Status colors */
+    --error-color: #ff6b6b;
+    --success-color: #51cf66;
+    --info-color: #74c0fc;
+    --warning-color: #ffd43b;
+    --hidden-content-color: #ff6b6b;
+    --matrix-color: #00ff41;
+}
+
+/* Theme variants */
+[data-theme="blue"] {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #1a1a2a;
+    --bg-tertiary: #000011;
+    --bg-header: #2d2d3d;
+    --border-color: #334;
+    --text-primary: #00aaff;
+    --text-secondary: #ccd;
+    --accent-color: #00aaff;
+    --glow-color: rgba(0, 170, 255, 0.3);
+    --glow-color-intense: rgba(0, 170, 255, 0.5);
+    --scrollbar-thumb: #00aaff;
+    --scrollbar-thumb-hover: #0088cc;
+    --matrix-color: #00ccff;
+}
+
+[data-theme="amber"] {
+    --bg-primary: #1a1a0a;
+    --bg-secondary: #2a2a1a;
+    --bg-tertiary: #111100;
+    --bg-header: #3d3d2d;
+    --border-color: #443;
+    --text-primary: #ffaa00;
+    --text-secondary: #ddcc;
+    --accent-color: #ffaa00;
+    --glow-color: rgba(255, 170, 0, 0.3);
+    --glow-color-intense: rgba(255, 170, 0, 0.5);
+    --scrollbar-thumb: #ffaa00;
+    --scrollbar-thumb-hover: #cc8800;
+    --matrix-color: #ffcc41;
+}
+
+[data-theme="purple"] {
+    --bg-primary: #1a0a1a;
+    --bg-secondary: #2a1a2a;
+    --bg-tertiary: #110011;
+    --bg-header: #3d2d3d;
+    --border-color: #434;
+    --text-primary: #aa00ff;
+    --text-secondary: #dcd;
+    --accent-color: #aa00ff;
+    --glow-color: rgba(170, 0, 255, 0.3);
+    --glow-color-intense: rgba(170, 0, 255, 0.5);
+    --scrollbar-thumb: #aa00ff;
+    --scrollbar-thumb-hover: #8800cc;
+    --matrix-color: #cc41ff;
+}
+
+[data-theme="red"] {
+    --bg-primary: #1a0a0a;
+    --bg-secondary: #2a1a1a;
+    --bg-tertiary: #110000;
+    --bg-header: #3d2d2d;
+    --border-color: #434;
+    --text-primary: #ff0044;
+    --text-secondary: #dcc;
+    --accent-color: #ff0044;
+    --glow-color: rgba(255, 0, 68, 0.3);
+    --glow-color-intense: rgba(255, 0, 68, 0.5);
+    --scrollbar-thumb: #ff0044;
+    --scrollbar-thumb-hover: #cc0033;
+    --matrix-color: #ff4177;
+}
+
+[data-theme="cyan"] {
+    --bg-primary: #0a1a1a;
+    --bg-secondary: #1a2a2a;
+    --bg-tertiary: #001111;
+    --bg-header: #2d3d3d;
+    --border-color: #344;
+    --text-primary: #00ffaa;
+    --text-secondary: #cdd;
+    --accent-color: #00ffaa;
+    --glow-color: rgba(0, 255, 170, 0.3);
+    --glow-color-intense: rgba(0, 255, 170, 0.5);
+    --scrollbar-thumb: #00ffaa;
+    --scrollbar-thumb-hover: #00cc88;
+    --matrix-color: #41ffcc;
+}
+
+[data-theme="retro"] {
+    --bg-primary: #2a1810;
+    --bg-secondary: #3a2820;
+    --bg-tertiary: #1a1008;
+    --bg-header: #4a3830;
+    --border-color: #544;
+    --text-primary: #ff8800;
+    --text-secondary: #ddc;
+    --accent-color: #ff8800;
+    --glow-color: rgba(255, 136, 0, 0.3);
+    --glow-color-intense: rgba(255, 136, 0, 0.5);
+    --scrollbar-thumb: #ff8800;
+    --scrollbar-thumb-hover: #cc6600;
+    --matrix-color: #ffaa41;
+}
+
+/* Theme preview styles */
+.theme-preview {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    margin-right: 10px;
+    vertical-align: middle;
+    border: 1px solid var(--border-color);
+}
+
+.theme-preview.green { background: #00ff00; }
+.theme-preview.blue { background: #00aaff; }
+.theme-preview.amber { background: #ffaa00; }
+.theme-preview.purple { background: #aa00ff; }
+.theme-preview.red { background: #ff0044; }
+.theme-preview.cyan { background: #00ffaa; }
+.theme-preview.retro { background: #ff8800; }
+
+/* Theme transition animation */
+@keyframes themeTransition {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+    100% { filter: brightness(1); }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,41 +153,44 @@
 }
 
 body {
-    background: #0a0a0a;
+    background: var(--bg-primary);
     font-family: 'Source Code Pro', 'Courier New', monospace;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    transition: background 0.3s ease;
 }
 
 .terminal-container {
     width: 90%;
     max-width: 1000px;
     height: 80vh;
-    background: #1a1a1a;
+    background: var(--bg-secondary);
     border-radius: 8px;
-    box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
-    border: 1px solid #333;
+    box-shadow: 0 0 30px var(--glow-color);
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     animation: terminalGlow 2s ease-in-out infinite alternate;
+    transition: all 0.3s ease;
 }
 
 @keyframes terminalGlow {
-    0% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.3); }
-    100% { box-shadow: 0 0 40px rgba(0, 255, 0, 0.5); }
+    0% { box-shadow: 0 0 30px var(--glow-color); }
+    100% { box-shadow: 0 0 40px var(--glow-color-intense); }
 }
 
 .terminal-header {
-    background: #2d2d2d;
+    background: var(--bg-header);
     height: 30px;
     display: flex;
     align-items: center;
     padding: 0 15px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border-color);
     border-radius: 8px 8px 0 0;
+    transition: background 0.3s ease;
 }
 
 .terminal-buttons {
@@ -58,20 +209,22 @@ body {
 .maximize { background: #28ca42; }
 
 .terminal-title {
-    color: #ccc;
+    color: var(--text-secondary);
     font-size: 12px;
     margin-left: 20px;
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
 .terminal-body {
     flex: 1;
-    background: #000;
+    background: var(--bg-tertiary);
     padding: 20px;
     overflow-y: auto;
-    color: #00ff00;
+    color: var(--text-primary);
     font-size: 14px;
     line-height: 1.4;
+    transition: all 0.3s ease;
 }
 
 .output {
@@ -99,7 +252,8 @@ body {
 
 .command-line {
     margin-bottom: 5px;
-    color: #00ff00;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 .command-output {
@@ -110,19 +264,19 @@ body {
 }
 
 .command-output.error {
-    color: #ff6b6b;
+    color: var(--error-color);
 }
 
 .command-output.success {
-    color: #51cf66;
+    color: var(--success-color);
 }
 
 .command-output.info {
-    color: #74c0fc;
+    color: var(--info-color);
 }
 
 .command-output.warning {
-    color: #ffd43b;
+    color: var(--warning-color);
 }
 
 .input-line {
@@ -132,26 +286,29 @@ body {
 }
 
 .prompt {
-    color: #00ff00;
+    color: var(--accent-color);
     margin-right: 5px;
     font-weight: 600;
+    transition: color 0.3s ease;
 }
 
 .command-input {
     background: transparent;
     border: none;
-    color: #00ff00;
+    color: var(--text-primary);
     font-family: inherit;
     font-size: inherit;
     outline: none;
     flex: 1;
     caret-color: transparent;
+    transition: color 0.3s ease;
 }
 
 .cursor {
-    color: #00ff00;
+    color: var(--accent-color);
     animation: blink 1s infinite;
     margin-left: 2px;
+    transition: color 0.3s ease;
 }
 
 @keyframes blink {
@@ -160,15 +317,16 @@ body {
 }
 
 .ascii-art {
-    color: #00ff00;
+    color: var(--text-primary);
     font-size: 12px;
     line-height: 1.2;
     margin: 10px 0;
     white-space: pre;
+    transition: color 0.3s ease;
 }
 
 .hidden-content {
-    color: #ff6b6b;
+    color: var(--hidden-content-color);
     font-weight: bold;
     animation: glitch 0.5s ease-in-out;
 }
@@ -183,7 +341,7 @@ body {
 }
 
 .matrix-effect {
-    color: #00ff41;
+    color: var(--matrix-color);
     animation: matrix 2s linear infinite;
 }
 
@@ -199,16 +357,17 @@ body {
 }
 
 .terminal-body::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--bg-secondary);
 }
 
 .terminal-body::-webkit-scrollbar-thumb {
-    background: #00ff00;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
+    transition: background 0.3s ease;
 }
 
 .terminal-body::-webkit-scrollbar-thumb:hover {
-    background: #00cc00;
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* Mobile responsiveness */
@@ -222,7 +381,7 @@ body {
         width: 100%;
         height: 95vh;
         border-radius: 12px;
-        box-shadow: 0 0 20px rgba(0, 255, 0, 0.4);
+        box-shadow: 0 0 20px var(--glow-color);
     }
     
     .terminal-header {
