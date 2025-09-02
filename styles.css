@@ -307,7 +307,8 @@ body {
 .cursor {
     color: var(--accent-color);
     animation: blink 1s infinite;
-    margin-left: 2px;
+    position: absolute;
+    pointer-events: none;
     transition: color 0.3s ease;
 }
 

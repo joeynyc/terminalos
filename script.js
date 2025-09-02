@@ -64,12 +64,36 @@ class Terminal {
 
     init() {
         this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
+        this.input.addEventListener('input', () => this.updateCursorPosition());
         this.input.focus();
         
         // Keep input focused
         document.addEventListener('click', () => this.input.focus());
         
+        // Initial cursor positioning
+        this.updateCursorPosition();
+        
         this.typeCommand('help', 2000);
+    }
+
+    updateCursorPosition() {
+        const prompt = document.querySelector('.prompt');
+        const inputValue = this.input.value;
+        
+        // Create a temporary span to measure text width
+        const measurer = document.createElement('span');
+        measurer.style.visibility = 'hidden';
+        measurer.style.position = 'absolute';
+        measurer.style.font = window.getComputedStyle(this.input).font;
+        measurer.textContent = inputValue;
+        document.body.appendChild(measurer);
+        
+        const textWidth = measurer.offsetWidth;
+        document.body.removeChild(measurer);
+        
+        // Position cursor after the prompt and input text
+        const promptWidth = prompt.offsetWidth;
+        this.cursor.style.left = (promptWidth + textWidth) + 'px';
     }
 
     handleKeydown(e) {
