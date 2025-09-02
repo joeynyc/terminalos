@@ -52,7 +52,6 @@ A unique, interactive terminal-style portfolio website that showcases skills and
 
 The project includes mobile testing utilities:
 - `mobile-test.html` - Mobile testing instructions
-- `qr-code.html` - QR code generator for easy mobile access
 
 ## 🔧 Technical Stack
 
@@ -106,7 +105,6 @@ OSsite/
 ├── script.js           # Terminal logic and commands
 ├── styles.css          # Styling and animations
 ├── mobile-test.html    # Mobile testing page
-├── qr-code.html        # QR code for mobile access
 ├── README.md           # This file
 └── .gitignore          # Git ignore rules
 ```

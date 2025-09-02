@@ -2,6 +2,9 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
     <title>Mobile Test Page</title>
     <style>
         body {
@@ -57,6 +60,19 @@
         </ul>
     </div>
     
-    <p><em>Server running on: http://192.168.1.35:8000</em></p>
+    <p><em>Server running on: <span id="server-display">Loading...</span></em></p>
+    
+    <script>
+        // Dynamically detect server URL
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname || 'localhost';
+        const port = window.location.port || '8000';
+        const serverUrl = `${protocol}//${hostname}:${port}`;
+        
+        // Update all elements with the dynamic URL
+        document.getElementById('server-url').textContent = `${hostname}:${port}`;
+        document.getElementById('terminal-link').href = serverUrl;
+        document.getElementById('server-display').textContent = serverUrl;
+    </script>
 </body>
 </html>

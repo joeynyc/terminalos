@@ -147,8 +147,58 @@ class Terminal {
     addToOutput(content, className = 'command-output') {
         const div = document.createElement('div');
         div.className = className;
-        div.innerHTML = content;
+        
+        // Secure HTML rendering: parse and sanitize content
+        if (typeof content === 'string' && content.includes('<span')) {
+            // Handle formatted content with spans safely
+            this.renderFormattedContent(div, content);
+        } else {
+            // Plain text content - safe
+            div.textContent = content;
+        }
+        
         this.output.appendChild(div);
+    }
+
+    renderFormattedContent(container, content) {
+        // Safe HTML parser that only allows specific formatting tags
+        const allowedTags = ['span', 'pre', 'div'];
+        const allowedClasses = [
+            'success', 'error', 'warning', 'info', 'hidden-content', 
+            'matrix-effect', 'theme-preview'
+        ];
+        
+        // Split content by HTML tags and process safely
+        const parts = content.split(/(<\/?[^>]+>)/);
+        
+        parts.forEach(part => {
+            if (part.startsWith('<') && part.endsWith('>')) {
+                // This is an HTML tag - validate and create safely
+                const tagMatch = part.match(/<\/?(\w+)(?:\s+class=['"]([^'"]+)['"])?[^>]*>/);
+                if (tagMatch) {
+                    const [, tagName, className] = tagMatch;
+                    
+                    if (allowedTags.includes(tagName.toLowerCase())) {
+                        if (part.startsWith('</')) {
+                            // Closing tag - handled by DOM structure
+                            return;
+                        }
+                        
+                        const element = document.createElement(tagName);
+                        if (className && allowedClasses.includes(className)) {
+                            element.className = className;
+                        }
+                        container.appendChild(element);
+                        // Set current container to the new element for nested content
+                        container = element;
+                    }
+                }
+            } else if (part.trim()) {
+                // This is text content - safe to add
+                const textNode = document.createTextNode(part);
+                container.appendChild(textNode);
+            }
+        });
     }
 
     getPrompt() {
