@@ -448,3 +448,62 @@ body {
     }
 }
 
+/* Mobile-specific device targeting */
+.device-mobile .terminal-container {
+    box-shadow: 0 0 15px var(--glow-color);
+    animation: none; /* Reduce animations for performance */
+}
+
+.device-mobile .boot-sequence {
+    animation-duration: 0.3s; /* Faster animations on mobile */
+}
+
+.device-mobile .matrix-effect {
+    animation-duration: 1s; /* Faster matrix effect */
+}
+
+.has-touch .terminal-body {
+    padding-bottom: 60px; /* Extra space for virtual keyboard */
+}
+
+.has-touch .cursor {
+    opacity: 0.8; /* Slightly less prominent cursor for touch */
+}
+
+/* Mobile theme adjustments */
+.device-mobile .terminal-header {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.device-mobile .terminal-body {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Improved scrolling on mobile */
+.device-mobile .output {
+    scroll-behavior: smooth;
+}
+
+/* Better button visibility on mobile */
+.device-mobile .btn {
+    width: 14px;
+    height: 14px;
+}
+
+/* Tablet-specific adjustments */
+.device-tablet .terminal-container {
+    max-width: 900px;
+    height: 85vh;
+}
+
+.device-tablet .terminal-body {
+    font-size: 15px;
+}
+
+/* Desktop enhancements */
+.device-desktop .terminal-container:hover {
+    box-shadow: 0 0 35px var(--glow-color-intense);
+}
+

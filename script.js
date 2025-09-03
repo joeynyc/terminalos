@@ -9,6 +9,12 @@ class Terminal {
         this.currentDirectory = '~';
         this.currentTheme = 'green';
         
+        // Mobile detection and device capabilities
+        this.deviceInfo = this.detectDevice();
+        this.isMobile = this.deviceInfo.isMobile;
+        this.isTablet = this.deviceInfo.isTablet;
+        this.hasTouch = this.deviceInfo.hasTouch;
+        
         // Game state management
         this.gameActive = false;
         this.currentGame = null;
@@ -55,11 +61,121 @@ class Terminal {
             guess: () => this.playGuessNumber(),
             wordle: () => this.playWordGuess(),
             tictactoe: () => this.playTicTacToe(),
-            rps: () => this.playRockPaperScissors()
+            rps: () => this.playRockPaperScissors(),
+            device: () => this.showDeviceInfo(),
+            mobile_help: () => this.showMobileHelp(),
+            touch: () => this.showTouchCommands()
         };
 
         this.init();
         this.loadTheme();
+        this.initMobileFeatures();
+    }
+
+    detectDevice() {
+        const userAgent = navigator.userAgent;
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent) ||
+                         (navigator.maxTouchPoints && navigator.maxTouchPoints > 1 && window.innerWidth <= 768);
+        const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent) && window.innerWidth > 768;
+        const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const supportsHover = window.matchMedia('(hover: hover)').matches;
+        
+        return {
+            isMobile,
+            isTablet,
+            isDesktop: !isMobile && !isTablet,
+            hasTouch,
+            supportsHover,
+            userAgent,
+            screenWidth: window.screen.width,
+            screenHeight: window.screen.height,
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            orientation: window.screen.orientation ? window.screen.orientation.angle : 0,
+            platform: navigator.platform,
+            maxTouchPoints: navigator.maxTouchPoints || 0
+        };
+    }
+
+    initMobileFeatures() {
+        // Add device classes to body for CSS targeting
+        document.body.classList.add(
+            this.isMobile ? 'device-mobile' : 
+            this.isTablet ? 'device-tablet' : 'device-desktop'
+        );
+        
+        if (this.hasTouch) {
+            document.body.classList.add('has-touch');
+        }
+        
+        // Mobile-specific event listeners
+        if (this.isMobile || this.hasTouch) {
+            this.initTouchEvents();
+        }
+        
+        // Orientation change detection
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.deviceInfo = this.detectDevice();
+                this.handleOrientationChange();
+            }, 100);
+        });
+        
+        // Viewport size change detection
+        window.addEventListener('resize', () => {
+            this.deviceInfo = this.detectDevice();
+        });
+    }
+
+    initTouchEvents() {
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        // Touch events for swipe gestures on terminal body
+        this.output.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+        
+        this.output.addEventListener('touchend', (e) => {
+            touchEndY = e.changedTouches[0].screenY;
+            this.handleSwipeGesture(touchStartY, touchEndY);
+        });
+        
+        // Prevent zoom on double tap for input
+        let lastTouchEnd = 0;
+        this.input.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    }
+
+    handleSwipeGesture(startY, endY) {
+        const swipeThreshold = 50;
+        const diff = startY - endY;
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swipe up - scroll to bottom
+                this.scrollToBottom();
+            } else {
+                // Swipe down - scroll to top if at bottom
+                if (this.output.scrollTop + this.output.clientHeight >= this.output.scrollHeight - 10) {
+                    this.output.scrollTop = Math.max(0, this.output.scrollTop - 200);
+                }
+            }
+        }
+    }
+
+    handleOrientationChange() {
+        // Adjust terminal size and focus input after orientation change
+        setTimeout(() => {
+            this.input.focus();
+            this.scrollToBottom();
+        }, 300);
     }
 
     init() {
@@ -73,7 +189,12 @@ class Terminal {
         // Initial cursor positioning
         this.updateCursorPosition();
         
-        this.typeCommand('help', 2000);
+        // Different welcome commands based on device
+        if (this.isMobile) {
+            this.typeCommand('mobile_help', 2000);
+        } else {
+            this.typeCommand('help', 2000);
+        }
     }
 
     updateCursorPosition() {
@@ -242,6 +363,7 @@ Available Commands:
 <span class="success">tictactoe</span>    - Play Tic-Tac-Toe
 <span class="success">rps</span>          - Rock Paper Scissors
 
+${this.isMobile ? '<span class="warning">📱 Mobile Commands:</span>\n<span class="success">device</span>       - Show device info\n<span class="success">touch</span>        - Touch gesture help\n<span class="success">mobile_help</span>  - Mobile-optimized help\n' : ''}
 <span class="warning">Special Commands:</span>
 <span class="success">sudo su</span>      - Switch to root user (🔓)
 <span class="success">matrix</span>       - Enter the Matrix
@@ -249,8 +371,7 @@ Available Commands:
 <span class="success">secret</span>       - ???
 
 <span class="info">Navigation:</span>
-↑/↓ arrows for command history
-Tab for autocompletion
+${this.isMobile ? '• Tap to focus input\n• Swipe up/down to scroll\n• Use on-screen keyboard' : '↑/↓ arrows for command history\nTab for autocompletion'}
         `;
         this.addToOutput(helpText, 'command-output');
     }
@@ -746,20 +867,16 @@ Computer Science Degree | University of Code (2020)
 ═══════════════════════
 
 <span class="success">Available Games:</span>
-├── <span class="success">snake</span>      - Classic Snake game with ASCII graphics
+├── <span class="success">snake</span>      - Classic Snake game${this.isMobile ? ' (mobile optimized)' : ' with ASCII graphics'}
 ├── <span class="success">guess</span>      - Number guessing game (1-100)
 ├── <span class="success">wordle</span>     - Word guessing game (5 letters)
 ├── <span class="success">tictactoe</span>  - Tic-Tac-Toe against AI
 └── <span class="success">rps</span>        - Rock Paper Scissors
 
 <span class="warning">Game Controls:</span>
-• Most games use simple text commands
-• Snake uses WASD or arrow key letters (w/a/s/d)
-• Type 'quit' during any game to exit
-• Type 'help' in-game for game-specific commands
+${this.isMobile ? '📱 Mobile Controls:\n• Most games use simple text input\n• Snake: Use w/a/s/d keys on your device keyboard\n• Number entry games work great with mobile keyboards\n• Type "quit" during any game to exit' : '• Most games use simple text commands\n• Snake uses WASD or arrow key letters (w/a/s/d)\n• Type "quit" during any game to exit\n• Type "help" in-game for game-specific commands'}
 
-<span class="info">High Scores:</span>
-Games will track your best scores during this session!
+${this.isMobile ? '<span class="info">💡 Mobile Gaming Tips:</span>\n• Snake game uses smaller board for mobile screens\n• Virtual keyboard will appear automatically\n• Swipe gestures still work during games for scrolling\n• Portrait mode recommended for best experience' : '<span class="info">High Scores:</span>\nGames will track your best scores during this session!'}
 
 <span class="success">Ready to play?</span> Just type the game name to start!
         `;
@@ -806,17 +923,31 @@ Games will track your best scores during this session!
     playSnake() {
         this.gameActive = true;
         this.currentGame = 'snake';
+        
+        // Adjust board size for mobile
+        const boardWidth = this.isMobile ? 20 : 30;
+        const boardHeight = this.isMobile ? 12 : 15;
+        
         this.gameData = {
-            board: Array(15).fill().map(() => Array(30).fill(' ')),
-            snake: [{x: 15, y: 7}, {x: 14, y: 7}, {x: 13, y: 7}],
+            board: Array(boardHeight).fill().map(() => Array(boardWidth).fill(' ')),
+            snake: [{x: Math.floor(boardWidth/2), y: Math.floor(boardHeight/2)}, 
+                    {x: Math.floor(boardWidth/2)-1, y: Math.floor(boardHeight/2)}, 
+                    {x: Math.floor(boardWidth/2)-2, y: Math.floor(boardHeight/2)}],
             direction: {x: 1, y: 0},
-            food: {x: 20, y: 7},
+            food: {x: Math.floor(boardWidth*0.7), y: Math.floor(boardHeight/2)},
             score: 0,
-            gameOver: false
+            gameOver: false,
+            boardWidth,
+            boardHeight
         };
 
         this.addToOutput('<span class="success">🐍 SNAKE GAME STARTED 🐍</span>', 'command-output');
-        this.addToOutput('<span class="info">Controls: w(up) a(left) s(down) d(right) | Type "quit" to exit</span>', 'command-output');
+        if (this.isMobile) {
+            this.addToOutput('<span class="info">📱 Mobile Controls: w(up) a(left) s(down) d(right) | "quit" to exit</span>', 'command-output');
+            this.addToOutput('<span class="warning">💡 Tip: Use your device keyboard for w/a/s/d controls</span>', 'command-output');
+        } else {
+            this.addToOutput('<span class="info">Controls: w(up) a(left) s(down) d(right) | Type "quit" to exit</span>', 'command-output');
+        }
         this.updateSnakeDisplay();
     }
 
@@ -856,7 +987,7 @@ Games will track your best scores during this session!
         head.y += this.gameData.direction.y;
 
         // Check wall collision
-        if (head.x < 0 || head.x >= 30 || head.y < 0 || head.y >= 15) {
+        if (head.x < 0 || head.x >= this.gameData.boardWidth || head.y < 0 || head.y >= this.gameData.boardHeight) {
             this.gameData.gameOver = true;
             this.addToOutput('<span class="error">💥 GAME OVER! Hit the wall!</span>', 'command-output');
             this.addToOutput(`<span class="info">Final Score: ${this.gameData.score}</span>`, 'command-output');
@@ -891,8 +1022,8 @@ Games will track your best scores during this session!
     generateFood() {
         do {
             this.gameData.food = {
-                x: Math.floor(Math.random() * 30),
-                y: Math.floor(Math.random() * 15)
+                x: Math.floor(Math.random() * this.gameData.boardWidth),
+                y: Math.floor(Math.random() * this.gameData.boardHeight)
             };
         } while (this.gameData.snake.some(segment => 
             segment.x === this.gameData.food.x && segment.y === this.gameData.food.y
@@ -900,7 +1031,7 @@ Games will track your best scores during this session!
     }
 
     updateSnakeDisplay() {
-        const board = Array(15).fill().map(() => Array(30).fill('·'));
+        const board = Array(this.gameData.boardHeight).fill().map(() => Array(this.gameData.boardWidth).fill('·'));
         
         // Place food
         board[this.gameData.food.y][this.gameData.food.x] = '🍎';
@@ -1301,6 +1432,102 @@ AI:  ${this.getRPSEmoji(aiChoice)} ${aiChoice}
     getRPSEmoji(choice) {
         const emojis = { rock: '🪨', paper: '📄', scissors: '✂️' };
         return emojis[choice] || '';
+    }
+
+    // ========================
+    // MOBILE-SPECIFIC COMMANDS
+    // ========================
+
+    showMobileHelp() {
+        const mobileHelpText = `
+<span class="info">📱 Mobile Terminal - Welcome!</span>
+═══════════════════════════════
+
+<span class="success">👋 Quick Start for Mobile:</span>
+<span class="success">about_me</span>      - Learn about Joey
+<span class="success">contact_joey</span>  - Get contact info  
+<span class="success">skills</span>       - View skills & experience
+<span class="success">games</span>        - Play terminal games
+
+<span class="warning">📱 Mobile Features:</span>
+<span class="success">device</span>       - Show device info
+<span class="success">touch</span>        - Touch gesture help
+<span class="success">mobile_help</span>  - This help (mobile optimized)
+<span class="success">help</span>         - Full command list
+
+<span class="info">🎮 Touch Controls:</span>
+• Tap to focus input
+• Swipe up/down to scroll
+• Use on-screen keyboard
+• Double-tap prevention enabled
+
+<span class="info">💡 Pro Tips:</span>
+• Rotate device for better view
+• Use 'clear' to clean screen
+• Try 'theme blue' for different colors
+• 'snake' game works great on mobile!
+
+<span class="warning">Type any command to get started!</span>
+        `;
+        this.addToOutput(mobileHelpText, 'command-output');
+    }
+
+    showDeviceInfo() {
+        const deviceText = `
+<span class="info">Device Information</span>
+═══════════════════════
+
+<span class="success">Device Type:</span>    ${this.isMobile ? '📱 Mobile' : this.isTablet ? '📱 Tablet' : '💻 Desktop'}
+<span class="success">Touch Support:</span>  ${this.hasTouch ? '✅ Yes' : '❌ No'}
+<span class="success">Hover Support:</span>  ${this.deviceInfo.supportsHover ? '✅ Yes' : '❌ No'}
+<span class="success">Screen Size:</span>    ${this.deviceInfo.screenWidth}x${this.deviceInfo.screenHeight}
+<span class="success">Viewport:</span>       ${this.deviceInfo.viewportWidth}x${this.deviceInfo.viewportHeight}
+<span class="success">Pixel Ratio:</span>    ${this.deviceInfo.devicePixelRatio}x
+<span class="success">Touch Points:</span>   ${this.deviceInfo.maxTouchPoints}
+<span class="success">Platform:</span>       ${this.deviceInfo.platform}
+<span class="success">Orientation:</span>    ${this.deviceInfo.orientation}°
+
+<span class="warning">User Agent:</span>
+${this.deviceInfo.userAgent}
+
+<span class="info">Optimizations Active:</span>
+${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mobile-first welcome' : '• Desktop experience\n• Full feature set\n• Hover interactions'}
+        `;
+        this.addToOutput(deviceText, 'command-output');
+    }
+
+    showTouchCommands() {
+        const touchText = `
+<span class="info">🤚 Touch Gesture Guide</span>
+═══════════════════════════
+
+<span class="success">Basic Gestures:</span>
+├── <span class="warning">Tap</span>           Focus input field
+├── <span class="warning">Swipe Up</span>      Scroll to bottom
+├── <span class="warning">Swipe Down</span>    Scroll up (when at bottom)
+└── <span class="warning">Double Tap</span>    Prevented (no zoom)
+
+<span class="success">Mobile Navigation:</span>
+├── Use on-screen keyboard for typing
+├── Scroll naturally through terminal history
+├── Rotate device for landscape view
+└── Terminal automatically adjusts to orientation
+
+<span class="success">Gaming on Mobile:</span>
+├── <span class="success">snake</span> - Use w/a/s/d keys
+├── <span class="success">tictactoe</span> - Tap numbers 1-9
+├── <span class="success">rps</span> - Type rock/paper/scissors
+└── <span class="success">guess</span> - Number guessing works great!
+
+<span class="warning">Pro Tips:</span>
+• Terminal remembers your command history
+• Use Tab for autocompletion on mobile keyboards
+• 'clear' command cleans up cluttered screen
+• Themes work beautifully on mobile displays
+
+<span class="info">Having issues? Try 'device' to see your setup!</span>
+        `;
+        this.addToOutput(touchText, 'command-output');
     }
 }
 
