@@ -125,6 +125,7 @@ class Terminal {
         // Viewport size change detection
         window.addEventListener('resize', () => {
             this.deviceInfo = this.detectDevice();
+            this.handleViewportChange();
         });
     }
 
@@ -175,7 +176,32 @@ class Terminal {
         setTimeout(() => {
             this.input.focus();
             this.scrollToBottom();
+            this.updateCursorPosition(); // Recalculate cursor position after orientation change
         }, 300);
+        
+        // Additional delay for iOS Safari viewport adjustment
+        setTimeout(() => {
+            this.updateCursorPosition();
+        }, 500);
+    }
+
+    handleViewportChange() {
+        // Handle viewport changes for better mobile alignment
+        if (this.isMobile || this.hasTouch) {
+            setTimeout(() => {
+                this.updateCursorPosition();
+                // Ensure input line stays visible
+                if (this.input && this.input.getBoundingClientRect) {
+                    const inputRect = this.input.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    
+                    // If input is close to viewport bottom, scroll it into view
+                    if (inputRect.bottom > viewportHeight - 100) {
+                        this.input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }, 100);
+        }
     }
 
     init() {
@@ -201,7 +227,37 @@ class Terminal {
         const prompt = document.querySelector('.prompt');
         const inputValue = this.input.value;
         
-        // Create a temporary span to measure text width
+        // Mobile-optimized cursor positioning
+        if (this.isMobile || this.hasTouch) {
+            this.updateMobileCursorPosition(prompt, inputValue);
+        } else {
+            this.updateDesktopCursorPosition(prompt, inputValue);
+        }
+    }
+
+    updateMobileCursorPosition(prompt, inputValue) {
+        // Use more accurate text measurement for mobile
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const computedStyle = window.getComputedStyle(this.input);
+        context.font = `${computedStyle.fontWeight} ${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+        
+        const textWidth = context.measureText(inputValue).width;
+        const promptWidth = prompt.getBoundingClientRect().width;
+        
+        // Add small offset for mobile touch precision
+        const mobileOffset = 2;
+        this.cursor.style.left = (promptWidth + textWidth + mobileOffset) + 'px';
+        
+        // Ensure cursor stays visible on small screens
+        const maxLeft = this.input.parentElement.getBoundingClientRect().width - 20;
+        if (promptWidth + textWidth + mobileOffset > maxLeft) {
+            this.cursor.style.left = maxLeft + 'px';
+        }
+    }
+
+    updateDesktopCursorPosition(prompt, inputValue) {
+        // Original desktop cursor positioning logic
         const measurer = document.createElement('span');
         measurer.style.visibility = 'hidden';
         measurer.style.position = 'absolute';
@@ -212,7 +268,6 @@ class Terminal {
         const textWidth = measurer.offsetWidth;
         document.body.removeChild(measurer);
         
-        // Position cursor after the prompt and input text
         const promptWidth = prompt.offsetWidth;
         this.cursor.style.left = (promptWidth + textWidth) + 'px';
     }

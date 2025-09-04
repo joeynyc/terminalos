@@ -161,6 +161,29 @@ body {
     align-items: center;
     overflow: hidden;
     transition: background 0.3s ease;
+    position: relative;
+}
+
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    object-fit: cover;
+    pointer-events: none;
+}
+
+.video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
+    pointer-events: none;
 }
 
 .terminal-container {
@@ -445,6 +468,18 @@ body {
         font-size: 16px; /* Prevents zoom on iOS */
         -webkit-appearance: none;
         -webkit-border-radius: 0;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+    
+    /* iOS Safari specific fixes */
+    .input-line {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .prompt, .command-input, .cursor {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 }
 
@@ -452,6 +487,61 @@ body {
 .device-mobile .terminal-container {
     box-shadow: 0 0 15px var(--glow-color);
     animation: none; /* Reduce animations for performance */
+}
+
+/* Mobile text alignment fixes */
+.device-mobile .input-line {
+    align-items: baseline;
+    min-height: 24px;
+    position: relative;
+}
+
+.device-mobile .prompt {
+    flex-shrink: 0;
+    margin-right: 8px;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.device-mobile .command-input {
+    font-size: 16px; /* Prevent iOS zoom */
+    line-height: 1.2;
+    padding: 2px 0;
+    min-height: 20px;
+}
+
+.device-mobile .cursor {
+    top: 2px;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+/* Mobile text wrapping and overflow fixes */
+.device-mobile .command-output {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    max-width: 100%;
+    line-height: 1.4;
+}
+
+.device-mobile .terminal-body {
+    overflow-x: hidden;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* Prevent horizontal scrolling on mobile */
+.device-mobile pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: hidden;
+}
+
+/* Better spacing for mobile readability */
+.device-mobile .command-line {
+    margin-bottom: 8px;
+    word-break: break-word;
 }
 
 .device-mobile .boot-sequence {
@@ -463,7 +553,23 @@ body {
 }
 
 .has-touch .terminal-body {
-    padding-bottom: 60px; /* Extra space for virtual keyboard */
+    padding-bottom: 80px; /* Extra space for virtual keyboard */
+    min-height: calc(100vh - 140px); /* Ensure content doesn't get cut off */
+}
+
+/* Virtual keyboard optimization */
+.device-mobile .terminal-body {
+    padding-bottom: 100px; /* More space on mobile for keyboard */
+}
+
+/* Ensure input stays visible when keyboard appears */
+.device-mobile .input-line {
+    position: sticky;
+    bottom: 20px;
+    background: var(--bg-tertiary);
+    padding: 8px 0;
+    margin-top: 10px;
+    border-top: 1px solid var(--border-color);
 }
 
 .has-touch .cursor {
