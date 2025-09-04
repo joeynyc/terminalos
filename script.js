@@ -38,11 +38,7 @@ class Terminal {
             contact_joey: () => this.showContact(),
             clear: () => this.clearScreen(),
             ls: () => this.listFiles(),
-            pwd: () => this.showCurrentDir(),
-            whoami: () => this.showUser(),
             date: () => this.showDate(),
-            uname: () => this.showSystem(),
-            cat: (args) => this.catFile(args),
             echo: (args) => this.echo(args),
             sudo: (args) => this.sudo(args),
             exit: () => this.exit(),
@@ -51,9 +47,6 @@ class Terminal {
             secret: () => this.showSecret(),
             skills: () => this.showSkills(),
             projects: () => this.showProjects(),
-            github: () => this.openGithub(),
-            linkedin: () => this.openLinkedIn(),
-            resume: () => this.showResume(),
             theme: (args) => this.themeCommand(args),
             themes: () => this.showThemes(),
             games: () => this.showGames(),
@@ -391,19 +384,12 @@ Available Commands:
 <span class="success">contact_joey</span>  - Get contact information
 <span class="success">skills</span>       - Show programming skills
 <span class="success">projects</span>     - View portfolio projects
-<span class="success">resume</span>       - Display resume information
 <span class="success">blog</span>         - Open minimal blog page
-<span class="success">github</span>       - Open GitHub profile
-<span class="success">linkedin</span>     - Open LinkedIn profile
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
 <span class="success">ls</span>           - List directory contents
-<span class="success">pwd</span>          - Show current directory
-<span class="success">whoami</span>       - Show current user
 <span class="success">date</span>         - Display current date
-<span class="success">uname</span>        - System information
-<span class="success">cat [file]</span>   - Display file contents
 <span class="success">echo [text]</span>  - Display text
 
 <span class="warning">Theme Commands:</span>
@@ -600,56 +586,15 @@ drwxr-xr-x  joey  staff   skills.json
 drwxr-xr-x  joey  staff   projects/
 drwxr-xr-x  joey  staff   contact.info
 drwxr-xr-x  joey  staff   games/
--rw-r--r--  joey  staff   resume.pdf
 -rw-r--r--  joey  staff   secret.encrypted
 -rwxr-xr-x  root  admin   sudo_access.sh
         `;
         this.addToOutput(files, 'command-output');
     }
 
-    showCurrentDir() {
-        this.addToOutput(this.currentDirectory, 'command-output');
-    }
-
-    showUser() {
-        const user = this.isRoot ? 'root' : 'joey';
-        this.addToOutput(user, 'command-output');
-    }
-
     showDate() {
         const now = new Date();
         this.addToOutput(now.toString(), 'command-output');
-    }
-
-    showSystem() {
-        const systemInfo = `
-Linux terminal-portfolio 5.15.0 #1 SMP
-Build: Terminal-OS v2.0.1 (Hacker Edition)
-Architecture: x86_64
-Kernel: Advanced-Shell-Interface
-        `;
-        this.addToOutput(systemInfo.trim(), 'command-output');
-    }
-
-    catFile(args) {
-        if (!args.length) {
-            this.addToOutput('Usage: cat [filename]', 'error');
-            return;
-        }
-
-        const file = args[0];
-        const fileContents = {
-            'about_me.txt': 'Passionate developer | Problem solver | Terminal enthusiast',
-            'contact.info': 'Email: joey@terminal.dev\nLocation: Cyberspace',
-            'resume.pdf': 'PDF content cannot be displayed in terminal. Use \'resume\' command instead.',
-            'secret.encrypted': '���ḧ̸̖́e̴̩̽l̷̰̈́l̴̰̇o̸͇̎_̷̣̈́w̶̱̌o̷̰͊r̷̰̄l̶̰̇d̷̰̈́_̸̰̄2̴̹̇0̸̰̅2̷̰̀4̸̰̅���'
-        };
-
-        if (fileContents[file]) {
-            this.addToOutput(fileContents[file], 'command-output');
-        } else {
-            this.addToOutput(`cat: ${file}: No such file or directory`, 'error');
-        }
     }
 
     echo(args) {
@@ -750,52 +695,6 @@ Welcome to the Matrix, Neo. The choice is yours.
         });
     }
 
-    openGithub() {
-        this.addToOutput('Opening GitHub profile in new tab...', 'info');
-        // In a real implementation, you'd use: window.open('https://github.com/yourusername', '_blank');
-        this.addToOutput('GitHub: https://github.com/joey-terminal', 'success');
-    }
-
-    openLinkedIn() {
-        this.addToOutput('Opening LinkedIn profile in new tab...', 'info');
-        // In a real implementation, you'd use: window.open('https://linkedin.com/in/yourprofile', '_blank');
-        this.addToOutput('LinkedIn: https://linkedin.com/in/joey-dev', 'success');
-    }
-
-    showResume() {
-        const resumeText = `
-<span class="info">Joey's Resume</span>
-═══════════════
-
-<span class="success">EXPERIENCE</span>
-──────────────
-Senior Full-Stack Developer | Tech Corp (2022-2024)
-├── Led development of scalable web applications
-├── Mentored junior developers
-└── Improved system performance by 40%
-
-Full-Stack Developer | StartupCo (2020-2022)
-├── Built MVP from scratch using Python/React
-├── Implemented CI/CD pipelines
-└── Collaborated with cross-functional teams
-
-<span class="success">EDUCATION</span>
-─────────────
-Computer Science Degree | University of Code (2020)
-├── Graduated Summa Cum Laude
-├── Focus: Software Engineering & Algorithms
-└── Relevant Coursework: Data Structures, Web Dev
-
-<span class="success">CERTIFICATIONS</span>
-─────────────────
-├── AWS Certified Developer
-├── Python Professional Certification
-└── Certified Ethical Hacker (CEH)
-
-<span class="warning">Download full resume:</span> joey-resume.pdf
-        `;
-        this.addToOutput(resumeText, 'command-output');
-    }
 
     exit() {
         this.addToOutput('Thanks for visiting! Connection terminated.', 'warning');
