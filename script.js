@@ -64,7 +64,8 @@ class Terminal {
             rps: () => this.playRockPaperScissors(),
             device: () => this.showDeviceInfo(),
             mobile_help: () => this.showMobileHelp(),
-            touch: () => this.showTouchCommands()
+            touch: () => this.showTouchCommands(),
+            blog: () => this.openBlog()
         };
 
         this.init();
@@ -393,6 +394,7 @@ Available Commands:
 <span class="success">skills</span>       - Show programming skills
 <span class="success">projects</span>     - View portfolio projects
 <span class="success">resume</span>       - Display resume information
+<span class="success">blog</span>         - Open minimal blog page
 <span class="success">github</span>       - Open GitHub profile
 <span class="success">linkedin</span>     - Open LinkedIn profile
 
@@ -1583,6 +1585,12 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 <span class="info">Having issues? Try 'device' to see your setup!</span>
         `;
         this.addToOutput(touchText, 'command-output');
+    }
+
+    openBlog() {
+        this.addToOutput('<span class="info">Opening blog in new tab...</span>', 'command-output');
+        window.open('blog.html', '_blank');
+        this.addToOutput('<span class="success">Blog opened! Check your browser tabs.</span>', 'command-output');
     }
 }
 

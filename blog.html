@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <title>Joey's Blog</title>
+    <link rel="stylesheet" href="blog.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="nav">
+            <a href="index.html" class="back-link">← Back to Terminal</a>
+            <h1 class="site-title">Joey's Blog</h1>
+        </nav>
+    </header>
+
+    <main class="main-content" id="posts-container">
+        <!-- Posts will be loaded dynamically from posts.json -->
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2024 Joey. Built with intention.</p>
+    </footer>
+    
+    <script src="blog.js"></script>
+</body>
+</html>
