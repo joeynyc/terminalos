@@ -215,13 +215,6 @@ class Terminal {
         
         // Initial cursor positioning
         this.updateCursorPosition();
-        
-        // Different welcome commands based on device
-        if (this.isMobile) {
-            this.typeCommand('mobile_help', 2000);
-        } else {
-            this.typeCommand('help', 2000);
-        }
     }
 
     updateCursorPosition() {
@@ -318,7 +311,6 @@ class Terminal {
         }
 
         this.input.value = '';
-        this.scrollToBottom();
     }
 
     addToOutput(content, className = 'command-output') {
@@ -335,6 +327,12 @@ class Terminal {
         }
         
         this.output.appendChild(div);
+        
+        // Always scroll to bottom after adding content to keep cursor visible
+        // Use requestAnimationFrame for smooth scrolling that syncs with browser rendering
+        requestAnimationFrame(() => {
+            setTimeout(() => this.scrollToBottom(), 0);
+        });
     }
 
     renderFormattedContent(container, content) {
