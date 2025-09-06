@@ -20,6 +20,10 @@ class Terminal {
         this.currentGame = null;
         this.gameData = {};
         
+        // RSS state management
+        this.rssActive = false;
+        this.rssStories = [];
+        
         // Available themes
         this.themes = {
             green: { name: 'Matrix Green', color: '#00ff00', description: 'Classic hacker terminal' },
@@ -58,7 +62,8 @@ class Terminal {
             device: () => this.showDeviceInfo(),
             mobile_help: () => this.showMobileHelp(),
             touch: () => this.showTouchCommands(),
-            blog: () => this.openBlog()
+            blog: () => this.openBlog(),
+            rss: () => this.showRSS()
         };
 
         this.init();
@@ -291,6 +296,14 @@ class Terminal {
             return;
         }
 
+        // Handle RSS states
+        if (this.rssActive) {
+            this.handleRSSInput(command);
+            this.input.value = '';
+            this.scrollToBottom();
+            return;
+        }
+
         this.addToOutput(`${this.getPrompt()}${command}`, 'command-line');
         this.commandHistory.unshift(command);
         this.historyIndex = -1;
@@ -385,6 +398,7 @@ Available Commands:
 <span class="success">skills</span>       - Show programming skills
 <span class="success">projects</span>     - View portfolio projects
 <span class="success">blog</span>         - Open minimal blog page
+<span class="success">rss</span>          - Browse Hacker News stories
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -1488,6 +1502,167 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.addToOutput('<span class="info">Opening blog in new tab...</span>', 'command-output');
         window.open('blog.html', '_blank');
         this.addToOutput('<span class="success">Blog opened! Check your browser tabs.</span>', 'command-output');
+    }
+
+    // ========================
+    // RSS / HACKER NEWS INTEGRATION
+    // ========================
+
+    async showRSS() {
+        this.addToOutput('<span class="info">📰 Fetching latest Hacker News stories...</span>', 'command-output');
+        
+        try {
+            const stories = await this.fetchHackerNewsStories();
+            
+            if (!stories || stories.length === 0) {
+                throw new Error('No stories received from API');
+            }
+            
+            this.rssStories = stories.filter(story => story && story.title);
+            this.displayRSSStories();
+            this.rssActive = true;
+            
+        } catch (error) {
+            this.addToOutput('<span class="error">❌ Failed to fetch live Hacker News stories</span>', 'command-output');
+            this.addToOutput('<span class="error">Please check your internet connection and try again</span>', 'command-output');
+            this.addToOutput(`<span class="info">Error: ${error.message}</span>`, 'command-output');
+        }
+    }
+
+    async fetchHackerNewsStories() {
+        try {
+            // Try multiple proxy services in order
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://corsproxy.io/?'
+            ];
+            
+            const baseUrl = 'https://hacker-news.firebaseio.com/v0/';
+            let storyIds = null;
+            
+            // Try each proxy until one works for top stories
+            for (const proxy of proxies) {
+                try {
+                    const url = proxy + encodeURIComponent(baseUrl + 'topstories.json');
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        storyIds = await response.json();
+                        this.workingProxy = proxy; // Remember which proxy worked
+                        break;
+                    }
+                } catch (error) {
+                    console.log(`Proxy ${proxy} failed:`, error.message);
+                    continue;
+                }
+            }
+            
+            if (!storyIds || !Array.isArray(storyIds)) {
+                throw new Error('Unable to fetch story IDs from any proxy service');
+            }
+            
+            const topStoryIds = storyIds.slice(0, 10);
+            
+            // Use the working proxy to fetch individual stories
+            const stories = [];
+            for (const id of topStoryIds) {
+                try {
+                    const url = this.workingProxy + encodeURIComponent(baseUrl + `item/${id}.json`);
+                    const response = await fetch(url);
+                    
+                    if (response.ok) {
+                        const story = await response.json();
+                        if (story && story.title) {
+                            stories.push(story);
+                        }
+                    }
+                    
+                    // Small delay between requests
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                } catch (error) {
+                    console.log(`Skipped story ${id}:`, error.message);
+                    continue;
+                }
+                
+                // Stop if we have enough stories
+                if (stories.length >= 8) break;
+            }
+            
+            if (stories.length === 0) {
+                throw new Error('No stories could be fetched');
+            }
+            
+            return stories;
+            
+        } catch (error) {
+            throw new Error(`Failed to fetch Hacker News stories: ${error.message}`);
+        }
+    }
+
+
+    displayRSSStories() {
+        this.addToOutput('<span class="success">🚀 Top Hacker News Stories</span>', 'command-output');
+        this.addToOutput('═══════════════════════════════', 'command-output');
+        
+        this.rssStories.forEach((story, index) => {
+            const storyNumber = index + 1;
+            const points = story.score || 0;
+            const comments = story.descendants || 0;
+            const title = story.title.length > 60 ? story.title.substring(0, 57) + '...' : story.title;
+            
+            const storyText = `
+<span class="success">${storyNumber.toString().padStart(2, ' ')}.</span> ${title}
+    <span class="info">↑${points} points | 💬${comments} comments</span>`;
+            
+            this.addToOutput(storyText, 'command-output');
+        });
+        
+        this.addToOutput('', 'command-output');
+        this.addToOutput('<span class="warning">Type a number (1-10) to open story, or "quit" to exit RSS mode</span>', 'command-output');
+    }
+
+    handleRSSInput(input) {
+        if (input.toLowerCase() === 'quit' || input.toLowerCase() === 'exit') {
+            this.endRSS();
+            return;
+        }
+
+        const storyNumber = parseInt(input);
+        if (isNaN(storyNumber) || storyNumber < 1 || storyNumber > this.rssStories.length) {
+            this.addToOutput('<span class="error">Please enter a valid story number (1-10) or "quit" to exit</span>', 'command-output');
+            return;
+        }
+
+        const selectedStory = this.rssStories[storyNumber - 1];
+        if (selectedStory) {
+            this.openStory(selectedStory);
+        }
+    }
+
+    openStory(story) {
+        this.addToOutput(`<span class="info">Opening: ${story.title}</span>`, 'command-output');
+        
+        if (story.url) {
+            // External link
+            window.open(story.url, '_blank');
+            this.addToOutput('<span class="success">✅ Story opened in new tab</span>', 'command-output');
+        } else {
+            // HN discussion only (Ask HN, Show HN, etc.)
+            const hnUrl = `https://news.ycombinator.com/item?id=${story.id}`;
+            window.open(hnUrl, '_blank');
+            this.addToOutput('<span class="success">✅ Hacker News discussion opened in new tab</span>', 'command-output');
+        }
+        
+        this.addToOutput('<span class="info">Type another number to open more stories, or "quit" to exit RSS mode</span>', 'command-output');
+    }
+
+    endRSS() {
+        this.rssActive = false;
+        this.rssStories = [];
+        this.addToOutput('<span class="warning">RSS mode ended. Back to terminal.</span>', 'command-output');
+        this.addToOutput('Type \'rss\' to browse Hacker News again or \'help\' for all commands.', 'info');
     }
 }
 

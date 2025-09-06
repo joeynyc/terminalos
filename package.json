@@ -1,0 +1,24 @@
+{
+  "name": "ossite",
+  "version": "1.0.0",
+  "description": "A unique, interactive terminal-style portfolio website that showcases skills and experience through a command-line interface.",
+  "main": "blog.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeynyc/terminalos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joeynyc/terminalos/issues"
+  },
+  "homepage": "https://github.com/joeynyc/terminalos#readme",
+  "devDependencies": {
+    "playwright": "^1.55.0",
+    "puppeteer": "^24.19.0"
+  }
+}
