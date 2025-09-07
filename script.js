@@ -63,7 +63,8 @@ class Terminal {
             mobile_help: () => this.showMobileHelp(),
             touch: () => this.showTouchCommands(),
             blog: () => this.openBlog(),
-            rss: () => this.showRSS()
+            rss: () => this.showRSS(),
+            github: () => this.openGitHub()
         };
 
         this.init();
@@ -398,6 +399,7 @@ Available Commands:
 <span class="success">skills</span>       - Show programming skills
 <span class="success">projects</span>     - View portfolio projects
 <span class="success">blog</span>         - Open minimal blog page
+<span class="success">github</span>       - Open Govee-MCP repository
 <span class="success">rss</span>          - Browse Hacker News stories
 
 <span class="info">System Commands:</span>
@@ -583,7 +585,7 @@ within 24 hours (or faster if you include a good coding joke).
 • Documentation improvements
 • Bug fixes and feature requests
 
-Type 'github' to view my complete portfolio!
+Type 'github' to view my Govee-MCP repository!
         `;
         this.addToOutput(projectsText, 'command-output');
     }
@@ -1504,6 +1506,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.addToOutput('<span class="success">Blog opened! Check your browser tabs.</span>', 'command-output');
     }
 
+    openGitHub() {
+        this.addToOutput('<span class="info">🐙 Opening Govee-MCP GitHub repository...</span>', 'command-output');
+        window.open('https://github.com/joeynyc/Govee-MCP.git', '_blank');
+        this.addToOutput('<span class="success">✅ GitHub repository opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">💡 A MCP Server to control your Govee Lights using natural language!</span>', 'command-output');
+    }
+
     // ========================
     // RSS / HACKER NEWS INTEGRATION
     // ========================
@@ -1663,6 +1672,16 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.rssStories = [];
         this.addToOutput('<span class="warning">RSS mode ended. Back to terminal.</span>', 'command-output');
         this.addToOutput('Type \'rss\' to browse Hacker News again or \'help\' for all commands.', 'info');
+    }
+
+
+
+    endGame() {
+        this.gameActive = false;
+        this.currentGame = null;
+        this.gameData = {};
+        this.addToOutput('<span class="warning">Game ended. Back to terminal.</span>', 'command-output');
+        this.addToOutput('Type \'games\' to see available games or \'help\' for all commands.', 'info');
     }
 }
 
