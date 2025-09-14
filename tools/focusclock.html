@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FocusClock — Secure Single‑File</title>
+    <meta name="description" content="Offline time tracker with notes and client-side encryption." />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      :root {
+        --bg: #0b0f14;
+        --panel: #121823;
+        --panel-2: #0f1620;
+        --text: #e7edf3;
+        --muted: #9fb2c3;
+        --accent: #6ee7b7;
+        --accent-2: #22d3ee;
+        --danger: #f87171;
+        --warn: #fbbf24;
+        --ok: #4ade80;
+        --border: #213041;
+        --shadow: rgba(0,0,0,.35);
+        --radius: 12px;
+      }
+      html, body { height: 100%; }
+      body {
+        margin: 0; background: radial-gradient(1200px 800px at 25% -10%, #132031 0%, var(--bg) 60%), var(--bg);
+        color: var(--text); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+      header { display: flex; gap: 16px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+      .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .3px; }
+      .brand .dot { width: 10px; height: 10px; border-radius: 99px; background: var(--accent); box-shadow: 0 0 14px var(--accent); }
+      .row { display: flex; gap: 16px; }
+      .col { flex: 1; }
+      .panel { background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 8px 24px var(--shadow); padding: 16px; min-width: 0; }
+      .timer { text-align: center; padding: 16px; }
+      .time { font-size: 56px; font-weight: 800; letter-spacing: 1px; margin: 8px 0 2px; }
+      .sub { color: var(--muted); font-size: 13px; }
+      .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+      button, .btn {
+        appearance: none; border: 1px solid var(--border); background: #0e1621; color: var(--text); padding: 10px 14px; border-radius: 10px; cursor: pointer;
+        transition: transform .05s ease, background .2s ease, border-color .2s ease; font-weight: 600;
+      }
+      button:hover, .btn:hover { background: #122031; border-color: #2a415b; }
+      button:active, .btn:active { transform: translateY(1px); }
+      .primary { background: linear-gradient(180deg, #123138, #0d2530); border-color: #1f3b4f; }
+      .primary:hover { background: linear-gradient(180deg, #17424c, #0f2e3b); border-color: #2b5876; }
+      .accent { background: linear-gradient(180deg, #0b2d22, #0a241c); border-color: #164c37; color: #d1fae5; }
+      .accent:hover { background: linear-gradient(180deg, #0e3a2b, #0a2a20); border-color: #1c6a4d; }
+      .danger { background: linear-gradient(180deg, #2f1212, #230b0b); border-color: #5c2323; color: #fee2e2; }
+      .muted { color: var(--muted); }
+      input[type="text"], textarea, input[type="password"] {
+        width: 100%; max-width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #0e1621; color: var(--text);
+      }
+      label { display: block; font-size: 12px; color: var(--muted); margin: 6px 0 6px; }
+      .list { display: grid; gap: 10px; }
+      .item { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,0.02); min-width: 0; }
+      .item .meta { font-size: 12px; color: var(--muted); }
+      .item .title { font-weight: 700; display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 6px; overflow-wrap: anywhere; }
+      .tag { display: inline-block; font-size: 11px; color: #cffafe; background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.35); padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
+      .note { font-size: 13px; color: #cbd5e1; padding-left: 8px; border-left: 2px solid #1f3b4f; margin-top: 8px; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+      .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; min-width: 0; }
+      .grid-2 > * { min-width: 0; }
+      @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+      .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .spacer { flex: 1; }
+      .pill { font-size: 12px; padding: 4px 8px; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 999px; }
+      .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 20px; }
+      dialog::backdrop { background: rgba(0,0,0,.6); }
+      dialog { border: 1px solid var(--border); border-radius: 12px; background: var(--panel); color: var(--text); padding: 16px; box-shadow: 0 10px 40px var(--shadow); }
+      .error { color: var(--danger); font-size: 12px; }
+      .success { color: var(--ok); font-size: 12px; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="brand" aria-label="FocusClock">
+          <div class="dot" aria-hidden="true"></div>
+          <div>FocusClock</div>
+          <span class="pill" id="status-pill" title="Encryption status">Locked</span>
+        </div>
+        <div class="toolbar">
+          <button id="lockBtn" class="btn" title="Lock vault (encrypt & clear from memory)">Lock</button>
+          <button id="changePassBtn" class="btn" title="Change passphrase">Change Passphrase</button>
+          <button id="settingsBtn" class="btn" title="Settings">Settings</button>
+          <div class="spacer"></div>
+          <button id="exportJsonBtn" class="btn" title="Export encrypted JSON">Export</button>
+          <label class="btn" for="importJsonInput" title="Import encrypted JSON" style="cursor:pointer;">Import<input id="importJsonInput" type="file" accept="application/json" style="display:none;" /></label>
+        </div>
+      </header>
+
+      <section class="grid-2">
+        <div class="panel timer" aria-live="polite">
+          <div class="sub">Current Session</div>
+          <div id="time" class="time">00:00:00</div>
+          <div class="controls">
+            <button id="startBtn" class="primary">Start</button>
+            <button id="pauseBtn" disabled>Pause</button>
+            <button id="resumeBtn" disabled>Resume</button>
+            <button id="stopBtn" class="danger" disabled>Stop</button>
+          </div>
+          <div style="margin-top:12px;">
+            <label for="labelInput">Label</label>
+            <input id="labelInput" type="text" placeholder="What are you working on?" />
+          </div>
+          <div style="margin-top:12px;">
+            <label for="tagsInput">Tags (comma-separated)</label>
+            <input id="tagsInput" type="text" placeholder="e.g. deep work, docs" />
+          </div>
+          <div style="margin-top:12px;">
+            <label for="quickNote">Quick Note</label>
+            <textarea id="quickNote" rows="2" placeholder="Add a note about this moment..."></textarea>
+            <div class="controls" style="justify-content:flex-end;">
+              <button id="addNoteBtn" class="accent">Add Note</button>
+            </div>
+            <div id="noteStatus" class="sub" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="toolbar" style="margin-bottom:10px;">
+            <strong>Sessions</strong>
+            <div class="spacer"></div>
+            <select id="filterRange" title="Filter range">
+              <option value="all">All</option>
+              <option value="today">Today</option>
+              <option value="week">This week</option>
+            </select>
+            <input id="filterTag" type="text" placeholder="Filter tag" title="Filter by tag" style="max-width:160px;" />
+            <button id="exportCsvBtn" class="btn">Export CSV</button>
+          </div>
+          <div id="sessions" class="list" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <div class="footer">Single-file app. Data stored locally and encrypted with your passphrase.</div>
+    </div>
+
+    <dialog id="unlockDialog" aria-label="Unlock Vault">
+      <form method="dialog" id="unlockForm">
+        <h3 style="margin:0 0 8px;">Unlock Your Vault</h3>
+        <p class="sub" id="unlockHelp">Enter your passphrase to decrypt your data.</p>
+        <label for="unlockPass">Passphrase</label>
+        <input id="unlockPass" type="password" autocomplete="current-password" required />
+        <div id="unlockError" class="error" role="alert" style="min-height:18px;margin-top:6px;"></div>
+        <div class="controls" style="justify-content:flex-end; margin-top:8px;">
+          <button value="cancel">Cancel</button>
+          <button id="unlockSubmit" class="primary" value="unlock">Unlock</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="settingsDialog" aria-label="Settings">
+      <form method="dialog" id="settingsForm">
+        <h3 style="margin:0 0 8px;">Settings</h3>
+        <label for="autoLockMinutes">Auto-lock after minutes (0 = never)</label>
+        <input id="autoLockMinutes" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="10" />
+        <div class="sub" style="margin-top:4px;">When no activity is detected, the vault locks.</div>
+        <div class="controls" style="justify-content:flex-end; margin-top:8px;">
+          <button value="cancel">Cancel</button>
+          <button id="settingsSubmit" class="primary" value="save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="setupDialog" aria-label="Create Vault">
+      <form method="dialog" id="setupForm">
+        <h3 style="margin:0 0 8px;">Create Your Vault</h3>
+        <p class="sub">Set a passphrase to encrypt your data locally.</p>
+        <label for="newPass">New Passphrase</label>
+        <input id="newPass" type="password" autocomplete="new-password" required />
+        <label for="newPass2">Confirm Passphrase</label>
+        <input id="newPass2" type="password" autocomplete="new-password" required />
+        <div id="setupError" class="error" role="alert" style="min-height:18px;margin-top:6px;"></div>
+        <div class="controls" style="justify-content:flex-end; margin-top:8px;">
+          <button value="cancel">Cancel</button>
+          <button id="setupSubmit" class="primary" value="create">Create</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="changePassDialog" aria-label="Change Passphrase">
+      <form method="dialog" id="changePassForm">
+        <h3 style="margin:0 0 8px;">Change Passphrase</h3>
+        <label for="oldPass">Current Passphrase</label>
+        <input id="oldPass" type="password" autocomplete="current-password" required />
+        <label for="newPass3">New Passphrase</label>
+        <input id="newPass3" type="password" autocomplete="new-password" required />
+        <label for="newPass4">Confirm New Passphrase</label>
+        <input id="newPass4" type="password" autocomplete="new-password" required />
+        <div id="changePassError" class="error" role="alert" style="min-height:18px;margin-top:6px;"></div>
+        <div class="controls" style="justify-content:flex-end; margin-top:8px;">
+          <button value="cancel">Cancel</button>
+          <button id="changePassSubmit" class="primary" value="change">Change</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      // FocusClock Single-File App with Client-Side Encryption
+      // Data model and crypto helpers
+      const STORE_KEY = 'fc_v1';
+      const META_KEY = 'fc_meta_v1'; // holds { saltBase64, iter }
+
+      const state = {
+        unlocked: false,
+        key: null, // CryptoKey
+        meta: null, // { saltBase64, iter }
+        data: null, // { version, sessions: [], active: {...}|null }
+        tickHandle: null,
+        autoLockHandle: null,
+        lastActivityAt: Date.now(),
+      };
+
+      // Utils
+      const $ = (sel) => document.querySelector(sel);
+      const fmt2 = (n) => n.toString().padStart(2, '0');
+      const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+      const now = () => Date.now();
+      
+      function formatDuration(ms) {
+        ms = Math.max(0, Math.floor(ms));
+        const s = Math.floor(ms / 1000);
+        const hh = Math.floor(s / 3600);
+        const mm = Math.floor((s % 3600) / 60);
+        const ss = s % 60;
+        return `${fmt2(hh)}:${fmt2(mm)}:${fmt2(ss)}`;
+      }
+      function uuid() {
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+      }
+
+      // Crypto
+      async function deriveKey(pass, saltBytes, iter) {
+        const enc = new TextEncoder();
+        const keyMat = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+        return await crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: saltBytes, iterations: iter, hash: 'SHA-256' },
+          keyMat,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      }
+      function b64enc(bytes) { return btoa(String.fromCharCode(...bytes)); }
+      function b64dec(b64) { return new Uint8Array(atob(b64).split('').map(c => c.charCodeAt(0))); }
+      async function encryptObj(obj, key) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const data = new TextEncoder().encode(JSON.stringify(obj));
+        const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data));
+        return { iv: b64enc(iv), ct: b64enc(ct) };
+      }
+      async function decryptObj(payload, key) {
+        const iv = b64dec(payload.iv);
+        const ct = b64dec(payload.ct);
+        const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct));
+        return JSON.parse(new TextDecoder().decode(pt));
+      }
+
+      // Storage
+      function loadMeta() {
+        const raw = localStorage.getItem(META_KEY);
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch { return null; }
+      }
+      function saveMeta(meta) { localStorage.setItem(META_KEY, JSON.stringify(meta)); }
+      function loadEncrypted() {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch { return null; }
+      }
+      function saveEncrypted(payload) { localStorage.setItem(STORE_KEY, JSON.stringify(payload)); }
+      function clearVault() { localStorage.removeItem(STORE_KEY); localStorage.removeItem(META_KEY); }
+
+      async function persist() {
+        if (!state.unlocked || !state.key || !state.data) return;
+        const payload = await encryptObj(state.data, state.key);
+        saveEncrypted(payload);
+      }
+
+      // App Logic
+      function resetStateData() {
+        state.data = { version: 1, sessions: [], active: null, settings: { autoLockMinutes: 0 } };
+      }
+      function render() {
+        const pill = $('#status-pill');
+        pill.textContent = state.unlocked ? 'Unlocked' : 'Locked';
+        pill.style.color = state.unlocked ? 'var(--ok)' : 'var(--muted)';
+
+        const running = !!(state.data && state.data.active && state.data.active.running);
+        const paused = !!(state.data && state.data.active && !state.data.active.running && state.data.active);
+        $('#startBtn').disabled = !state.unlocked || running || paused;
+        $('#pauseBtn').disabled = !state.unlocked || !running;
+        $('#resumeBtn').disabled = !state.unlocked || !paused;
+        $('#stopBtn').disabled = !state.unlocked || !(running || paused);
+        $('#labelInput').disabled = !state.unlocked;
+        const tagsInput = document.getElementById('tagsInput');
+        if (tagsInput) tagsInput.disabled = !state.unlocked;
+        $('#quickNote').disabled = !state.unlocked || !(running || paused);
+        $('#addNoteBtn').disabled = !state.unlocked || !(running || paused);
+
+        // Time
+        const t = computeElapsed();
+        $('#time').textContent = formatDuration(t);
+
+        // Active tags field
+        if (state.data && state.data.active && document.getElementById('tagsInput')) {
+          document.getElementById('tagsInput').value = (state.data.active.tags || []).join(', ');
+        } else if (document.getElementById('tagsInput')) {
+          document.getElementById('tagsInput').value = '';
+        }
+
+        // Sessions list
+        renderSessions();
+      }
+      function computeElapsed() {
+        if (!state.data || !state.data.active) return 0;
+        const a = state.data.active;
+        if (a.running) {
+          return a.elapsedMs + (now() - a.lastStartAt);
+        }
+        return a.elapsedMs;
+      }
+      function tick() {
+        if (!state.unlocked) return;
+        $('#time').textContent = formatDuration(computeElapsed());
+      }
+      function startTicking() {
+        if (state.tickHandle) clearInterval(state.tickHandle);
+        state.tickHandle = setInterval(tick, 500);
+      }
+
+      function startSession() {
+        const label = $('#labelInput').value.trim();
+        const tags = parseTags(document.getElementById('tagsInput') ? document.getElementById('tagsInput').value : '');
+        state.data.active = {
+          id: uuid(),
+          startedAt: now(),
+          lastStartAt: now(),
+          elapsedMs: 0,
+          running: true,
+          label,
+          tags,
+          notes: [],
+        };
+        startTicking();
+        render();
+        persist();
+      }
+      function pauseSession() {
+        const a = state.data.active; if (!a || !a.running) return;
+        a.elapsedMs += now() - a.lastStartAt;
+        a.running = false;
+        render();
+        persist();
+      }
+      function resumeSession() {
+        const a = state.data.active; if (!a || a.running) return;
+        a.lastStartAt = now();
+        a.running = true;
+        render();
+        persist();
+      }
+      function stopSession() {
+        const a = state.data.active; if (!a) return;
+        if (a.running) a.elapsedMs += now() - a.lastStartAt;
+        const session = {
+          id: a.id,
+          start: a.startedAt,
+          end: now(),
+          durationMs: a.elapsedMs,
+          label: a.label || '',
+          tags: a.tags || [],
+          notes: a.notes || [],
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        state.data.sessions.unshift(session);
+        state.data.active = null;
+        $('#labelInput').value = '';
+        render();
+        persist();
+      }
+      function addNote() {
+        const val = $('#quickNote').value.trim();
+        if (!val) return;
+        const target = state.data.active || null;
+        const note = { id: uuid(), at: now(), content: val };
+        if (target) {
+          target.notes.push(note);
+        }
+        $('#quickNote').value = '';
+        const s = $('#noteStatus');
+        s.textContent = 'Note added';
+        setTimeout(() => s.textContent = '', 1200);
+        render();
+        persist();
+      }
+      function deleteSession(id) {
+        state.data.sessions = state.data.sessions.filter(s => s.id !== id);
+        render();
+        persist();
+      }
+      function editLabel(id, next) {
+        const s = state.data.sessions.find(s => s.id === id); if (!s) return;
+        s.label = next; s.updatedAt = now();
+        render();
+        persist();
+      }
+      function editTags(id, tags) {
+        const s = state.data.sessions.find(s => s.id === id); if (!s) return;
+        s.tags = tags; s.updatedAt = now();
+        render();
+        persist();
+      }
+      function editTimes(id, startTs, endTs) {
+        const s = state.data.sessions.find(s => s.id === id); if (!s) return;
+        s.start = startTs; s.end = endTs; s.durationMs = Math.max(0, endTs - startTs); s.updatedAt = now();
+        render();
+        persist();
+      }
+      function removeNote(sessionId, noteId) {
+        const s = state.data.sessions.find(s => s.id === sessionId); if (!s) return;
+        s.notes = s.notes.filter(n => n.id !== noteId); s.updatedAt = now();
+        render();
+        persist();
+      }
+
+      function renderSessions() {
+        const el = $('#sessions');
+        el.innerHTML = '';
+        if (!state.data) return;
+        const range = $('#filterRange').value;
+        const tagFilter = (document.getElementById('filterTag')?.value || '').trim().toLowerCase();
+        const nowDate = new Date();
+        const isSameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+        const getWeek = (d) => {
+          const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+          const dayNum = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dayNum);
+          const yearStart = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+          return Math.ceil((((t - yearStart) / 86400000) + 1)/7)
+        };
+        const thisWeek = getWeek(nowDate), thisYear = nowDate.getFullYear();
+        let items = state.data.sessions;
+        items = items.filter(s => {
+          if (range === 'all') return true;
+          const d = new Date(s.start);
+          if (range === 'today') return isSameDay(d, nowDate);
+          if (range === 'week') return getWeek(d) === thisWeek && d.getFullYear() === thisYear;
+        });
+        if (tagFilter) {
+          items = items.filter(s => (s.tags||[]).some(t => String(t).toLowerCase().includes(tagFilter)));
+        }
+        if (items.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'sub';
+          empty.textContent = 'No sessions yet.';
+          el.appendChild(empty);
+          return;
+        }
+        for (const s of items) {
+          const item = document.createElement('div');
+          item.className = 'item';
+          const left = document.createElement('div');
+          const title = document.createElement('div');
+          title.className = 'title';
+          title.textContent = s.label || 'Untitled';
+          if (s.tags && s.tags.length) {
+            for (const tg of s.tags) {
+              const chip = document.createElement('span');
+              chip.className = 'tag';
+              chip.textContent = tg;
+              title.appendChild(chip);
+            }
+          }
+          const meta = document.createElement('div');
+          meta.className = 'meta';
+          const startStr = new Date(s.start).toLocaleString();
+          const endStr = new Date(s.end).toLocaleString();
+          meta.textContent = `${startStr} → ${endStr} • ${formatDuration(s.durationMs)}`;
+          left.appendChild(title); left.appendChild(meta);
+          if (s.notes && s.notes.length) {
+            for (const n of s.notes) {
+              const note = document.createElement('div');
+              note.className = 'note';
+              const dt = new Date(n.at).toLocaleString();
+              note.innerHTML = `<span class="mono">${dt}</span> — ${escapeHtml(n.content)} `;
+              const del = document.createElement('button'); del.textContent = 'Delete'; del.className = 'btn'; del.style.marginLeft = '8px';
+              del.addEventListener('click', () => removeNote(s.id, n.id));
+              note.appendChild(del);
+              left.appendChild(note);
+            }
+          }
+          const right = document.createElement('div');
+          const editBtn = document.createElement('button'); editBtn.textContent = 'Edit'; editBtn.className = 'btn';
+          editBtn.addEventListener('click', () => openEditDialog(s));
+          const delBtn = document.createElement('button'); delBtn.textContent = 'Delete'; delBtn.className = 'btn danger'; delBtn.style.marginLeft = '6px';
+          delBtn.addEventListener('click', () => deleteSession(s.id));
+          right.appendChild(editBtn); right.appendChild(delBtn);
+
+          item.appendChild(left); item.appendChild(right);
+          el.appendChild(item);
+        }
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;'}[c]));
+      }
+
+      function openEditDialog(s) {
+        const dlg = document.createElement('dialog');
+        dlg.innerHTML = `
+          <form method="dialog">
+            <h3 style="margin:0 0 8px;">Edit Session</h3>
+            <label>Label</label>
+            <input id="eLabel" type="text" value="${escapeHtml(s.label || '')}">
+            <div class="grid-2" style="margin-top:8px;">
+              <div>
+                <label>Start</label>
+                <input id="eStart" type="datetime-local" value="${toLocalInputValue(new Date(s.start))}">
+              </div>
+              <div>
+                <label>End</label>
+                <input id="eEnd" type="datetime-local" value="${toLocalInputValue(new Date(s.end))}">
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <label>Tags (comma-separated)</label>
+              <input id="eTags" type="text" value="${escapeHtml((s.tags||[]).join(', '))}">
+            </div>
+            <div class="controls" style="justify-content:flex-end; margin-top:10px;">
+              <button value="cancel">Cancel</button>
+              <button value="save" class="primary">Save</button>
+            </div>
+          </form>
+        `;
+        document.body.appendChild(dlg);
+        dlg.addEventListener('close', () => dlg.remove());
+        dlg.addEventListener('cancel', () => dlg.close());
+        dlg.querySelector('form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const lbl = dlg.querySelector('#eLabel').value.trim();
+          const start = fromLocalInputValue(dlg.querySelector('#eStart').value);
+          const end = fromLocalInputValue(dlg.querySelector('#eEnd').value);
+          if (!start || !end || end < start) { alert('Invalid date/time'); return; }
+          editLabel(s.id, lbl);
+          editTags(s.id, parseTags(dlg.querySelector('#eTags').value));
+          editTimes(s.id, +start, +end);
+          dlg.close();
+        });
+        dlg.showModal();
+      }
+      function toLocalInputValue(d) {
+        const pad = (n) => n.toString().padStart(2,'0');
+        const yyyy = d.getFullYear();
+        const mm = pad(d.getMonth()+1);
+        const dd = pad(d.getDate());
+        const hh = pad(d.getHours());
+        const mi = pad(d.getMinutes());
+        return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+      }
+      function fromLocalInputValue(v) { const d = new Date(v); return isNaN(+d) ? null : d; }
+
+      // Export/Import
+      function sessionsToCsv(sessions) {
+        const esc = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+        const rows = [["id","start","end","duration_ms","label","tags","note_count"]];
+        for (const s of sessions) rows.push([s.id, new Date(s.start).toISOString(), new Date(s.end).toISOString(), s.durationMs, s.label || '', (s.tags||[]).join('|'), (s.notes||[]).length]);
+        return rows.map(r => r.map(esc).join(',')).join('\n');
+      }
+      function download(filename, text) {
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      // Unlock/Setup/Lock
+      async function ensureUnlocked() {
+        state.meta = loadMeta();
+        if (!state.meta) { // first-time setup
+          await openSetup();
+          return;
+        }
+        await openUnlock();
+      }
+      async function openSetup() {
+        const dlg = $('#setupDialog');
+        $('#setupError').textContent = '';
+        dlg.showModal();
+        $('#newPass').focus();
+        return new Promise((resolve) => {
+          $('#setupForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const p1 = $('#newPass').value; const p2 = $('#newPass2').value;
+            if (p1.length < 8) { $('#setupError').textContent = 'Use at least 8 characters.'; return; }
+            if (p1 !== p2) { $('#setupError').textContent = 'Passphrases do not match.'; return; }
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iter = 200000; // PBKDF2 iterations
+            const key = await deriveKey(p1, salt, iter);
+            state.key = key; state.meta = { saltBase64: b64enc(salt), iter };
+            saveMeta(state.meta);
+            resetStateData();
+            state.unlocked = true;
+            await persist();
+            dlg.close();
+            render();
+            resolve();
+          };
+        });
+      }
+      async function openUnlock() {
+        const dlg = $('#unlockDialog');
+        const err = $('#unlockError'); err.textContent = '';
+        dlg.showModal();
+        $('#unlockPass').focus();
+        return new Promise((resolve) => {
+          $('#unlockForm').onsubmit = async (e) => {
+            e.preventDefault();
+            try {
+              const pass = $('#unlockPass').value;
+              const meta = state.meta || loadMeta();
+              if (!meta) throw new Error('Missing vault metadata');
+              const key = await deriveKey(pass, b64dec(meta.saltBase64), meta.iter);
+              const payload = loadEncrypted();
+              if (payload) {
+                const data = await decryptObj(payload, key);
+                state.data = data;
+              } else {
+                resetStateData();
+              }
+              state.key = key; state.unlocked = true; dlg.close();
+              render(); startTicking();
+              resolve();
+            } catch (e) {
+              err.textContent = 'Incorrect passphrase or corrupted data.';
+            }
+          };
+        });
+      }
+      async function lockVault() {
+        state.unlocked = false; state.key = null; state.data = null;
+        render();
+      }
+      async function changePassphrase() {
+        if (!state.unlocked || !state.data) { alert('Unlock first.'); return; }
+        const dlg = $('#changePassDialog');
+        $('#changePassError').textContent = '';
+        dlg.showModal();
+        $('#oldPass').focus();
+        $('#changePassForm').onsubmit = async (e) => {
+          e.preventDefault();
+          try {
+            const oldp = $('#oldPass').value, np1 = $('#newPass3').value, np2 = $('#newPass4').value;
+            if (np1.length < 8) throw new Error('Use at least 8 characters.');
+            if (np1 !== np2) throw new Error('Passphrases do not match.');
+            // Verify old pass
+            const meta = loadMeta();
+            const testKey = await deriveKey(oldp, b64dec(meta.saltBase64), meta.iter);
+            // Try decrypt to verify
+            const payload = loadEncrypted();
+            if (payload) await decryptObj(payload, testKey);
+            // Re-encrypt with new meta
+            const newSalt = crypto.getRandomValues(new Uint8Array(16));
+            const iter = 250000;
+            const newKey = await deriveKey(np1, newSalt, iter);
+            state.key = newKey; state.meta = { saltBase64: b64enc(newSalt), iter };
+            saveMeta(state.meta);
+            await persist();
+            dlg.close();
+            render();
+          } catch (err) {
+            $('#changePassError').textContent = err.message || 'Failed to change passphrase.';
+          }
+        };
+      }
+
+      // Wire UI
+      function bind() {
+        $('#startBtn').addEventListener('click', startSession);
+        $('#pauseBtn').addEventListener('click', pauseSession);
+        $('#resumeBtn').addEventListener('click', resumeSession);
+        $('#stopBtn').addEventListener('click', stopSession);
+        $('#addNoteBtn').addEventListener('click', addNote);
+        $('#filterRange').addEventListener('change', render);
+        const ft = document.getElementById('filterTag'); if (ft) ft.addEventListener('input', render);
+        $('#exportCsvBtn').addEventListener('click', () => {
+          if (!state.unlocked || !state.data) return;
+          const csv = sessionsToCsv(state.data.sessions);
+          download(`focusclock_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`, csv);
+        });
+        $('#exportJsonBtn').addEventListener('click', () => {
+          const payload = loadEncrypted();
+          if (!payload) { alert('Nothing to export yet.'); return; }
+          download('focusclock_encrypted.json', JSON.stringify({ meta: state.meta || loadMeta(), payload }, null, 2));
+        });
+        $('#importJsonInput').addEventListener('change', async (e) => {
+          const file = e.target.files && e.target.files[0]; if (!file) return;
+          const text = await file.text();
+          try {
+            const obj = JSON.parse(text);
+            if (obj && obj.meta && obj.payload) {
+              saveMeta(obj.meta);
+              saveEncrypted(obj.payload);
+              alert('Imported. Please unlock with the corresponding passphrase.');
+              await lockVault();
+              await ensureUnlocked();
+            } else {
+              alert('Invalid import file.');
+            }
+          } catch {
+            alert('Invalid JSON file.');
+          } finally {
+            e.target.value = '';
+          }
+        });
+        $('#lockBtn').addEventListener('click', lockVault);
+        $('#changePassBtn').addEventListener('click', changePassphrase);
+        $('#labelInput').addEventListener('change', () => {
+          if (state.data && state.data.active) { state.data.active.label = $('#labelInput').value.trim(); persist(); }
+        });
+        const ti = document.getElementById('tagsInput'); if (ti) ti.addEventListener('change', () => {
+          if (state.data && state.data.active) { state.data.active.tags = parseTags(document.getElementById('tagsInput').value); persist(); }
+        });
+        const sb = document.getElementById('settingsBtn'); if (sb) sb.addEventListener('click', openSettings);
+
+        // Activity listeners for auto-lock
+        ['mousemove','keydown','mousedown','touchstart','visibilitychange'].forEach(ev => {
+          window.addEventListener(ev, touchActivity, { passive: true });
+        });
+      }
+
+      function parseTags(str) {
+        return Array.from(new Set((str || '').split(',').map(s => s.trim()).filter(Boolean))).slice(0, 12);
+      }
+
+      function touchActivity() { state.lastActivityAt = Date.now(); }
+      function startAutoLockCheck() {
+        if (state.autoLockHandle) clearInterval(state.autoLockHandle);
+        state.autoLockHandle = setInterval(() => {
+          if (!state.unlocked || !state.data) return;
+          const mins = (state.data.settings && Number(state.data.settings.autoLockMinutes)) || 0;
+          if (!mins) return;
+          if (Date.now() - state.lastActivityAt > mins * 60000) {
+            lockVault();
+          }
+        }, 5000);
+      }
+      function ensureSettings() {
+        if (!state.data.settings) state.data.settings = { autoLockMinutes: 0 };
+      }
+      function openSettings() {
+        if (!state.unlocked || !state.data) { alert('Unlock first.'); return; }
+        ensureSettings();
+        const dlg = document.getElementById('settingsDialog');
+        document.getElementById('autoLockMinutes').value = String(state.data.settings.autoLockMinutes || 0);
+        dlg.showModal();
+        document.getElementById('settingsForm').onsubmit = (e) => {
+          e.preventDefault();
+          const v = clamp(parseInt(document.getElementById('autoLockMinutes').value, 10) || 0, 0, 720);
+          state.data.settings.autoLockMinutes = v;
+          persist();
+          dlg.close();
+        };
+      }
+
+      // Init
+      (async function init() {
+        bind();
+        render();
+        await ensureUnlocked();
+        startTicking();
+        startAutoLockCheck();
+      })();
+    </script>
+  </body>
+  </html>

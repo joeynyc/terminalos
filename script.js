@@ -64,7 +64,9 @@ class Terminal {
             touch: () => this.showTouchCommands(),
             blog: () => this.openBlog(),
             rss: () => this.showRSS(),
-            github: () => this.openGitHub()
+            github: () => this.openGitHub(),
+            focusclock: () => this.openFocusClock(),
+            git: () => this.openGitCheatsheet()
         };
 
         this.init();
@@ -402,6 +404,10 @@ Available Commands:
 <span class="success">blog</span>         - Open minimal blog page
 <span class="success">github</span>       - Open Govee-MCP repository
 <span class="success">rss</span>          - Browse Hacker News stories
+
+<span class="info">Available Tools:</span>
+<span class="success">focusclock</span>   - Launch productivity timer tool
+<span class="success">git</span>          - Launch Git command reference
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -1512,6 +1518,20 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('https://github.com/joeynyc/Govee-MCP.git', '_blank');
         this.addToOutput('<span class="success">✅ GitHub repository opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">💡 A MCP Server to control your Govee Lights using natural language!</span>', 'command-output');
+    }
+
+    openFocusClock() {
+        this.addToOutput('<span class="info">🔧 Launching FocusClock tool...</span>', 'command-output');
+        window.open('tools/focusclock.html', '_blank');
+        this.addToOutput('<span class="success">✅ FocusClock opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">⏱️ Offline productivity timer with notes and client-side encryption.</span>', 'command-output');
+    }
+
+    openGitCheatsheet() {
+        this.addToOutput('<span class="info">📚 Opening Git command cheatsheet...</span>', 'command-output');
+        window.open('tools/git-cheatsheet.html', '_blank');
+        this.addToOutput('<span class="success">✅ Git cheatsheet opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">💡 Quick reference for all your Git commands and workflows.</span>', 'command-output');
     }
 
     // ========================

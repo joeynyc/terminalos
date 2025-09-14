@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git Command Cheatsheet</title>
+<style>
+  :root {
+    --bg: #0b0d10;
+    --panel: #12161b;
+    --text: #e6edf3;
+    --muted: #9aa7b2;
+    --accent: #4f8cff;
+    --accent-2: #6ee7b7;
+    --border: #20262d;
+    --card: #0f1317;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --ok: #22c55e;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box }
+  html, body { height: 100% }
+  body {
+    margin: 0; font: 16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+    background: radial-gradient(1000px 600px at 20% -10%, rgba(79,140,255,.12), transparent 40%),
+                radial-gradient(800px 500px at 110% 20%, rgba(34,197,94,.10), transparent 45%),
+                var(--bg);
+    color: var(--text);
+  }
+  .wrap { max-width: 1100px; margin: 32px auto; padding: 0 16px }
+  header { display: grid; gap: 12px; grid-template-columns: 1fr; margin-bottom: 18px }
+  h1 { font-size: 28px; margin: 0; letter-spacing: .3px }
+  .sub { color: var(--muted); font-size: 14px }
+
+  .controls {
+    display: grid; gap: 10px; grid-template-columns: 1fr 280px; align-items: center;
+  }
+  @media (max-width: 820px) { .controls { grid-template-columns: 1fr } }
+
+  .search {
+    display: grid; grid-template-columns: 40px 1fr 40px; align-items: center;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    background: var(--panel); box-shadow: var(--shadow);
+  }
+  .search input {
+    background: transparent; border: 0; outline: none; color: var(--text);
+    padding: 14px 0; font-size: 16px;
+  }
+  .search .icon, .btn {
+    display: inline-grid; place-items: center; height: 44px; width: 44px; color: var(--muted);
+  }
+  .btn {
+    border: 1px solid var(--border); background: var(--panel); border-radius: 12px;
+    padding: 0 10px; height: 44px; width: auto; cursor: pointer;
+  }
+  :root[data-theme="light"] .btn { background: #ffffff }
+  .btn:hover { border-color: #2c343c }
+  .btn.primary { border-color: rgba(79,140,255,.4); color: var(--text) }
+
+  .filters {
+    display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 2px;
+  }
+  .chip {
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 999px;
+    background: rgba(255,255,255,.02); color: var(--muted); cursor: pointer; user-select: none;
+  }
+  .chip[aria-pressed="true"] { color: var(--text); border-color: rgba(79,140,255,.45); background: rgba(79,140,255,.12) }
+  .count { color: var(--muted); font-size: 13px; margin-left: 4px }
+
+  .grid {
+    margin-top: 12px;
+    display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(2, minmax(0,1fr)) } }
+  @media (max-width: 720px)  { .grid { grid-template-columns: 1fr } }
+
+  .card {
+    background: linear-gradient(180deg, var(--card), #0b0f13);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 14px 14px 10px; position: relative; overflow: hidden;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 16px }
+  .card .desc { color: var(--muted); font-size: 13px; margin: 0 0 10px }
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 13px; background: #0a0e11; border: 1px dashed #1e252c; border-radius: 10px;
+    padding: 10px 12px; word-break: break-word; color: #dbe7f3;
+  }
+  :root[data-theme="light"] .code { background: #f3f4f6; border-color: #e5e7eb; color: #111827 }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px }
+  .tag { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,.04); color: var(--muted); border: 1px solid #1c2229 }
+  :root[data-theme="light"] .tag { background: rgba(0,0,0,.03); border-color: #e5e7eb; color: #6b7280 }
+  .card .top {
+    display: flex; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 8px;
+  }
+  .copy {
+    border: 1px solid var(--border); background: #0c1116; color: var(--text);
+    padding: 6px 10px; border-radius: 10px; font-size: 12px; cursor: pointer;
+  }
+  :root[data-theme="light"] .copy { background: #ffffff }
+  :root[data-theme="light"] {
+    --bg: #f6f8fa;
+    --panel: #ffffff;
+    --text: #0b0d10;
+    --muted: #4b5563;
+    --accent: #2563eb;
+    --accent-2: #10b981;
+    --border: #d0d7de;
+    --card: #ffffff;
+    --danger: #b91c1c;
+    --warn: #b45309;
+    --ok: #16a34a;
+  }
+  .copy[aria-label*="Copied"] { outline: 2px solid rgba(110,231,183,.4); }
+  .copy { transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease }
+  .copy:active { transform: translateY(1px) scale(.99) }
+  .copy, .btn { position: relative }
+  .copy.copied {
+    border-color: rgba(110,231,183,.55);
+    background: rgba(34,197,94,.18);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.12) inset;
+    animation: copiedPulse .5s ease;
+  }
+  @keyframes copiedPulse { 0% { transform: scale(1) } 30% { transform: scale(1.03) } 100% { transform: scale(1) } }
+
+  .btn.copied {
+    border-color: rgba(110,231,183,.55);
+    background: rgba(34,197,94,.18);
+    box-shadow: 0 0 0 3px rgba(34,197,94,.12) inset, var(--shadow);
+    animation: copiedPulse .5s ease;
+  }
+  .btn:disabled, .copy:disabled { opacity: .75; cursor: default }
+
+  .pop {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: calc(100% + 6px); padding: 4px 8px; border-radius: 8px;
+    background: rgba(34,197,94,.15); color: var(--text); border: 1px solid rgba(110,231,183,.45);
+    font-size: 11px; white-space: nowrap; pointer-events: none; opacity: 0;
+    box-shadow: var(--shadow); animation: riseFade .9s ease forwards;
+  }
+  @keyframes riseFade { from { transform: translateX(-50%) translateY(6px); opacity: 0 } 30% { opacity: 1 } to { transform: translateX(-50%) translateY(-2px); opacity: 0 } }
+
+  .card.flash { box-shadow: 0 0 0 2px rgba(110,231,183,.45) inset, var(--shadow); animation: flashGlow .9s ease }
+  @keyframes flashGlow { 0% { box-shadow: 0 0 0 0 rgba(110,231,183,.0) inset } 30% { box-shadow: 0 0 0 2px rgba(110,231,183,.45) inset } 100% { box-shadow: 0 0 0 0 rgba(110,231,183,.0) inset } }
+
+  .bar {
+    display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; margin-top: 8px;
+  }
+  .bar .kbd {
+    border: 1px solid var(--border); border-bottom-width: 3px; padding: 2px 6px; border-radius: 6px; font-size: 12px;
+    background: #0e1318; color: #c7d1db;
+  }
+  :root[data-theme="light"] .bar .kbd { background: #f3f4f6; color: #374151; border-color: #e5e7eb }
+  .row { display: flex; align-items: center; gap: 8px }
+
+  .toast {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: 24px; background: #0b1218; border: 1px solid #1c232a; color: var(--text);
+    padding: 10px 14px; border-radius: 12px; box-shadow: var(--shadow); display: none;
+  }
+  :root[data-theme="light"] .toast { background: #ffffff; border-color: #e5e7eb; color: #111827 }
+  .toast.show { display: block; animation: pop .45s ease }
+  @keyframes pop { from { transform: translateX(-50%) translateY(6px); opacity: 0 } to { transform: translateX(-50%) translateY(0); opacity: 1 } }
+
+  .footer { color: var(--muted); font-size: 12px; text-align: center; margin: 22px 0 10px }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Git Command Cheatsheet</h1>
+        <div class="sub">Search, filter, and copy handy Git commands. Single-file HTML demo.</div>
+      </div>
+
+      <div class="controls" role="search">
+        <label class="search" aria-label="Search commands">
+          <span class="icon" aria-hidden="true">🔎</span>
+          <input id="q" type="search" placeholder="Search by command, description, or tag… (e.g., branch, rebase, undo)" autocomplete="off" />
+          <button id="clear" class="icon" title="Clear" aria-label="Clear search">✖️</button>
+        </label>
+        <div class="row" style="justify-content:flex-end; gap:10px">
+          <button id="toggle-dark" class="btn" aria-pressed="true" title="Toggle dark mode">🌘 Dark</button>
+          <button id="copy-all" class="btn primary" title="Copy all visible commands">Copy all</button>
+        </div>
+      </div>
+
+      <div class="filters" aria-label="Filter by tag">
+        <!-- chips injected by JS -->
+      </div>
+
+      <div class="bar" aria-live="polite">
+        <div class="row"><span class="count" id="count">0 results</span></div>
+        <div class="row" style="margin-left:auto">
+          <span class="kbd" title="Focus search">/</span>
+          <span class="kbd" title="Clear search">Esc</span>
+          <span class="kbd" title="Copy command">Enter</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid" id="grid" aria-live="polite">
+      <!-- cards injected by JS -->
+    </main>
+
+    <p class="footer">Pro tip: Hit <b>/</b> to focus search, <b>Esc</b> to clear, <b>Enter</b> to copy the first visible command.</p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copied!</div>
+
+<script>
+/* =========================
+   Data: commands + tags
+========================= */
+const COMMANDS = [
+  {
+    title: "Initialize repository",
+    cmd: "git init",
+    desc: "Create an empty Git repository in the current folder.",
+    tags: ["setup","repo"]
+  },
+  {
+    title: "Clone repository",
+    cmd: "git clone <url>",
+    desc: "Clone a remote repository to your local machine.",
+    tags: ["setup","remote"]
+  },
+  {
+    title: "Check status",
+    cmd: "git status -sb",
+    desc: "Short status view of changed, staged, and untracked files.",
+    tags: ["inspect","staging"]
+  },
+  {
+    title: "Stage changes",
+    cmd: "git add <path>",
+    desc: "Add file(s) to the staging area.",
+    tags: ["staging"]
+  },
+  {
+    title: "Unstage file",
+    cmd: "git restore --staged <path>",
+    desc: "Remove file(s) from staging without discarding edits.",
+    tags: ["staging","undo"]
+  },
+  {
+    title: "Commit staged",
+    cmd: "git commit -m \"message\"",
+    desc: "Create a new commit with a message.",
+    tags: ["commit"]
+  },
+  {
+    title: "Amend last commit",
+    cmd: "git commit --amend",
+    desc: "Edit the previous commit (message and/or staged content).",
+    tags: ["commit","rewrite","undo"]
+  },
+  {
+    title: "Show log (pretty)",
+    cmd: "git log --oneline --graph --decorate --all",
+    desc: "Compact log with branch graph and decorations.",
+    tags: ["inspect","history"]
+  },
+  {
+    title: "View commit diff",
+    cmd: "git show <commit>",
+    desc: "Show changes introduced by a commit.",
+    tags: ["inspect","diff"]
+  },
+  {
+    title: "Diff working vs staged",
+    cmd: "git diff",
+    desc: "See unstaged changes.",
+    tags: ["inspect","diff"]
+  },
+  {
+    title: "Diff staged vs HEAD",
+    cmd: "git diff --staged",
+    desc: "See staged changes.",
+    tags: ["inspect","diff"]
+  },
+  {
+    title: "Create branch",
+    cmd: "git switch -c <branch>",
+    desc: "Create and switch to a new branch.",
+    tags: ["branch"]
+  },
+  {
+    title: "Switch branch",
+    cmd: "git switch <branch>",
+    desc: "Switch to an existing branch.",
+    tags: ["branch"]
+  },
+  {
+    title: "List branches",
+    cmd: "git branch -vv",
+    desc: "List local branches with tracking info.",
+    tags: ["branch","inspect"]
+  },
+  {
+    title: "Delete branch (merged)",
+    cmd: "git branch -d <branch>",
+    desc: "Delete a fully merged branch.",
+    tags: ["branch","cleanup"]
+  },
+  {
+    title: "Set upstream",
+    cmd: "git push -u origin <branch>",
+    desc: "Push branch and set its upstream tracking.",
+    tags: ["remote","push","branch"]
+  },
+  {
+    title: "Fetch updates",
+    cmd: "git fetch --all --prune",
+    desc: "Fetch from all remotes and prune deleted remote branches.",
+    tags: ["remote","sync"]
+  },
+  {
+    title: "Merge branch",
+    cmd: "git merge <branch>",
+    desc: "Merge the named branch into the current branch.",
+    tags: ["merge","sync"]
+  },
+  {
+    title: "Rebase branch",
+    cmd: "git rebase <base>",
+    desc: "Replay commits on top of a new base.",
+    tags: ["rebase","rewrite","sync"]
+  },
+  {
+    title: "Abort rebase",
+    cmd: "git rebase --abort",
+    desc: "Stop the rebase and reset to the original state.",
+    tags: ["rebase","undo"]
+  },
+  {
+    title: "Continue rebase",
+    cmd: "git rebase --continue",
+    desc: "Continue after resolving conflicts during rebase.",
+    tags: ["rebase","conflicts"]
+  },
+  {
+    title: "Resolve conflicts (theirs)",
+    cmd: "git checkout --theirs <path>",
+    desc: "Use the version from the other branch during conflicts.",
+    tags: ["conflicts","merge","rebase"]
+  },
+  {
+    title: "Resolve conflicts (ours)",
+    cmd: "git checkout --ours <path>",
+    desc: "Use the current branch version during conflicts.",
+    tags: ["conflicts","merge","rebase"]
+  },
+  {
+    title: "Stash changes",
+    cmd: "git stash push -m \"wip\"",
+    desc: "Save uncommitted changes for later.",
+    tags: ["stash","wip"]
+  },
+  {
+    title: "Apply stash",
+    cmd: "git stash apply",
+    desc: "Apply most recent stash without removing it.",
+    tags: ["stash","wip"]
+  },
+  {
+    title: "List stashes",
+    cmd: "git stash list",
+    desc: "Show stash entries.",
+    tags: ["stash","inspect"]
+  },
+  {
+    title: "Reset file to HEAD",
+    cmd: "git restore <path>",
+    desc: "Discard working directory changes to a file.",
+    tags: ["undo","restore"]
+  },
+  {
+    title: "Hard reset branch",
+    cmd: "git reset --hard <commit|HEAD>",
+    desc: "Reset index & working tree to a specific commit.",
+    tags: ["undo","danger","rewrite"]
+  },
+  {
+    title: "Revert commit",
+    cmd: "git revert <commit>",
+    desc: "Create a new commit that reverses a previous one.",
+    tags: ["undo","safe"]
+  },
+  {
+    title: "Tag a release (lightweight)",
+    cmd: "git tag v1.0.0",
+    desc: "Create a lightweight tag at the current commit.",
+    tags: ["release","tag"]
+  },
+  {
+    title: "Annotated tag",
+    cmd: "git tag -a v1.0.0 -m \"First release\"",
+    desc: "Create an annotated tag with message.",
+    tags: ["release","tag"]
+  },
+  {
+    title: "Push tags",
+    cmd: "git push --tags",
+    desc: "Push all local tags to remote.",
+    tags: ["release","tag","push","remote"]
+  },
+  {
+    title: "Cherry-pick",
+    cmd: "git cherry-pick <commit>",
+    desc: "Apply a commit from elsewhere onto current branch.",
+    tags: ["rewrite","sync"]
+  },
+  {
+    title: "Squash interactive",
+    cmd: "git rebase -i HEAD~N",
+    desc: "Interactive rebase to reorder/squash the last N commits.",
+    tags: ["rewrite","rebase","history"]
+  },
+  {
+    title: "Blame a file",
+    cmd: "git blame <path>",
+    desc: "Show who changed which line and when.",
+    tags: ["inspect","history"]
+  },
+  {
+    title: "Show remote URLs",
+    cmd: "git remote -v",
+    desc: "List remotes and their fetch/push URLs.",
+    tags: ["remote","inspect"]
+  }
+];
+
+// Generate chips from all unique tags
+const ALL_TAGS = Array.from(new Set(COMMANDS.flatMap(c => c.tags))).sort();
+
+/* =========================
+   Helpers
+========================= */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function escapeHTML(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function showToast(msg="Copied!") {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(showToast.t);
+  showToast.t = setTimeout(()=> el.classList.remove("show"), 1400);
+}
+
+function copyText(text) {
+  // Try async Clipboard API first; fall back to execCommand always
+  if (navigator.clipboard) {
+    return navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand("copy"); ta.remove();
+      return Promise.resolve();
+    });
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text; document.body.appendChild(ta);
+  ta.select(); document.execCommand("copy"); ta.remove();
+  return Promise.resolve();
+}
+
+/* Basic scoring search: title/desc exact includes > tag includes > substring penalties */
+function matchesQuery(item, q) {
+  if (!q) return 10; // neutral score when no query
+  const text = (item.title + " " + item.desc + " " + item.cmd).toLowerCase();
+  const tags = item.tags.join(" ").toLowerCase();
+  const query = q.toLowerCase().trim();
+  let score = 0;
+  if (item.title.toLowerCase().includes(query)) score += 6;
+  if (item.desc.toLowerCase().includes(query))  score += 4;
+  if (item.cmd.toLowerCase().includes(query))   score += 5;
+  if (tags.includes(query))                     score += 3;
+  // token bonus
+  query.split(/\s+/).forEach(tok => {
+    if (!tok) return;
+    if (text.includes(tok)) score += 1;
+  });
+  return score;
+}
+
+function copiedFeedback(el, label = "✓ Copied") {
+  const original = el.getAttribute("data-original-label") || el.textContent;
+  el.setAttribute("data-original-label", original);
+  el.textContent = label;
+  el.classList.add("copied");
+  el.disabled = true;
+  el.setAttribute("aria-label", "Copied");
+  clearTimeout(el._copiedTimer);
+  el._copiedTimer = setTimeout(() => {
+    el.textContent = original;
+    el.classList.remove("copied");
+    el.disabled = false;
+    el.removeAttribute("aria-label");
+  }, 1200);
+}
+
+function popBadge(el, text = "Copied!") {
+  const badge = document.createElement("span");
+  badge.className = "pop";
+  badge.textContent = text;
+  el.appendChild(badge);
+  setTimeout(() => badge.remove(), 900);
+}
+
+/* =========================
+   State
+========================= */
+let state = {
+  q: "",
+  tags: new Set(), // active tag filters
+  dark: true
+};
+
+/* =========================
+   Render
+========================= */
+function renderChips() {
+  const wrap = $(".filters");
+  wrap.innerHTML = "";
+  const mk = (label) => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.setAttribute("role","switch");
+    b.setAttribute("aria-pressed","false");
+    b.textContent = label;
+    b.addEventListener("click", () => {
+      const on = b.getAttribute("aria-pressed") === "true";
+      b.setAttribute("aria-pressed", String(!on));
+      if (on) state.tags.delete(label); else state.tags.add(label);
+      renderGrid();
+    });
+    return b;
+  };
+  // special: clear filter chip
+  const clear = document.createElement("button");
+  clear.className = "chip";
+  clear.type = "button";
+  clear.textContent = "All";
+  clear.title = "Clear tag filters";
+  clear.addEventListener("click", () => { state.tags.clear(); $$(".chip[role='switch']").forEach(c=>c.setAttribute("aria-pressed","false")); renderGrid(); });
+  wrap.appendChild(clear);
+
+  ALL_TAGS.forEach(t => wrap.appendChild(mk(t)));
+}
+
+function renderGrid() {
+  const grid = $("#grid");
+  const q = state.q.trim();
+  const activeTags = state.tags;
+
+  let items = COMMANDS
+    .map((c, idx) => ({...c, _idx: idx, _score: matchesQuery(c, q)}))
+    .filter(c => activeTags.size === 0 || c.tags.some(t => activeTags.has(t)))
+    .filter(c => q === "" ? true : c._score > 0)
+    .sort((a,b) => b._score - a._score || a.title.localeCompare(b.title));
+
+  $("#count").textContent = `${items.length} result${items.length!==1?"s":""}`;
+
+  grid.innerHTML = items.map((c,i) => `
+    <article class="card" data-idx="${c._idx}" tabindex="0" aria-label="${escapeHTML(c.title)}">
+      <div class="top">
+        <h3>${escapeHTML(c.title)}</h3>
+        <button class="copy" data-copy="${escapeHTML(c.cmd)}" title="Copy command">Copy</button>
+      </div>
+      <p class="desc">${escapeHTML(c.desc)}</p>
+      <pre class="code"><code>${escapeHTML(c.cmd)}</code></pre>
+      <div class="tags">
+        ${c.tags.map(t=>`<span class="tag">#${t}</span>`).join("")}
+      </div>
+    </article>
+  `).join("");
+
+  // copy handled via event delegation in bindUI()
+}
+
+/* =========================
+   Events
+========================= */
+function bindUI() {
+  const input = $("#q");
+  $("#clear").addEventListener("click", () => { state.q=""; input.value=""; input.focus(); renderGrid(); });
+
+  input.addEventListener("input", (e) => { state.q = e.target.value; renderGrid(); });
+
+  // Keyboard shortcuts: / focus, Esc clear, Enter copy first
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && document.activeElement !== input) {
+      e.preventDefault(); input.focus(); input.select();
+    } else if (e.key === "Escape") {
+      if (input.value) { input.value=""; state.q=""; renderGrid(); }
+      else input.blur();
+    } else if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "INPUT") {
+      const firstCopy = $("#grid .copy");
+      if (firstCopy) firstCopy.click();
+    }
+  });
+
+  // Event delegation for copy buttons
+  $("#grid").addEventListener("click", async (e) => {
+    const btn = e.target.closest && e.target.closest('.copy');
+    if (!btn) return;
+    const cmd = btn.getAttribute("data-copy");
+    try { await copyText(cmd); } catch (_) {}
+    copiedFeedback(btn, "✓ Copied");
+    popBadge(btn, "Copied!");
+    const card = btn.closest('.card');
+    if (card) { card.classList.add('flash'); setTimeout(()=> card.classList.remove('flash'), 900); }
+    showToast("Command copied");
+  });
+
+  // Copy all visible
+  $("#copy-all").addEventListener("click", async () => {
+    const btn = $("#copy-all");
+    const copies = $$("#grid .copy");
+    const cmds = copies.map(b => b.getAttribute("data-copy")).join("\n");
+    const count = copies.length;
+    if (!cmds) { showToast("No commands to copy"); return; }
+    try { await copyText(cmds); } catch (_) {}
+    copiedFeedback(btn, `✓ Copied all (${count})`);
+    popBadge(btn, `Copied ${count}`);
+    showToast("All visible commands copied");
+  });
+
+  // Dark toggle
+  const darkBtn = $("#toggle-dark");
+  const applyDark = (on) => {
+    document.documentElement.style.colorScheme = on ? "dark" : "light";
+    document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
+    darkBtn.textContent = on ? "🌘 Dark" : "🌞 Light";
+    darkBtn.setAttribute("aria-pressed", String(on));
+  };
+  darkBtn.addEventListener("click", () => {
+    state.dark = !state.dark; applyDark(state.dark);
+    localStorage.setItem("gitcs.dark", state.dark ? "1" : "0");
+  });
+
+  // persist dark preference
+  const saved = localStorage.getItem("gitcs.dark");
+  state.dark = saved ? saved === "1" : true;
+  applyDark(state.dark);
+}
+
+/* =========================
+   Init
+========================= */
+renderChips();
+renderGrid();
+bindUI();
+</script>
+</body>
+</html>
