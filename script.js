@@ -569,30 +569,33 @@ within 24 hours (or faster if you include a good coding joke).
 
 <span class="success">1. Terminal Portfolio Website</span>
    ├── Tech: HTML, CSS, JavaScript
-   ├── Features: Interactive CLI, Easter eggs
+   ├── Features: Interactive CLI, Easter eggs, RSS integration
    └── Status: You're using it right now! 🎉
 
-<span class="success">2. Full-Stack E-commerce Platform</span>
-   ├── Tech: Python/Django, PostgreSQL, React
-   ├── Features: Payment integration, Admin dashboard
-   └── Status: Production Ready
+<span class="success">2. SocialWithJoey.com</span>
+   ├── Tech: Web Development
+   ├── Features: Social platform and content hub
+   └── Status: Live at socialwithjoey.com
 
-<span class="success">3. Real-time Chat Application</span>
-   ├── Tech: Node.js, Socket.io, MongoDB
-   ├── Features: Group chats, File sharing
-   └── Status: Live Demo Available
+<span class="success">3. FocusClock</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Productivity timer with notes & encryption
+   └── Status: Integrated tool (type 'focusclock')
 
-<span class="success">4. Data Visualization Dashboard</span>
-   ├── Tech: Python, Elasticsearch, D3.js
-   ├── Features: Real-time analytics, Custom charts
-   └── Status: Client Project - Confidential
+<span class="success">4. Git Command Cheatsheet</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Interactive Git reference guide
+   └── Status: Integrated tool (type 'git')
 
-<span class="warning">Open Source Contributions:</span>
-• Various Python libraries on GitHub
-• Documentation improvements
-• Bug fixes and feature requests
+<span class="success">5. Govee MCP Server</span>
+   ├── Tech: Python, MCP Protocol
+   ├── Features: Control Govee lights with natural language
+   └── Status: Open Source (type 'github')
 
-Type 'github' to view my Govee-MCP repository!
+<span class="warning">Development Tools:</span>
+• Terminal-based development environment
+• Integrated productivity and reference tools
+• Claude Code automation workflows
         `;
         this.addToOutput(projectsText, 'command-output');
     }
