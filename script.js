@@ -70,6 +70,7 @@ class Terminal {
         this.init();
         this.loadTheme();
         this.initMobileFeatures();
+        this.initNavigation();
     }
 
     detectDevice() {
@@ -1674,7 +1675,26 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.addToOutput('Type \'rss\' to browse Hacker News again or \'help\' for all commands.', 'info');
     }
 
+    initNavigation() {
+        const navItems = document.querySelectorAll('.nav-item');
 
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Remove active class from all items
+                navItems.forEach(nav => nav.classList.remove('active'));
+                // Add active class to clicked item
+                item.classList.add('active');
+
+                // Execute the corresponding command
+                const command = item.getAttribute('data-command');
+                if (command && this.commands[command]) {
+                    this.addToOutput(`${this.getPrompt()}${command}`, 'command-line');
+                    this.commands[command]();
+                    this.scrollToBottom();
+                }
+            });
+        });
+    }
 
     endGame() {
         this.gameActive = false;
