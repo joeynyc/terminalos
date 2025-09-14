@@ -50,7 +50,7 @@ class Terminal {
             hack: () => this.hackEffect(),
             secret: () => this.showSecret(),
             skills: () => this.showSkills(),
-            projects: () => this.showProjects(),
+            projects: () => this.openProjects(),
             theme: (args) => this.themeCommand(args),
             themes: () => this.showThemes(),
             games: () => this.showGames(),
@@ -400,7 +400,7 @@ Available Commands:
 <span class="success">show_tools</span>    - Display technical skills
 <span class="success">contact_joey</span>  - Get contact information
 <span class="success">skills</span>       - Show programming skills
-<span class="success">projects</span>     - View portfolio projects
+<span class="success">projects</span>     - Open projects portfolio page
 <span class="success">blog</span>         - Open minimal blog page
 <span class="success">github</span>       - Open Govee-MCP repository
 <span class="success">rss</span>          - Browse Hacker News stories
@@ -1514,6 +1514,12 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.addToOutput('<span class="info">Opening blog in new tab...</span>', 'command-output');
         window.open('blog.html', '_blank');
         this.addToOutput('<span class="success">Blog opened! Check your browser tabs.</span>', 'command-output');
+    }
+
+    openProjects() {
+        this.addToOutput('<span class="info">Opening projects portfolio in new tab...</span>', 'command-output');
+        window.open('projects.html', '_blank');
+        this.addToOutput('<span class="success">Projects portfolio opened! Check your browser tabs.</span>', 'command-output');
     }
 
     openGitHub() {
