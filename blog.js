@@ -110,7 +110,44 @@ class BlogLoader {
 
 }
 
-// Initialize blog loader when DOM is ready
+// Dark mode toggle functionality
+class ThemeToggle {
+    constructor() {
+        this.themeToggle = document.getElementById('theme-toggle');
+        this.themeIcon = this.themeToggle.querySelector('.theme-toggle-icon');
+        this.body = document.body;
+
+        // Check for saved theme preference or default to light mode
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.setTheme(this.currentTheme);
+
+        // Add click event listener
+        this.themeToggle.addEventListener('click', () => {
+            this.toggleTheme();
+        });
+    }
+
+    toggleTheme() {
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(this.currentTheme);
+        localStorage.setItem('theme', this.currentTheme);
+    }
+
+    setTheme(theme) {
+        if (theme === 'dark') {
+            this.body.classList.add('dark-mode');
+            this.themeIcon.textContent = '☀️';
+            this.themeToggle.setAttribute('aria-label', 'Toggle light mode');
+        } else {
+            this.body.classList.remove('dark-mode');
+            this.themeIcon.textContent = '🌙';
+            this.themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+        }
+    }
+}
+
+// Initialize blog loader and theme toggle when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new BlogLoader();
+    new ThemeToggle();
 });
