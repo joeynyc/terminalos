@@ -367,6 +367,110 @@ body {
     font-style: italic;
 }
 
+.jotdown-mockup {
+    padding: 20px;
+    text-align: center;
+}
+
+.jotdown-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+}
+
+.jotdown-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.note-block,
+.task-block {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: left;
+}
+
+.task-block {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.3);
+}
+
+.jotdown-toolbar {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 8px;
+}
+
+.pindrop-mockup {
+    padding: 20px;
+    text-align: center;
+}
+
+.pindrop-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+}
+
+.sticky-notes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.sticky-note {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transform: rotate(-2deg);
+}
+
+.sticky-note:nth-child(2) {
+    transform: rotate(1deg);
+}
+
+.sticky-note:nth-child(3) {
+    transform: rotate(-1deg);
+}
+
+.sticky-note.yellow {
+    background: rgba(255, 235, 59, 0.9);
+    color: #333;
+}
+
+.sticky-note.blue {
+    background: rgba(33, 150, 243, 0.9);
+    color: white;
+}
+
+.sticky-note.green {
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+}
+
+.pindrop-toolbar {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 8px;
+}
+
 /* Project content */
 .project-content {
     position: relative;

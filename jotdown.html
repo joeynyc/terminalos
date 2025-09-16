@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+<title>JOT DOWN — Minimal Modular Workspace</title>
+<link rel="stylesheet" href="jotdown-style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>JOT DOWN</h1>
+      <div class="toolbar" role="toolbar" aria-label="Workspace controls">
+        <button class="btn acc" id="new-note">+ Note</button>
+        <button class="btn acc" id="new-tasks">+ Task List</button>
+        <span class="sep"></span>
+        <div class="quick" title="Quick capture (press /)">
+          <span class="kbd">/</span>
+          <input id="quick" placeholder="Quick capture… (Enter to add Note)" />
+        </div>
+        <span class="sep"></span>
+        <button class="btn" id="layout-toggle" title="Toggle Layout">📐 Layout</button>
+        <div class="search" title="Search blocks">
+          <span class="search-icon">🔍</span>
+          <input id="search" placeholder="Search blocks..." />
+          <button class="search-clear" id="search-clear" title="Clear search" style="display:none">✕</button>
+        </div>
+        <span class="sep"></span>
+        <button class="btn" id="zen-mode" title="Toggle Zen Mode (Z)">🧘 Zen</button>
+        <button class="btn" id="themes">🎨 Themes</button>
+        <button class="btn primary" id="export">Export</button>
+        <label class="btn" for="importFile" title="Import JSON">Import</label>
+        <input id="importFile" type="file" accept="application/json" style="display:none" />
+      </div>
+    </header>
+
+    <main id="board" class="grid" aria-live="polite"></main>
+    <div id="empty" class="empty" style="display:none">
+      <div class="empty-content">
+        <div class="empty-title">Welcome to JOT DOWN</div>
+        <div class="empty-subtitle">Your minimal workspace for notes and tasks. Get started by creating your first block.</div>
+        <div class="empty-actions">
+          <button class="empty-btn primary" onclick="$('#new-note').click()">📝 Create Note</button>
+          <button class="empty-btn" onclick="$('#new-tasks').click()">✅ Create Tasks</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p class="footer-shortcuts">
+        Shortcuts: <span class="kbd">N</span> new note · <span class="kbd">T</span> new tasks ·
+        <span class="kbd">/</span> quick capture · <span class="kbd">Z</span> zen mode · <span class="kbd">⌘/Ctrl+F</span> search · <span class="kbd">⌘/Ctrl+S</span> export · Drag cards to reorder
+      </p>
+      <p class="footer-security">
+        🔒 Privacy First: All data stays in your browser. No servers, no tracking, no data collection.
+      </p>
+    </div>
+  </div>
+
+  <div id="color-panel" class="color-panel">
+    <h2>Themes & Colors</h2>
+    <div class="theme-presets">
+      <h3>Presets</h3>
+      <div class="preset-grid">
+        <button class="preset-btn" data-theme="dark">🌙 Dark</button>
+        <button class="preset-btn" data-theme="light">☀️ Light</button>
+        <button class="preset-btn" data-theme="midnight">🌌 Midnight</button>
+        <button class="preset-btn" data-theme="sepia">📜 Sepia</button>
+      </div>
+    </div>
+    <div class="custom-section">
+      <h3>Custom Colors</h3>
+    </div>
+    <div class="color-grid">
+      <div class="color-item">
+        <label for="bg-color">Background</label>
+        <input type="color" id="bg-color" data-var="--bg">
+      </div>
+      <div class="color-item">
+        <label for="text-color">Text</label>
+        <input type="color" id="text-color" data-var="--text">
+      </div>
+      <div class="color-item">
+        <label for="panel-color">Panel</label>
+        <input type="color" id="panel-color" data-var="--panel">
+      </div>
+      <div class="color-item">
+        <label for="border-color">Border</label>
+        <input type="color" id="border-color" data-var="--border">
+      </div>
+      <div class="color-item">
+        <label for="accent-color">Accent</label>
+        <input type="color" id="accent-color" data-var="--accent">
+      </div>
+      <div class="color-item">
+        <label for="accent-2-color">Accent 2</label>
+        <input type="color" id="accent-2-color" data-var="--accent-2">
+      </div>
+      <div class="color-item">
+        <label for="card-color">Card</label>
+        <input type="color" id="card-color" data-var="--card">
+      </div>
+    </div>
+    <div class="color-actions">
+        <button class="btn" id="reset-colors">Reset</button>
+        <button class="btn primary" id="save-colors">Save</button>
+    </div>
+  </div>
+
+  <div id="backdrop" class="backdrop" style="display:none"></div>
+  <div id="toast" class="toast" role="status">Saved</div>
+  <div id="saving-indicator" class="saving-indicator">💾 Saving...</div>
+  <div id="theme-transition-overlay" class="theme-transition-overlay"></div>
+  <div id="zen-overlay" class="zen-overlay">Press Z or click 🧘 Zen to exit zen mode</div>
+
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.3/dist/purify.min.js"></script>
+<script src="jotdown-script.js"></script>
+</body>
+</html>

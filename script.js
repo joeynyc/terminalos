@@ -66,7 +66,9 @@ class Terminal {
             rss: () => this.showRSS(),
             github: () => this.openGitHub(),
             focusclock: () => this.openFocusClock(),
-            git: () => this.openGitCheatsheet()
+            git: () => this.openGitCheatsheet(),
+            jotdown: () => this.openJotdown(),
+            pindrop: () => this.openPindrop()
         };
 
         this.init();
@@ -408,6 +410,8 @@ Available Commands:
 <span class="info">Available Tools:</span>
 <span class="success">focusclock</span>   - Launch productivity timer tool
 <span class="success">git</span>          - Launch Git command reference
+<span class="success">jotdown</span>     - Launch minimal modular workspace
+<span class="success">pindrop</span>     - Launch draggable sticky notes board
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -587,7 +591,17 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: Interactive Git reference guide
    └── Status: Integrated tool (type 'git')
 
-<span class="success">5. Govee MCP Server</span>
+<span class="success">5. JOT DOWN</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Minimal modular workspace for notes & tasks
+   └── Status: Integrated tool (type 'jotdown')
+
+<span class="success">6. PinDrop</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Draggable sticky notes with themes
+   └── Status: Integrated tool (type 'pindrop')
+
+<span class="success">7. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1541,6 +1555,20 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('tools/git-cheatsheet.html', '_blank');
         this.addToOutput('<span class="success">✅ Git cheatsheet opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">💡 Quick reference for all your Git commands and workflows.</span>', 'command-output');
+    }
+
+    openJotdown() {
+        this.addToOutput('<span class="info">📝 Launching JOT DOWN workspace...</span>', 'command-output');
+        window.open('jotdown.html', '_blank');
+        this.addToOutput('<span class="success">✅ JOT DOWN opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">✨ Minimal modular workspace for notes and task management.</span>', 'command-output');
+    }
+
+    openPindrop() {
+        this.addToOutput('<span class="info">📌 Launching PinDrop sticky notes...</span>', 'command-output');
+        window.open('pindrop.html', '_blank');
+        this.addToOutput('<span class="success">✅ PinDrop opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">🎨 Draggable sticky notes board with themes and organization.</span>', 'command-output');
     }
 
     // ========================

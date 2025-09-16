@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sticky Notes Board</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --toolbar-bg: #f8f8f8;
+        --toolbar-border: rgba(15, 23, 42, 0.08);
+        --canvas-bg: #f0f2f5;
+        --canvas-text: #1f1f1f;
+        --note-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+        --note-radius: 14px;
+        --note-text: #1f1f1f;
+        --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        --stack-bg: rgba(255, 255, 255, 0.82);
+        --stack-border: rgba(15, 23, 42, 0.08);
+        --stack-label: rgba(15, 23, 42, 0.45);
+        --toolbar-text: inherit;
+        --pattern-opacity: 1;
+        font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      body[data-theme='dark'] {
+        --toolbar-bg: #131922;
+        --toolbar-border: rgba(255, 255, 255, 0.08);
+        --toolbar-text: #f8fafc;
+        --canvas-bg: #0b0f16;
+        --canvas-text: #dbeafe;
+        --note-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+        --note-text: #0f172a;
+        --stack-bg: rgba(15, 23, 42, 0.65);
+        --stack-border: rgba(148, 163, 184, 0.35);
+        --stack-label: rgba(226, 232, 240, 0.7);
+      }
+
+      body[data-theme='sepia'] {
+        --toolbar-bg: #f7f0e1;
+        --toolbar-border: rgba(107, 64, 27, 0.25);
+        --canvas-bg: #f2e6d2;
+        --canvas-text: #3b2f2f;
+        --note-shadow: 0 14px 26px rgba(107, 64, 27, 0.2);
+        --note-text: #3b2f2f;
+        --stack-bg: rgba(255, 246, 232, 0.82);
+        --stack-border: rgba(120, 53, 15, 0.25);
+        --stack-label: rgba(107, 64, 27, 0.6);
+      }
+
+      body[data-theme='minimal'] {
+        --toolbar-bg: #ffffff;
+        --toolbar-border: rgba(15, 23, 42, 0.06);
+        --canvas-bg: #f7f7f7;
+        --canvas-text: #18181b;
+        --note-shadow: 0 16px 30px rgba(24, 24, 27, 0.14);
+        --note-text: #1a1a1a;
+        --stack-bg: rgba(255, 255, 255, 0.88);
+        --stack-border: rgba(24, 24, 27, 0.08);
+        --stack-label: rgba(63, 63, 70, 0.6);
+      }
+
+      body[data-theme='contrast'] {
+        --toolbar-bg: #000;
+        --toolbar-border: rgba(255, 255, 255, 0.2);
+        --toolbar-text: #fff;
+        --canvas-bg: #000;
+        --canvas-text: #fff;
+        --note-shadow: 0 18px 40px rgba(255, 255, 255, 0.45);
+        --note-text: #000;
+        --stack-bg: rgba(255, 255, 255, 0.95);
+        --stack-border: rgba(255, 255, 255, 0.4);
+        --stack-label: rgba(255, 255, 255, 0.7);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--canvas-bg);
+        color: var(--canvas-text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header.app-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        display: flex;
+        flex-wrap: wrap;
+        column-gap: 0.5rem;
+        row-gap: 0.75rem;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.25rem;
+        background: var(--toolbar-bg);
+        border-bottom: 1px solid var(--toolbar-border);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        color: var(--toolbar-text);
+      }
+
+      header.app-toolbar .toolbar-brand {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        line-height: 1;
+        text-align: center;
+      }
+
+      header.app-toolbar .toolbar-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      header.app-toolbar .toolbar-actions-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+
+      header.app-toolbar .toolbar-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      header.app-toolbar button,
+      header.app-toolbar .color-swatch,
+      header.app-toolbar select {
+        border: 1px solid transparent;
+        border-radius: 999px;
+        padding: 0.45rem 0.95rem;
+        background: rgba(255, 255, 255, 0.7);
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+
+      header.app-toolbar select {
+        cursor: pointer;
+        padding-right: 1.75rem;
+        appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, rgba(15, 23, 42, 0.35) 50%),
+          linear-gradient(135deg, rgba(15, 23, 42, 0.35) 50%, transparent 50%);
+        background-position: calc(100% - 18px) calc(0.7em), calc(100% - 13px) calc(0.7em);
+        background-size: 5px 5px;
+        background-repeat: no-repeat;
+      }
+
+      header.app-toolbar button:focus-visible,
+      header.app-toolbar .color-swatch:focus-visible,
+      header.app-toolbar select:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      header.app-toolbar button:hover,
+      header.app-toolbar .color-swatch:hover,
+      header.app-toolbar select:hover {
+        transform: translateY(-1px);
+      }
+
+      header.app-toolbar .color-picker {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+      }
+
+      header.app-toolbar .color-swatch {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.1);
+      }
+
+      header.app-toolbar .color-swatch.selected {
+        border-color: rgba(0, 0, 0, 0.45);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+      }
+
+      main#board {
+        position: relative;
+        flex: 1;
+        overflow: auto;
+        background-image: radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0);
+        background-size: 24px 24px;
+        background-blend-mode: multiply;
+        transition: background 220ms ease;
+      }
+
+      body[data-pattern='off'] main#board {
+        background-image: none;
+      }
+
+      [data-theme='contrast'] main#board {
+        background-image: none;
+      }
+
+      .note {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 180px;
+        min-height: 160px;
+        display: flex;
+        flex-direction: column;
+        background: var(--note-bg, #ffef8a);
+        border-radius: var(--note-radius);
+        box-shadow: var(--note-shadow);
+        color: var(--note-text);
+        transform-origin: center;
+        transition: transform 150ms ease, box-shadow 200ms ease;
+        backdrop-filter: blur(0.3px);
+        overflow: hidden;
+      }
+
+      .note.is-selected {
+        transform: scale(1.02);
+        box-shadow: 0 12px 22px rgba(59, 130, 246, 0.35);
+        animation: none;
+      }
+
+      body.is-dragging .note {
+        animation: none;
+      }
+
+      .note::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 40%),
+          linear-gradient(0deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.2));
+        opacity: 0.85;
+        pointer-events: none;
+        mix-blend-mode: soft-light;
+      }
+
+      .note::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 48px;
+        height: 48px;
+        background:
+          linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0) 70%),
+          linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.2) 65%);
+        clip-path: polygon(100% 0, 0 0, 100% 100%);
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
+      .note__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.45rem 0.6rem;
+        cursor: grab;
+        background: rgba(0, 0, 0, 0.04);
+        border-top-left-radius: var(--note-radius);
+        border-top-right-radius: var(--note-radius);
+        gap: 0.35rem;
+      }
+
+      .note__header:active {
+        cursor: grabbing;
+      }
+
+      .note__icon {
+        border: none;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 999px;
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+      }
+
+      .note__icon:hover {
+        transform: scale(1.08);
+      }
+
+      .note__icon:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .note__drag-label {
+        font-size: 0.9rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        opacity: 0.35;
+        user-select: none;
+        pointer-events: none;
+      }
+
+      .note__delete {
+        border: none;
+        background: rgba(0, 0, 0, 0.12);
+        border-radius: 999px;
+        color: inherit;
+        width: 28px;
+        height: 28px;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 120ms ease;
+      }
+
+      .note__delete:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .note__delete:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .note__format {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0.35rem 0.6rem;
+        background: rgba(255, 255, 255, 0.3);
+        justify-content: flex-end;
+      }
+
+      .note__format button {
+        border: none;
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 8px;
+        width: 32px;
+        height: 28px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 120ms ease, transform 120ms ease;
+      }
+
+      .note__format button:hover {
+        background: rgba(0, 0, 0, 0.18);
+        transform: translateY(-1px);
+      }
+
+      .note__format button:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .note__body {
+        flex: 1;
+        padding: 0.75rem;
+        font-size: 0.95rem;
+        line-height: 1.35;
+        overflow: auto;
+        outline: none;
+      }
+
+      .note__body:focus-visible {
+        box-shadow: inset var(--focus-ring);
+      }
+
+      .note__body b,
+      .note__body strong {
+        font-weight: 700;
+      }
+
+      .note__body mark {
+        background: rgba(253, 230, 138, 0.9);
+        padding: 0.05rem 0.2rem;
+        border-radius: 0.3rem;
+      }
+
+      .note__body .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.2rem 0;
+      }
+
+      .note__body .checklist-item input[type='checkbox'] {
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+      }
+
+      .note__body .checklist-item input:checked + span {
+        text-decoration: line-through;
+        opacity: 0.65;
+      }
+
+      .note__body ul,
+      .note__body ol {
+        padding-left: 1.2rem;
+      }
+
+      .note__body ul {
+        list-style: disc;
+      }
+
+      .note__body ol {
+        list-style: decimal;
+      }
+
+      .note__body::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .note__body::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+      }
+
+      .note.note--fresh {
+        animation: popIn 320ms ease;
+      }
+
+      .stack.note--fresh {
+        animation: popIn 320ms ease;
+      }
+
+      .note.note--removing {
+        animation: fadeOut 200ms ease forwards;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .stack {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 0.65rem 0.75rem 0.95rem;
+        min-width: 260px;
+        min-height: 220px;
+        background: var(--stack-bg);
+        border: 2px dashed var(--stack-border);
+        border-radius: 18px;
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+        transition: transform 180ms ease, box-shadow 200ms ease;
+        backdrop-filter: blur(1px);
+      }
+
+      .stack__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding-bottom: 0.35rem;
+        cursor: grab;
+      }
+
+      .stack__header:active {
+        cursor: grabbing;
+      }
+
+      .stack__title {
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        color: var(--stack-label);
+        outline: none;
+        border-bottom: 1px dashed transparent;
+      }
+
+      .stack__title:focus-visible {
+        border-bottom-color: rgba(59, 130, 246, 0.4);
+        box-shadow: inset var(--focus-ring);
+      }
+
+      .stack__delete {
+        border: none;
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 999px;
+        width: 28px;
+        height: 28px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 120ms ease;
+      }
+
+      .stack__delete:hover {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .stack__delete:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+
+      .stack__content {
+        position: relative;
+        flex: 1;
+        min-height: 140px;
+      }
+
+      .stack.is-drop-target {
+        transform: scale(1.02);
+        border-style: solid;
+        box-shadow: 0 24px 50px rgba(59, 130, 246, 0.35);
+      }
+
+      .stack .note {
+        position: absolute;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 1.25rem;
+        right: 1.25rem;
+        background: rgba(15, 23, 42, 0.85);
+        color: #fff;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+        font-size: 0.9rem;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px);
+        transition: opacity 150ms ease, transform 150ms ease;
+      }
+
+      .toast[data-visible='true'] {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes noteFloat {
+        0% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-3px) scale(1.01);
+        }
+        100% {
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes popIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      @media (max-width: 600px) {
+        header.app-toolbar {
+          gap: 0.5rem;
+        }
+        .note {
+          width: min(180px, calc(100vw - 2rem));
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-toolbar" role="toolbar" aria-label="PinDrop controls">
+      <div class="toolbar-actions">
+        <span class="toolbar-brand">PinDrop</span>
+        <div class="toolbar-actions-row">
+          <div class="toolbar-group" role="group" aria-label="Primary actions">
+            <button type="button" id="new-note" aria-keyshortcuts="N">New Note</button>
+            <button type="button" id="new-stack">New Stack</button>
+            <button type="button" id="clear-board">Clear All</button>
+          </div>
+          <div class="color-picker" role="group" aria-label="Note colors">
+            <span class="sr-only" id="color-swatch-label">Select note color</span>
+          </div>
+          <div class="theme-select" role="group" aria-label="Theme">
+            <label for="theme-select-input" class="sr-only">Theme</label>
+            <select id="theme-select-input" aria-label="Theme select">
+              <option value="default">Standard</option>
+              <option value="dark">Dark</option>
+              <option value="sepia">Sepia</option>
+              <option value="minimal">Minimal</option>
+              <option value="contrast">High Contrast</option>
+            </select>
+          </div>
+          <button type="button" id="pattern-toggle" aria-pressed="false">Grid On</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="board" tabindex="-1" aria-label="Sticky note canvas" role="application"></main>
+
+    <div class="toast" role="status" aria-live="polite" id="toast" data-visible="false"></div>
+
+    <template id="note-template">
+      <article class="note" role="group" aria-roledescription="sticky note" tabindex="0">
+        <header class="note__header" data-role="drag-handle">
+          <button class="note__icon" type="button" aria-label="Change note icon">📌</button>
+          <span class="note__drag-label" aria-hidden="true">drag</span>
+          <button class="note__delete" type="button" aria-label="Delete note">×</button>
+        </header>
+        <div class="note__format" aria-hidden="true">
+          <button type="button" data-action="bold" title="Bold">B</button>
+          <button type="button" data-action="highlight" title="Highlight">★</button>
+          <button type="button" data-action="checkbox" title="Insert checkbox">☑</button>
+        </div>
+        <div class="note__body" contenteditable="true" role="textbox" aria-multiline="true"></div>
+      </article>
+    </template>
+
+    <template id="stack-template">
+      <section class="stack" role="group" aria-label="Note stack" data-title="New Stack">
+        <header class="stack__header" data-role="stack-handle">
+          <span class="stack__title" contenteditable="true" role="textbox" aria-label="Stack title">New Stack</span>
+          <button type="button" class="stack__delete" aria-label="Delete stack">×</button>
+        </header>
+        <div class="stack__content" data-role="stack-content"></div>
+      </section>
+    </template>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = 'draggable-sticky-notes-v2';
+        const SETTINGS_KEY = 'draggable-sticky-notes-settings';
+        const DEFAULT_COLORS = [
+          '#ffef8a',
+          '#ffd6a5',
+          '#fdffb6',
+          '#caffbf',
+          '#9bf6ff',
+          '#bdb2ff',
+          '#ffc6ff',
+          '#f1f5f9'
+        ];
+        const DEFAULT_ICONS = ['📌', '⭐', '📝', '⚡', '🎯', '🧠', '✅'];
+        const NOTE_DEFAULT = { width: 180, height: 160 };
+        const STACK_DEFAULT = { width: 320, height: 260 };
+
+        const board = document.getElementById('board');
+        const noteTemplate = document.getElementById('note-template');
+        const stackTemplate = document.getElementById('stack-template');
+        const newNoteButton = document.getElementById('new-note');
+        const newStackButton = document.getElementById('new-stack');
+        const clearButton = document.getElementById('clear-board');
+        const themeSelect = document.getElementById('theme-select-input');
+        const patternToggle = document.getElementById('pattern-toggle');
+        const colorPicker = document.querySelector('.color-picker');
+        const toast = document.getElementById('toast');
+
+        const colorButtons = [];
+
+        let state = {
+          notes: [],
+          groups: [],
+          maxZ: 1,
+          maxStackZ: 1
+        };
+        let selectedId = null;
+        let activeDrag = null;
+        let rafId = null;
+        let settings = {
+          theme: 'default',
+          pattern: 'on'
+        };
+
+        function init() {
+          setupColorSwatches();
+          loadSettings();
+          applyTheme(settings.theme);
+          applyPatternSetting(settings.pattern);
+          loadState();
+          wireEvents();
+          board.focus({ preventScroll: true });
+        }
+
+        function setupColorSwatches() {
+          DEFAULT_COLORS.forEach((color, index) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'color-swatch';
+            button.style.setProperty('background', color);
+            button.setAttribute('title', `Set note color ${index + 1}`);
+            button.setAttribute('aria-label', `Set note color ${index + 1}`);
+            button.dataset.color = color;
+            button.addEventListener('click', () => applyColorToSelection(color));
+            button.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                applyColorToSelection(color);
+              }
+            });
+            colorButtons.push(button);
+            colorPicker.appendChild(button);
+          });
+        }
+
+        function wireEvents() {
+          newNoteButton.addEventListener('click', () => createNoteAtCenter());
+          newStackButton.addEventListener('click', () => createStackAtCenter());
+          clearButton.addEventListener('click', handleClearAll);
+          themeSelect.addEventListener('change', (event) => {
+            settings.theme = event.target.value;
+            applyTheme(settings.theme);
+            saveSettings();
+          });
+          patternToggle.addEventListener('click', () => {
+            settings.pattern = settings.pattern === 'on' ? 'off' : 'on';
+            applyPatternSetting(settings.pattern);
+            saveSettings();
+          });
+          document.addEventListener('keydown', handleKeydown, { passive: false });
+          board.addEventListener('pointerdown', handlePointerDown);
+          board.addEventListener('click', handleBoardClick);
+          board.addEventListener('focusin', (event) => {
+            const noteEl = event.target.closest('.note');
+            if (noteEl) selectNote(noteEl.dataset.id);
+          });
+          board.addEventListener('change', (event) => {
+            if (event.target.matches('.note__body input[type="checkbox"]')) {
+              const noteEl = event.target.closest('.note');
+              if (!noteEl) return;
+              if (event.target.checked) {
+                event.target.setAttribute('checked', '');
+              } else {
+                event.target.removeAttribute('checked');
+              }
+              const note = findNote(noteEl.dataset.id);
+              if (!note) return;
+              note.content = sanitizeRichText(noteEl.querySelector('.note__body').innerHTML);
+              note.updatedAt = Date.now();
+              requestPersist();
+            }
+          });
+        }
+
+        function loadSettings() {
+          const saved = safeParse(localStorage.getItem(SETTINGS_KEY));
+          if (saved && typeof saved === 'object') {
+            settings = { ...settings, ...saved };
+          }
+        }
+
+        function saveSettings() {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function applyTheme(theme) {
+          const allowed = new Set(['default', 'dark', 'sepia', 'minimal', 'contrast']);
+          const value = allowed.has(theme) ? theme : 'default';
+          document.body.dataset.theme = value;
+          themeSelect.value = value;
+        }
+
+        function applyPatternSetting(pattern) {
+          const active = pattern === 'on';
+          document.body.dataset.pattern = active ? 'on' : 'off';
+          patternToggle.setAttribute('aria-pressed', String(active));
+          patternToggle.textContent = active ? 'Grid On' : 'Grid Off';
+        }
+
+        function loadState() {
+          const saved = safeParse(localStorage.getItem(STORAGE_KEY));
+          if (saved) {
+            state.notes = Array.isArray(saved.notes) ? saved.notes : [];
+            state.groups = Array.isArray(saved.groups) ? saved.groups : [];
+            state.maxZ = typeof saved.maxZ === 'number' ? saved.maxZ : 1;
+            state.maxStackZ = typeof saved.maxStackZ === 'number' ? saved.maxStackZ : 1;
+          }
+
+          state.groups
+            .slice()
+            .sort((a, b) => a.z - b.z)
+            .forEach((stack) => renderStack(stack));
+
+          state.notes
+            .slice()
+            .sort((a, b) => a.z - b.z)
+            .forEach((note) => renderNote(note));
+
+          if (state.notes.length) {
+            const topNote = state.notes.reduce((acc, note) => (note.z > acc.z ? note : acc), state.notes[0]);
+            selectNote(topNote.id);
+          }
+        }
+
+        function safeParse(value) {
+          if (!value) return null;
+          try {
+            return JSON.parse(value);
+          } catch (error) {
+            console.warn('Failed to parse saved data', error);
+            return null;
+          }
+        }
+
+        function persistState() {
+          const payload = {
+            version: 2,
+            maxZ: state.maxZ,
+            maxStackZ: state.maxStackZ,
+            notes: state.notes,
+            groups: state.groups
+          };
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+          } catch (error) {
+            showToast('Save failed: storage is full. Consider exporting and clearing.');
+            console.error(error);
+          }
+        }
+
+        function createNoteAtCenter(targetStackId = null) {
+          let position;
+          if (targetStackId) {
+            const stack = findStack(targetStackId);
+            if (!stack) return;
+            position = {
+              groupId: stack.id,
+              x: Math.max((stack.w - NOTE_DEFAULT.width) / 2, 16),
+              y: Math.max((stack.h - NOTE_DEFAULT.height) / 2, 16)
+            };
+          } else {
+            const { width, height } = getBoardDimensions();
+            position = {
+              x: clamp(width / 2 - NOTE_DEFAULT.width / 2, 16, width - NOTE_DEFAULT.width - 16),
+              y: clamp(height / 2 - NOTE_DEFAULT.height / 2, 16, height - NOTE_DEFAULT.height - 16)
+            };
+          }
+
+          const note = createNote(position);
+          renderNote(note, { isNew: true });
+          selectNote(note.id, { focusBody: true });
+          persistState();
+        }
+
+        function createNote(overrides = {}) {
+          const id = `n_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          const now = Date.now();
+          const note = {
+            id,
+            groupId: typeof overrides.groupId === 'undefined' ? null : overrides.groupId,
+            x: typeof overrides.x === 'number' ? overrides.x : 32,
+            y: typeof overrides.y === 'number' ? overrides.y : 32,
+            w: typeof overrides.w === 'number' ? overrides.w : NOTE_DEFAULT.width,
+            h: typeof overrides.h === 'number' ? overrides.h : NOTE_DEFAULT.height,
+            color: overrides.color || DEFAULT_COLORS[0],
+            icon: typeof overrides.icon === 'undefined' ? DEFAULT_ICONS[0] : overrides.icon,
+            content: typeof overrides.content === 'undefined' ? '' : overrides.content,
+            z: ++state.maxZ,
+            createdAt: now,
+            updatedAt: now
+          };
+          state.notes.push(note);
+          return note;
+        }
+
+        function renderNote(note, options = {}) {
+          note.icon = typeof note.icon === 'undefined' ? DEFAULT_ICONS[0] : note.icon;
+          note.w = typeof note.w === 'number' ? note.w : NOTE_DEFAULT.width;
+          note.h = typeof note.h === 'number' ? note.h : NOTE_DEFAULT.height;
+          note.color = note.color || DEFAULT_COLORS[0];
+          if (typeof note.groupId === 'undefined') {
+            note.groupId = null;
+          }
+          const noteEl = noteTemplate.content.firstElementChild.cloneNode(true);
+          noteEl.dataset.id = note.id;
+          noteEl.style.setProperty('--note-bg', note.color);
+          noteEl.style.width = `${note.w}px`;
+          noteEl.style.minHeight = `${note.h}px`;
+          noteEl.style.zIndex = String(note.z);
+
+          const iconButton = noteEl.querySelector('.note__icon');
+          iconButton.textContent = typeof note.icon === 'undefined' ? DEFAULT_ICONS[0] : note.icon;
+          iconButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            cycleNoteIcon(note.id);
+          });
+
+          const formatBar = noteEl.querySelector('.note__format');
+          formatBar.addEventListener('click', (event) => {
+            const action = event.target.dataset.action;
+            if (!action) return;
+            event.preventDefault();
+            event.stopPropagation();
+            handleFormatAction(note.id, action);
+          });
+
+          const body = noteEl.querySelector('.note__body');
+          body.innerHTML = note.content ? sanitizeRichText(note.content) : '';
+          body.addEventListener('input', () => handleContentInput(note.id, body));
+          body.addEventListener('blur', () => handleContentBlur(note.id));
+
+          const deleteButton = noteEl.querySelector('.note__delete');
+          deleteButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteNote(note.id);
+          });
+
+          attachNoteToParent(note, noteEl);
+          positionNoteElement(note, noteEl);
+
+          if (options.isNew) {
+            noteEl.classList.add('note--fresh');
+            noteEl.addEventListener('animationend', () => {
+              noteEl.classList.remove('note--fresh');
+            }, { once: true });
+          }
+        }
+
+        function attachNoteToParent(note, noteEl) {
+          const parent = note.groupId ? getStackContentElement(note.groupId) : board;
+          if (!parent) return;
+          parent.appendChild(noteEl);
+        }
+
+        function positionNoteElement(note, noteEl) {
+          const x = Math.round(note.x);
+          const y = Math.round(note.y);
+          noteEl.style.left = `${x}px`;
+          noteEl.style.top = `${y}px`;
+        }
+
+        function createStackAtCenter() {
+          const { width, height } = getBoardDimensions();
+          const stack = createStack({
+            x: clamp(width / 2 - STACK_DEFAULT.width / 2, 24, width - STACK_DEFAULT.width - 24),
+            y: clamp(height / 2 - STACK_DEFAULT.height / 2, 24, height - STACK_DEFAULT.height - 24)
+          });
+          renderStack(stack, { isNew: true });
+          persistState();
+          showToast('Stack added. Drag notes into the frame.');
+        }
+
+        function createStack(overrides = {}) {
+          const id = `s_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          const stack = {
+            id,
+            x: typeof overrides.x === 'number' ? overrides.x : 48,
+            y: typeof overrides.y === 'number' ? overrides.y : 48,
+            w: typeof overrides.w === 'number' ? overrides.w : STACK_DEFAULT.width,
+            h: typeof overrides.h === 'number' ? overrides.h : STACK_DEFAULT.height,
+            title: overrides.title ? String(overrides.title) : 'New Stack',
+            z: ++state.maxStackZ
+          };
+          state.groups.push(stack);
+          return stack;
+        }
+
+        function renderStack(stack, options = {}) {
+          stack.w = typeof stack.w === 'number' ? stack.w : STACK_DEFAULT.width;
+          stack.h = typeof stack.h === 'number' ? stack.h : STACK_DEFAULT.height;
+          stack.title = stack.title ? String(stack.title) : 'Stack';
+          const stackEl = stackTemplate.content.firstElementChild.cloneNode(true);
+          stackEl.dataset.id = stack.id;
+          stackEl.dataset.title = stack.title;
+          stackEl.style.width = `${stack.w}px`;
+          stackEl.style.height = `${stack.h}px`;
+          stackEl.style.zIndex = String(stack.z);
+          stackEl.style.left = `${Math.round(stack.x)}px`;
+          stackEl.style.top = `${Math.round(stack.y)}px`;
+
+          const titleEl = stackEl.querySelector('.stack__title');
+          titleEl.textContent = stack.title;
+          titleEl.addEventListener('input', () => {
+            stack.title = titleEl.textContent.trim() || 'Untitled Stack';
+            stackEl.dataset.title = stack.title;
+            requestPersist();
+          });
+          titleEl.addEventListener('blur', () => {
+            titleEl.textContent = stack.title;
+          });
+
+          const deleteBtn = stackEl.querySelector('.stack__delete');
+          deleteBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            deleteStack(stack.id);
+          });
+
+          const handle = stackEl.querySelector('[data-role="stack-handle"]');
+          handle.addEventListener('pointerdown', (event) => startStackDrag(event, stack.id, stackEl));
+
+          board.appendChild(stackEl);
+
+          if (options.isNew) {
+            stackEl.classList.add('note--fresh');
+            stackEl.addEventListener('animationend', () => {
+              stackEl.classList.remove('note--fresh');
+            }, { once: true });
+          }
+        }
+
+        function deleteStack(id) {
+          const stack = findStack(id);
+          if (!stack) return;
+          if (!confirm('Delete this stack? Notes inside will stay on the board.')) return;
+
+          const stackEl = getStackElement(id);
+          if (stackEl) {
+            const contentEl = stackEl.querySelector('[data-role="stack-content"]');
+            contentEl.querySelectorAll('.note').forEach((noteEl) => {
+              const note = findNote(noteEl.dataset.id);
+              if (!note) return;
+              const { width, height } = getBoardDimensions();
+              const boardCoords = {
+                x: clamp(stack.x + note.x, 16, width - note.w - 16),
+                y: clamp(stack.y + note.y, 16, height - note.h - 16)
+              };
+              note.groupId = null;
+              note.x = boardCoords.x;
+              note.y = boardCoords.y;
+              noteEl.style.zIndex = String(++state.maxZ);
+              board.appendChild(noteEl);
+              positionNoteElement(note, noteEl);
+            });
+            stackEl.remove();
+          }
+          state.groups = state.groups.filter((item) => item.id !== id);
+          requestPersist();
+          showToast('Stack removed.');
+        }
+
+        function startStackDrag(event, stackId, stackEl) {
+          event.preventDefault();
+          const stack = findStack(stackId);
+          if (!stack) return;
+          activeDrag = {
+            type: 'stack',
+            id: stackId,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            originX: stack.x,
+            originY: stack.y,
+            element: stackEl
+          };
+          document.body.classList.add('is-dragging');
+          stackEl.setPointerCapture(event.pointerId);
+          stackEl.addEventListener('pointermove', handlePointerMove);
+          stackEl.addEventListener('pointerup', handlePointerUp, { once: true });
+          stackEl.addEventListener('pointercancel', handlePointerUp, { once: true });
+        }
+
+        function findNote(id) {
+          return state.notes.find((item) => item.id === id);
+        }
+
+        function findStack(id) {
+          return state.groups.find((item) => item.id === id);
+        }
+
+        function selectNote(id, options = {}) {
+          if (selectedId === id) {
+            if (options.focusBody) focusNoteBody(id);
+            return;
+          }
+          deselectAll();
+          const note = findNote(id);
+          const el = getNoteElement(id);
+          if (!note || !el) return;
+          selectedId = id;
+          el.classList.add('is-selected');
+          el.style.zIndex = String(++state.maxZ);
+          note.z = state.maxZ;
+          updateColorSelection(note.color);
+          requestPersist();
+          if (options.focusBody) focusNoteBody(id);
+        }
+
+        function focusNoteBody(id) {
+          const el = getNoteElement(id);
+          if (!el) return;
+          const body = el.querySelector('.note__body');
+          body.focus({ preventScroll: false });
+          placeCaretAtEnd(body);
+        }
+
+        function deselectAll() {
+          board.querySelectorAll('.note.is-selected').forEach((el) => el.classList.remove('is-selected'));
+          selectedId = null;
+          updateColorSelection(null);
+        }
+
+        function updateColorSelection(color) {
+          colorButtons.forEach((swatch) => {
+            swatch.classList.toggle('selected', !!color && swatch.dataset.color === color);
+          });
+        }
+
+        function getNoteElement(id) {
+          return board.querySelector(`.note[data-id='${CSS.escape(id)}']`);
+        }
+
+        function getStackElement(id) {
+          return board.querySelector(`.stack[data-id='${CSS.escape(id)}']`);
+        }
+
+        function getStackContentElement(id) {
+          const stackEl = getStackElement(id);
+          if (!stackEl) return null;
+          return stackEl.querySelector('[data-role="stack-content"]');
+        }
+
+        function handleContentInput(id, body) {
+          const note = findNote(id);
+          if (!note) return;
+          note.content = body.innerHTML;
+          note.updatedAt = Date.now();
+          requestPersist();
+        }
+
+        function handleContentBlur(id) {
+          const note = findNote(id);
+          if (!note) return;
+          const noteEl = getNoteElement(id);
+          if (!noteEl) return;
+          const body = noteEl.querySelector('.note__body');
+          if (!body) return;
+          const sanitized = sanitizeRichText(body.innerHTML);
+          body.innerHTML = sanitized;
+          note.content = sanitized;
+          note.updatedAt = Date.now();
+          requestPersist();
+        }
+
+        function deleteNote(id) {
+          const note = findNote(id);
+          if (!note) return;
+          if (note.content.trim().length && !confirm('Delete this note? This cannot be undone.')) {
+            return;
+          }
+          state.notes = state.notes.filter((item) => item.id !== id);
+          const el = getNoteElement(id);
+          if (el) {
+            el.classList.add('note--removing');
+            el.addEventListener('animationend', () => {
+              el.remove();
+            }, { once: true });
+          }
+          if (selectedId === id) {
+            selectedId = null;
+          }
+          requestPersist();
+        }
+
+        function handleClearAll() {
+          if (!state.notes.length) {
+            showToast('Board is already empty.');
+            return;
+          }
+          if (confirm('Clear all notes? This cannot be undone.')) {
+            state.notes = [];
+            state.maxZ = 1;
+            selectedId = null;
+            board.querySelectorAll('.note').forEach((node) => node.remove());
+            requestPersist();
+            showToast('Board cleared.');
+          }
+        }
+
+        function handleKeydown(event) {
+          if (event.target.closest('.note__body') || event.target.closest('.stack__title')) {
+            if (event.key === 'Escape') {
+              event.target.blur();
+              if (!event.target.closest('.stack__title')) {
+                deselectAll();
+                board.focus();
+              }
+            }
+            return;
+          }
+
+          if (event.key === 'N' || event.key === 'n') {
+            event.preventDefault();
+            if (selectedId) {
+              const current = findNote(selectedId);
+              if (current && current.groupId) {
+                createNoteAtCenter(current.groupId);
+                return;
+              }
+            }
+            createNoteAtCenter();
+            return;
+          }
+
+          if ((event.key === 'Delete' || event.key === 'Backspace') && selectedId) {
+            event.preventDefault();
+            deleteNote(selectedId);
+            return;
+          }
+
+          if (event.key === 'Escape') {
+            deselectAll();
+            return;
+          }
+
+          if (selectedId && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+            event.preventDefault();
+            const note = findNote(selectedId);
+            if (!note) return;
+            const delta = event.shiftKey ? 10 : 1;
+            if (event.key === 'ArrowUp') note.y -= delta;
+            if (event.key === 'ArrowDown') note.y += delta;
+            if (event.key === 'ArrowLeft') note.x -= delta;
+            if (event.key === 'ArrowRight') note.x += delta;
+            clampNoteToContainer(note);
+            const el = getNoteElement(note.id);
+            if (el) positionNoteElement(note, el);
+            note.updatedAt = Date.now();
+            requestPersist();
+          }
+        }
+
+        function handleBoardClick(event) {
+          const noteEl = event.target.closest('.note');
+          if (noteEl) {
+            selectNote(noteEl.dataset.id);
+          } else if (!event.target.closest('.stack')) {
+            deselectAll();
+          }
+        }
+
+        function handlePointerDown(event) {
+          if (event.target.closest('.note__delete') || event.target.closest('.stack__delete')) return;
+          if (event.target.closest('.note__format')) return;
+          if (event.target.closest('.note__icon')) return;
+          if (event.target.closest('input[type="checkbox"]')) return;
+
+          const stackHandle = event.target.closest('[data-role="stack-handle"]');
+          if (stackHandle) return; // handled in stack-specific listener
+
+          const noteEl = event.target.closest('.note');
+          if (!noteEl) return;
+          const handle = event.target.closest('[data-role="drag-handle"]');
+          if (!handle) return;
+
+          event.preventDefault();
+          const note = findNote(noteEl.dataset.id);
+          if (!note) return;
+          selectNote(note.id);
+
+          const stack = note.groupId ? findStack(note.groupId) : null;
+          const originX = stack ? stack.x + note.x : note.x;
+          const originY = stack ? stack.y + note.y : note.y;
+
+          if (stack) {
+            board.appendChild(noteEl);
+            noteEl.style.zIndex = String(++state.maxZ);
+            positionAbsolute(noteEl, originX, originY);
+          }
+
+          activeDrag = {
+            type: 'note',
+            id: note.id,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            originX,
+            originY,
+            absoluteX: originX,
+            absoluteY: originY,
+            fromStackId: stack ? stack.id : null,
+            element: noteEl
+          };
+
+          document.body.classList.add('is-dragging');
+          noteEl.setPointerCapture(event.pointerId);
+          noteEl.addEventListener('pointermove', handlePointerMove);
+          noteEl.addEventListener('pointerup', handlePointerUp, { once: true });
+          noteEl.addEventListener('pointercancel', handlePointerUp, { once: true });
+        }
+
+        function handlePointerMove(event) {
+          if (!activeDrag) return;
+          if (activeDrag.type === 'stack') {
+            const stack = findStack(activeDrag.id);
+            if (!stack) return;
+            const { width, height } = getBoardDimensions();
+            const deltaX = event.clientX - activeDrag.startX;
+            const deltaY = event.clientY - activeDrag.startY;
+            stack.x = clamp(activeDrag.originX + deltaX, 16, width - stack.w - 16);
+            stack.y = clamp(activeDrag.originY + deltaY, 16, height - stack.h - 16);
+            stack.updatedAt = Date.now();
+            activeDrag.element.style.left = `${Math.round(stack.x)}px`;
+            activeDrag.element.style.top = `${Math.round(stack.y)}px`;
+            return;
+          }
+
+          if (activeDrag.type === 'note') {
+            const note = findNote(activeDrag.id);
+            if (!note) return;
+            const { width, height } = getBoardDimensions();
+            const deltaX = event.clientX - activeDrag.startX;
+            const deltaY = event.clientY - activeDrag.startY;
+            const absoluteX = clamp(activeDrag.originX + deltaX, 8, width - note.w - 8);
+            const absoluteY = clamp(activeDrag.originY + deltaY, 8, height - note.h - 8);
+            activeDrag.absoluteX = absoluteX;
+            activeDrag.absoluteY = absoluteY;
+
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+              positionAbsolute(activeDrag.element, absoluteX, absoluteY);
+            });
+
+            const dropTarget = findStackAtPoint(event.clientX, event.clientY);
+            setDropTarget(dropTarget);
+            activeDrag.dropTarget = dropTarget ? dropTarget.dataset.id : null;
+          }
+        }
+
+        function handlePointerUp(event) {
+          if (!activeDrag) return;
+          const targetEl = activeDrag.element;
+          targetEl.releasePointerCapture(activeDrag.pointerId);
+
+          if (activeDrag.type === 'stack') {
+            targetEl.removeEventListener('pointermove', handlePointerMove);
+            document.body.classList.remove('is-dragging');
+            const stack = findStack(activeDrag.id);
+            if (stack) {
+              stack.z = ++state.maxStackZ;
+              targetEl.style.zIndex = String(stack.z);
+              requestPersist();
+            }
+            clearDropTargets();
+            activeDrag = null;
+            return;
+          }
+
+          if (activeDrag.type === 'note') {
+            targetEl.removeEventListener('pointermove', handlePointerMove);
+            document.body.classList.remove('is-dragging');
+
+            const note = findNote(activeDrag.id);
+            if (!note) {
+              activeDrag = null;
+              clearDropTargets();
+              return;
+            }
+
+            const dropStackId = activeDrag.dropTarget;
+            let newGroupId = null;
+            let newX = activeDrag.absoluteX;
+            let newY = activeDrag.absoluteY;
+
+            if (dropStackId) {
+              const stack = findStack(dropStackId);
+              if (stack) {
+                newGroupId = stack.id;
+                newX = clamp(activeDrag.absoluteX - stack.x, 8, stack.w - note.w - 8);
+                newY = clamp(activeDrag.absoluteY - stack.y, 8, stack.h - note.h - 8);
+                const parent = getStackContentElement(stack.id);
+                if (parent) {
+                  parent.appendChild(targetEl);
+                }
+                positionNoteElement({ ...note, x: newX, y: newY }, targetEl);
+              }
+            } else {
+              board.appendChild(targetEl);
+              const { width, height } = getBoardDimensions();
+              newX = clamp(activeDrag.absoluteX, 8, width - note.w - 8);
+              newY = clamp(activeDrag.absoluteY, 8, height - note.h - 8);
+              positionNoteElement({ ...note, x: newX, y: newY }, targetEl);
+            }
+
+            note.groupId = newGroupId;
+            note.x = newX;
+            note.y = newY;
+            note.z = ++state.maxZ;
+            note.updatedAt = Date.now();
+            targetEl.style.zIndex = String(note.z);
+
+            if (rafId) {
+              cancelAnimationFrame(rafId);
+              rafId = null;
+            }
+            clearDropTargets();
+            activeDrag = null;
+            requestPersist();
+            return;
+          }
+        }
+
+        function positionAbsolute(el, x, y) {
+          el.style.left = `${Math.round(x)}px`;
+          el.style.top = `${Math.round(y)}px`;
+        }
+
+        function findStackAtPoint(clientX, clientY) {
+          const stacks = [...board.querySelectorAll('.stack')];
+          for (let i = stacks.length - 1; i >= 0; i -= 1) {
+            const rect = stacks[i].getBoundingClientRect();
+            if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+              return stacks[i];
+            }
+          }
+          return null;
+        }
+
+        function setDropTarget(stackEl) {
+          clearDropTargets();
+          if (stackEl) {
+            stackEl.classList.add('is-drop-target');
+          }
+        }
+
+        function clearDropTargets() {
+          board.querySelectorAll('.stack.is-drop-target').forEach((el) => el.classList.remove('is-drop-target'));
+        }
+
+        function clampNoteToContainer(note) {
+          if (note.groupId) {
+            const stack = findStack(note.groupId);
+            if (!stack) {
+              note.groupId = null;
+              clampNoteToContainer(note);
+              return;
+            }
+            note.x = clamp(note.x, 8, stack.w - note.w - 8);
+            note.y = clamp(note.y, 8, stack.h - note.h - 8);
+          } else {
+            const { width, height } = getBoardDimensions();
+            note.x = clamp(note.x, 8, width - note.w - 8);
+            note.y = clamp(note.y, 8, height - note.h - 8);
+          }
+        }
+
+        function clamp(value, min, max) {
+          if (max < min) return min;
+          return Math.min(Math.max(value, min), max);
+        }
+
+        function getBoardDimensions() {
+          return {
+            width: Math.max(board.clientWidth, board.scrollWidth),
+            height: Math.max(board.clientHeight, board.scrollHeight)
+          };
+        }
+
+        let persistTimer = null;
+        function requestPersist() {
+          if (persistTimer) {
+            clearTimeout(persistTimer);
+          }
+          persistTimer = setTimeout(() => {
+            persistTimer = null;
+            persistState();
+          }, 180);
+        }
+
+        function placeCaretAtEnd(el) {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          range.collapse(false);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+
+        function applyColorToSelection(color) {
+          if (!selectedId) {
+            showToast('Select a note first.');
+            return;
+          }
+          const note = findNote(selectedId);
+          if (!note) return;
+          note.color = color;
+          note.updatedAt = Date.now();
+          const el = getNoteElement(selectedId);
+          if (el) {
+            el.style.setProperty('--note-bg', color);
+          }
+          updateColorSelection(color);
+          requestPersist();
+        }
+
+        function cycleNoteIcon(id) {
+          const note = findNote(id);
+          if (!note) return;
+          const currentIndex = DEFAULT_ICONS.indexOf(note.icon);
+          const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % DEFAULT_ICONS.length;
+          note.icon = DEFAULT_ICONS[nextIndex];
+          const el = getNoteElement(id);
+          if (el) {
+            const iconEl = el.querySelector('.note__icon');
+            if (iconEl) iconEl.textContent = note.icon;
+          }
+          note.updatedAt = Date.now();
+          requestPersist();
+        }
+
+        function handleFormatAction(id, action) {
+          const note = findNote(id);
+          const noteEl = getNoteElement(id);
+          if (!note || !noteEl) return;
+          const body = noteEl.querySelector('.note__body');
+          body.focus();
+          if (action === 'bold') {
+            document.execCommand('bold');
+          } else if (action === 'highlight') {
+            applyHighlight(body);
+          } else if (action === 'checkbox') {
+            insertCheckbox(body);
+          }
+          note.content = sanitizeRichText(body.innerHTML);
+          note.updatedAt = Date.now();
+          requestPersist();
+        }
+
+        function applyHighlight(body) {
+          const selection = window.getSelection();
+          if (!selection || selection.isCollapsed || !body.contains(selection.anchorNode)) {
+            const mark = document.createElement('mark');
+            mark.textContent = 'Highlight';
+            body.appendChild(mark);
+            placeCaretAtEnd(mark);
+            return;
+          }
+          const range = selection.getRangeAt(0);
+          const wrapper = document.createElement('mark');
+          wrapper.appendChild(range.extractContents());
+          range.insertNode(wrapper);
+          selection.removeAllRanges();
+          const newRange = document.createRange();
+          newRange.selectNodeContents(wrapper);
+          newRange.collapse(false);
+          selection.addRange(newRange);
+        }
+
+        function insertCheckbox(body) {
+          const selection = window.getSelection();
+          const range = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+          if (!range || !body.contains(range.commonAncestorContainer)) {
+            placeCaretAtEnd(body);
+          }
+          const container = document.createElement('div');
+          container.className = 'checklist-item';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          const span = document.createElement('span');
+          span.contentEditable = 'true';
+          span.textContent = 'Checklist item';
+          container.appendChild(checkbox);
+          container.appendChild(span);
+          const insertRange = selection && selection.rangeCount ? selection.getRangeAt(0) : null;
+          if (insertRange) {
+            insertRange.deleteContents();
+            insertRange.insertNode(container);
+          } else {
+            body.appendChild(container);
+          }
+          placeCaretAtEnd(span);
+        }
+
+        function sanitizeRichText(input) {
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = typeof input === 'string' ? input : '';
+          const allowedTags = new Set(['B', 'STRONG', 'I', 'EM', 'MARK', 'UL', 'OL', 'LI', 'BR', 'DIV', 'SPAN', 'P', 'LABEL', 'INPUT']);
+          const walker = document.createTreeWalker(wrapper, NodeFilter.SHOW_ELEMENT, null);
+          const toRemove = [];
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (!allowedTags.has(node.tagName)) {
+              toRemove.push(node);
+              continue;
+            }
+            [...node.attributes].forEach((attr) => {
+              if (attr.name === 'class') {
+                const allowedClasses = ['checklist-item'];
+                const cleaned = attr.value
+                  .split(/\s+/)
+                  .filter((token) => allowedClasses.includes(token))
+                  .join(' ');
+                if (cleaned) {
+                  node.setAttribute('class', cleaned);
+                } else {
+                  node.removeAttribute('class');
+                }
+              } else if (node.tagName === 'INPUT' && attr.name === 'type' && attr.value === 'checkbox') {
+                // allow
+              } else if (node.tagName === 'INPUT' && attr.name === 'checked') {
+                // allow
+              } else if (node.tagName === 'SPAN' && attr.name === 'contenteditable') {
+                // allow
+              } else {
+                node.removeAttribute(attr.name);
+              }
+            });
+            if (node.tagName === 'INPUT' && node.getAttribute('type') !== 'checkbox') {
+              toRemove.push(node);
+            }
+          }
+          toRemove.forEach((node) => node.replaceWith(...node.childNodes));
+          return wrapper.innerHTML;
+        }
+
+        function showToast(message) {
+          toast.textContent = message;
+          toast.dataset.visible = 'true';
+          clearTimeout(showToast.timer);
+          showToast.timer = setTimeout(() => {
+            toast.dataset.visible = 'false';
+          }, 2800);
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
