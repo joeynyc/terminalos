@@ -68,7 +68,8 @@ class Terminal {
             focusclock: () => this.openFocusClock(),
             git: () => this.openGitCheatsheet(),
             jotdown: () => this.openJotdown(),
-            pindrop: () => this.openPindrop()
+            pindrop: () => this.openPindrop(),
+            cryptowatch: () => this.openCryptowatch()
         };
 
         this.init();
@@ -412,6 +413,7 @@ Available Commands:
 <span class="success">git</span>          - Launch Git command reference
 <span class="success">jotdown</span>     - Launch minimal modular workspace
 <span class="success">pindrop</span>     - Launch draggable sticky notes board
+<span class="success">cryptowatch</span>  - Launch cryptocurrency dashboard
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -601,7 +603,12 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: Draggable sticky notes with themes
    └── Status: Integrated tool (type 'pindrop')
 
-<span class="success">7. Govee MCP Server</span>
+<span class="success">7. Vespera Cryptocurrency Dashboard</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: NASA-inspired crypto tracker with live prices
+   └── Status: Integrated tool (type 'cryptowatch')
+
+<span class="success">8. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1569,6 +1576,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('pindrop.html', '_blank');
         this.addToOutput('<span class="success">✅ PinDrop opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🎨 Draggable sticky notes board with themes and organization.</span>', 'command-output');
+    }
+
+    openCryptowatch() {
+        this.addToOutput('<span class="info">📈 Launching Vespera Cryptocurrency Dashboard...</span>', 'command-output');
+        window.open('../cryptowatch/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ Cryptowatch opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">🚀 NASA-inspired cryptocurrency mission control with live prices and analytics.</span>', 'command-output');
     }
 
     // ========================
