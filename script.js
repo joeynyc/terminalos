@@ -1580,7 +1580,7 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 
     openCryptowatch() {
         this.addToOutput('<span class="info">📈 Launching Vespera Cryptocurrency Dashboard...</span>', 'command-output');
-        window.open('../cryptowatch/index.html', '_blank');
+        window.open('cryptowatch/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Cryptowatch opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🚀 NASA-inspired cryptocurrency mission control with live prices and analytics.</span>', 'command-output');
     }
