@@ -1622,6 +1622,24 @@
                 },
                 circulating_supply: 138456789012,
                 total_supply: 138456789012
+            },
+            {
+                id: "dogecoin",
+                symbol: "doge",
+                name: "Dogecoin",
+                image: "https://coin-images.coingecko.com/coins/images/5/large/dogecoin.png",
+                current_price: 0.28,
+                market_cap: 42345678901,
+                market_cap_rank: 8,
+                total_volume: 5234567890,
+                price_change_24h: 0.015,
+                price_change_percentage_24h: 5.67,
+                price_change_percentage_7d_in_currency: 8.23,
+                sparkline_in_7d: {
+                    price: [0.26, 0.27, 0.28, 0.29, 0.27, 0.28, 0.28]
+                },
+                circulating_supply: 150987654321,
+                total_supply: 150987654321
             }
         ];
 
@@ -1791,9 +1809,15 @@
                         return false;
                     }
 
-                    // Validate reasonable ranges for specific fields
-                    if (field.includes('percentage') && Math.abs(coin[field]) > 10000) {
+                    // Validate reasonable ranges for specific fields (allow very high ATL percentages for crypto)
+                    if (field.includes('percentage') && field !== 'atl_change_percentage' && Math.abs(coin[field]) > 10000) {
                         console.warn(`Percentage field '${field}' out of reasonable range for coin:`, coin);
+                        return false;
+                    }
+
+                    // Special handling for ATL percentage - allow up to 1 million percent
+                    if (field === 'atl_change_percentage' && Math.abs(coin[field]) > 1000000) {
+                        console.warn(`ATL percentage too extreme for coin:`, coin);
                         return false;
                     }
 
@@ -2032,7 +2056,7 @@
         }
 
         // CoinGecko API functions
-        async function fetchMarketData(currency = 'usd', perPage = 20, signal) {
+        async function fetchMarketData(currency = 'usd', perPage = 100, signal) {
             const params = new URLSearchParams({
                 vs_currency: currency,
                 order: 'market_cap_desc',
@@ -2126,11 +2150,16 @@
                     state.isLoading = true;
                 }
 
-                // Fetch both market data and global data in parallel
-                const [data, globalData] = await Promise.all([
-                    fetchMarketData(state.currentCurrency, 20, abortController.signal),
-                    fetchGlobalData(abortController.signal)
-                ]);
+                // Fetch market data (required) and global data (optional)
+                const data = await fetchMarketData(state.currentCurrency, 100, abortController.signal);
+
+                // Try to fetch global data but don't fail if it doesn't work
+                let globalData = null;
+                try {
+                    globalData = await fetchGlobalData(abortController.signal);
+                } catch (globalError) {
+                    console.warn('Global data fetch failed (non-critical):', globalError);
+                }
 
                 // Process global data for market intelligence
                 if (globalData?.data) {
