@@ -69,7 +69,8 @@ class Terminal {
             git: () => this.openGitCheatsheet(),
             jotdown: () => this.openJotdown(),
             pindrop: () => this.openPindrop(),
-            cryptowatch: () => this.openCryptowatch()
+            cryptowatch: () => this.openCryptowatch(),
+            expneural: () => this.openExpneural()
         };
 
         this.init();
@@ -608,7 +609,12 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: NASA-inspired crypto tracker with live prices
    └── Status: Integrated tool (type 'cryptowatch')
 
-<span class="success">8. Govee MCP Server</span>
+<span class="success">8. Experience Neural</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Interactive AI visualization platform with immersive experiences
+   └── Status: Integrated tool (type 'expneural')
+
+<span class="success">9. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1583,6 +1589,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('cryptowatch/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Cryptowatch opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🚀 NASA-inspired cryptocurrency mission control with live prices and analytics.</span>', 'command-output');
+    }
+
+    openExpneural() {
+        this.addToOutput('<span class="info">🧠 Launching Experience Neural...</span>', 'command-output');
+        window.open('expneural/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ Experience Neural opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">✨ Interactive AI visualization platform with immersive neural network experiences.</span>', 'command-output');
     }
 
     // ========================

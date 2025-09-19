@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EXPERIENCE NEURAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-brand">
+      <span class="site-brand__mark">EXPERIENCE</span>
+      <span class="site-brand__name">NEURAL</span>
+    </div>
+    <a class="site-cta" href="#hero">Start Exploring</a>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero__video-bg" aria-hidden="true">
+        <video class="hero__video" autoplay loop muted playsinline preload="metadata">
+          <source src="assets/neuralvid.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div class="hero__scrim"></div>
+
+      <div class="hero__content">
+        <div class="hero__text">
+          <p class="hero__eyebrow">Immersive AI Journeys</p>
+          <h1 class="hero__title">Experience neural networks like never before.</h1>
+          <p class="hero__lead">
+            Dive into interactive visualizations that translate complex neural activity into
+            captivating sensory experiences. Explore, tune, and feel the latent patterns powering
+            the next era of intelligence.
+          </p>
+        </div>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#explore">Explore the Lab</a>
+          <button class="btn btn--ghost" type="button">Request a Demo</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="lens" id="neural-lens" aria-labelledby="lens-title">
+      <header class="lens__header">
+        <p class="lens__eyebrow">Neural Lens</p>
+        <h2 class="lens__title" id="lens-title">Project neural textures into your world</h2>
+        <p class="lens__lead">
+          Launch the live camera overlay on your phone to blend the current immersion stage with
+          reactive particle fields. Works best in Safari on iPhone with the rear camera engaged.
+        </p>
+      </header>
+
+      <div class="lens__viewport">
+        <video class="lens__video" playsinline muted></video>
+        <canvas class="lens__canvas" aria-hidden="true"></canvas>
+        <div class="lens__hud" aria-live="polite">
+          <p class="lens__hud-label">Stage focus</p>
+          <p class="lens__hud-stage" data-lens-stage>Signal Capture</p>
+          <p class="lens__hud-meta" data-lens-intensity>Intensity 0.62</p>
+        </div>
+      </div>
+
+      <div class="lens__controls">
+        <p class="lens__status" data-lens-status>Ready to activate • camera off</p>
+        <div class="lens__actions">
+          <button class="btn btn--primary" type="button" data-lens-action="start">Start Lens</button>
+          <button class="btn btn--ghost" type="button" data-lens-action="stop">Stop</button>
+        </div>
+      </div>
+
+      <div class="lens__handoff">
+        <figure class="lens__qr" aria-labelledby="lens-qr-title">
+          <figcaption id="lens-qr-title" class="lens__qr-caption">Scan to launch on mobile</figcaption>
+          <div class="lens__qr-frame">
+            <img
+              class="lens__qr-image"
+              src="https://api.qrserver.com/v1/create-qr-code/?data=https%3A%2F%2Fexperience-neural-lens.test&size=280x280&margin=0"
+              alt="QR code linking to the Experience Neural Lens prototype"
+              width="280"
+              height="280"
+              decoding="async"
+            />
+            <div class="lens__qr-glow" aria-hidden="true"></div>
+          </div>
+          <p class="lens__qr-meta">Award showcase URL • experience-neural-lens.test</p>
+        </figure>
+        <p class="lens__handoff-text">
+          Open the lens instantly by aiming your phone&rsquo;s camera at the code. The prototype URL hosts
+          a curated capture of the neural textures for award juries to explore in under ten seconds.
+        </p>
+      </div>
+
+      <p class="lens__note">
+        Scan this section&rsquo;s QR code from another screen or open directly on your iPhone to enable
+        the neural lens. Requires HTTPS for camera access.
+      </p>
+    </section>
+
+    <section class="soundboard" id="soundboard" aria-labelledby="soundboard-title">
+      <header class="soundboard__header">
+        <p class="soundboard__eyebrow">Immersive Soundboard</p>
+        <h2 class="soundboard__title" id="soundboard-title">Mix the neural sound textures in spatial stereo</h2>
+        <p class="soundboard__lead">
+          Each processing stage resonates through a unique layer—blend them to feel the cognitive
+          journey evolve. Solo a channel, cue the hush, or let the mix react as you scroll.
+        </p>
+      </header>
+
+      <div class="soundboard__controls" role="group" aria-label="Transport controls">
+        <button class="soundboard__transport" type="button" data-soundboard-action="toggle">
+          <span class="soundboard__transport-icon" aria-hidden="true"></span>
+          <span class="soundboard__transport-label">Play Mix</span>
+        </button>
+        <button class="soundboard__transport" type="button" data-soundboard-action="reset">
+          <span class="soundboard__transport-icon soundboard__transport-icon--stop" aria-hidden="true"></span>
+          <span class="soundboard__transport-label">Fade Out</span>
+        </button>
+      </div>
+
+      <div class="soundboard__deck" role="list">
+        <article class="soundboard-channel" role="listitem" data-stage="01">
+          <header class="soundboard-channel__header">
+            <p class="soundboard-channel__eyebrow">Stage 01</p>
+            <h3 class="soundboard-channel__title">Signal capture</h3>
+          </header>
+          <div class="soundboard-channel__body">
+            <p class="soundboard-channel__desc">
+              Soft magnetic taps and low-end murmurs echo the raw recordings. Increase presence to
+              pull the sensor field forward.
+            </p>
+            <div class="soundboard-channel__controls">
+              <button type="button" class="soundboard-channel__button" data-action="solo">Solo</button>
+              <button type="button" class="soundboard-channel__button" data-action="mute">Mute</button>
+            </div>
+            <label class="soundboard-channel__slider">
+              <span class="soundboard-channel__slider-label">Gain</span>
+              <input type="range" min="0" max="100" value="65" data-action="gain" />
+            </label>
+          </div>
+        </article>
+
+        <article class="soundboard-channel" role="listitem" data-stage="02">
+          <header class="soundboard-channel__header">
+            <p class="soundboard-channel__eyebrow">Stage 02</p>
+            <h3 class="soundboard-channel__title">Latent mapping</h3>
+          </header>
+          <div class="soundboard-channel__body">
+            <p class="soundboard-channel__desc">
+              Glacial pads and spectral swells map the latent atlas. Sweep the gain for atmospheric
+              depth.
+            </p>
+            <div class="soundboard-channel__controls">
+              <button type="button" class="soundboard-channel__button" data-action="solo">Solo</button>
+              <button type="button" class="soundboard-channel__button" data-action="mute">Mute</button>
+            </div>
+            <label class="soundboard-channel__slider">
+              <span class="soundboard-channel__slider-label">Gain</span>
+              <input type="range" min="0" max="100" value="58" data-action="gain" />
+            </label>
+          </div>
+        </article>
+
+        <article class="soundboard-channel" role="listitem" data-stage="03">
+          <header class="soundboard-channel__header">
+            <p class="soundboard-channel__eyebrow">Stage 03</p>
+            <h3 class="soundboard-channel__title">Synaesthetic rendering</h3>
+          </header>
+          <div class="soundboard-channel__body">
+            <p class="soundboard-channel__desc">
+              Granular sparks and harmonic arps bloom with the visuals. Push the volume to intensify
+              the sensory bloom.
+            </p>
+            <div class="soundboard-channel__controls">
+              <button type="button" class="soundboard-channel__button" data-action="solo">Solo</button>
+              <button type="button" class="soundboard-channel__button" data-action="mute">Mute</button>
+            </div>
+            <label class="soundboard-channel__slider">
+              <span class="soundboard-channel__slider-label">Gain</span>
+              <input type="range" min="0" max="100" value="72" data-action="gain" />
+            </label>
+          </div>
+        </article>
+
+        <article class="soundboard-channel" role="listitem" data-stage="04">
+          <header class="soundboard-channel__header">
+            <p class="soundboard-channel__eyebrow">Stage 04</p>
+            <h3 class="soundboard-channel__title">Adaptive reflection</h3>
+          </header>
+          <div class="soundboard-channel__body">
+            <p class="soundboard-channel__desc">
+              Pulsed reverses and glistening echoes trace the feedback loop. Roll it back for calm or
+              unleash crescendos.
+            </p>
+            <div class="soundboard-channel__controls">
+              <button type="button" class="soundboard-channel__button" data-action="solo">Solo</button>
+              <button type="button" class="soundboard-channel__button" data-action="mute">Mute</button>
+            </div>
+            <label class="soundboard-channel__slider">
+              <span class="soundboard-channel__slider-label">Gain</span>
+              <input type="range" min="0" max="100" value="54" data-action="gain" />
+            </label>
+          </div>
+        </article>
+      </div>
+
+      <p class="soundboard__disclaimer">
+        Best experienced with headphones. The mix automatically spotlights the stage you are viewing
+        in the narrative above.
+      </p>
+    </section>
+
+    <section class="journey" id="journey" aria-labelledby="journey-title">
+      <div class="journey__background" aria-hidden="true">
+        <div class="journey__glow journey__glow--left"></div>
+        <div class="journey__glow journey__glow--right"></div>
+      </div>
+
+      <div class="journey__columns">
+        <div class="journey__pin">
+          <div class="journey__pin-inner">
+            <p class="journey__eyebrow">Immersion Sequence</p>
+            <h2 class="journey__title" id="journey-title">How we translate cognition into sensation</h2>
+            <p class="journey__lead">
+              Scroll to move through each stage of the neural experience pipeline. The interface
+              reacts to your motion, revealing how raw signals become a multi-sensory journey.
+            </p>
+
+            <div class="journey__stage-indicator" data-stage="01">
+              <span class="journey__stage-number">01</span>
+              <span class="journey__stage-label">Signal Capture</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="journey__steps">
+          <article class="journey-step is-active" data-stage="01">
+            <div class="journey-step__media" aria-hidden="true"></div>
+            <div class="journey-step__content">
+              <p class="journey-step__eyebrow">Stage 01</p>
+              <h3 class="journey-step__title">Signal capture</h3>
+              <p class="journey-step__text">
+                Bio-sensors harvest neural oscillations and convert them into high-fidelity
+                embeddings. We enhance clarity with adaptive denoising and amphoteric filtering,
+                preserving nuance for downstream synthesis.
+              </p>
+            </div>
+          </article>
+
+          <article class="journey-step" data-stage="02">
+            <div class="journey-step__media" aria-hidden="true"></div>
+            <div class="journey-step__content">
+              <p class="journey-step__eyebrow">Stage 02</p>
+              <h3 class="journey-step__title">Latent mapping</h3>
+              <p class="journey-step__text">
+                Our interpretable transformer stack plots each signal onto a navigable latent atlas.
+                Confidence-linked gradients let creators steer attention vectors and spotlight hidden
+                emotional hues.
+              </p>
+            </div>
+          </article>
+
+          <article class="journey-step" data-stage="03">
+            <div class="journey-step__media" aria-hidden="true"></div>
+            <div class="journey-step__content">
+              <p class="journey-step__eyebrow">Stage 03</p>
+              <h3 class="journey-step__title">Synaesthetic rendering</h3>
+              <p class="journey-step__text">
+                Synced audio-visual engines translate latent cues into sight, sound, and haptic
+                feedback. The environment blooms with each interaction, blending cinematic lighting
+                with responsive particle acoustics.
+              </p>
+            </div>
+          </article>
+
+          <article class="journey-step" data-stage="04">
+            <div class="journey-step__media" aria-hidden="true"></div>
+            <div class="journey-step__content">
+              <p class="journey-step__eyebrow">Stage 04</p>
+              <h3 class="journey-step__title">Adaptive reflection</h3>
+              <p class="journey-step__text">
+                A feedback loop scores how audiences respond and re-composes the scene in real time.
+                Stories evolve with every session—no two neural journeys are ever alike.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lab" id="explore" aria-labelledby="lab-title">
+      <header class="lab__header">
+        <p class="lab__eyebrow">Dynamic Demo Lab</p>
+        <h2 class="lab__title" id="lab-title">Play with our live neural previews</h2>
+        <p class="lab__lead">
+          Two micro-models render in real time—one remixes captured signals into painterly textures
+          while the other imagines fresh scenes from your prompts. Dial them in to feel the
+          responsiveness of the engine.
+        </p>
+      </header>
+
+      <div class="lab__grid">
+        <article class="lab-card lab-card--style" aria-labelledby="lab-style-title">
+          <div class="lab-card__preview">
+            <canvas class="lab-style__canvas" width="320" height="320" role="img" aria-label="Stylized neural signal rendering"></canvas>
+            <div class="lab-card__badge">16ms inference</div>
+          </div>
+          <div class="lab-card__body">
+            <h3 class="lab-card__title" id="lab-style-title">Neural style transfer</h3>
+            <p class="lab-card__text">
+              Blend latent textures into the captured signal. The slider adjusts the stylization
+              depth, revealing how the model hallucinates form from raw embeddings.
+            </p>
+            <div class="lab-card__controls">
+              <label class="lab-card__label" for="style-intensity">Style intensity</label>
+              <div class="lab-card__control-row">
+                <input id="style-intensity" class="lab-card__range" type="range" min="0" max="100" value="52" data-style-range />
+                <output class="lab-card__output" for="style-intensity" data-style-output>0.52</output>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="lab-card lab-card--imagine" aria-labelledby="lab-imagine-title">
+          <div class="lab-card__preview">
+            <div class="lab-imagine__render" aria-live="polite">
+              <span class="lab-imagine__prompt">"Aurora-synced cityscape"</span>
+            </div>
+            <div class="lab-card__badge">Prompt-to-scene 0.8s</div>
+          </div>
+          <div class="lab-card__body">
+            <h3 class="lab-card__title" id="lab-imagine-title">Text-to-image morphs</h3>
+            <p class="lab-card__text">
+              Feed the muse a prompt or reshuffle breakthroughs. Temperature tweaks how far it roams
+              from the latent prior—watch the palette respond instantly.
+            </p>
+            <form class="lab-card__form" data-prompt-form>
+              <label class="lab-card__label" for="lab-prompt">Prompt</label>
+              <input id="lab-prompt" class="lab-card__input" type="text" value="Aurora-synced cityscape" maxlength="60" data-lab-prompt />
+              <div class="lab-card__controls">
+                <label class="lab-card__label" for="lab-temperature">Temperature</label>
+                <div class="lab-card__control-row">
+                  <input id="lab-temperature" class="lab-card__range" type="range" min="0" max="100" value="35" data-lab-temperature />
+                  <output class="lab-card__output" for="lab-temperature" data-temperature-output>0.35</output>
+                </div>
+              </div>
+              <div class="lab-card__actions">
+                <button class="btn btn--ghost lab-card__button" type="button" data-prompt-refresh>Inspire me</button>
+                <span class="lab-card__meta" data-prompt-status>Ready • seed 4021</span>
+              </div>
+            </form>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Crafted for curious builders of intelligent systems.</p>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
