@@ -813,15 +813,15 @@ if (lensSection) {
   const portalButtons = Array.from(lensSection.querySelectorAll('.lens-portal')).filter(
     (button) => button instanceof HTMLButtonElement
   );
-  const portalModal = lensSection.querySelector('[data-portal-modal]');
-  const portalStageLabelEl = portalModal?.querySelector('[data-portal-stage-label]');
-  const portalTitleEl = portalModal?.querySelector('[data-portal-title]');
-  const portalDescriptionEl = portalModal?.querySelector('[data-portal-description]');
-  const portalMetaEl = portalModal?.querySelector('[data-portal-meta]');
-  const portalCanvas = portalModal?.querySelector('.lens-portal-canvas');
+  const portalOverlay = lensSection.querySelector('[data-portal-overlay]');
+  const portalStageLabelEl = portalOverlay?.querySelector('[data-portal-stage-label]');
+  const portalTitleEl = portalOverlay?.querySelector('[data-portal-title]');
+  const portalDescriptionEl = portalOverlay?.querySelector('[data-portal-description]');
+  const portalMetaEl = portalOverlay?.querySelector('[data-portal-meta]');
+  const portalCanvas = portalOverlay?.querySelector('.lens__portal-overlay-canvas');
   const portalCtx = portalCanvas instanceof HTMLCanvasElement ? portalCanvas.getContext('2d') : null;
-  const portalDismissEls = portalModal
-    ? Array.from(portalModal.querySelectorAll('[data-portal-dismiss]')).filter(
+  const portalDismissEls = portalOverlay
+    ? Array.from(portalOverlay.querySelectorAll('[data-portal-dismiss]')).filter(
         (el) => el instanceof HTMLElement
       )
     : [];
@@ -1068,18 +1068,12 @@ if (lensSection) {
   };
 
   const updatePortals = () => {
-    if (!portalButtons.length) {
-      return;
-    }
-
     portalButtons.forEach((button) => {
       const stage = button.dataset.portalStage ?? '';
-      const isActive = stage === currentStage;
-      button.dataset.active = String(isActive);
-      button.disabled = !isActive;
-      button.tabIndex = isActive ? 0 : -1;
-      button.setAttribute('aria-disabled', String(!isActive));
-      button.setAttribute('aria-pressed', String(isActive && portalSceneStage === stage));
+      const isOpen = portalSceneStage === stage;
+      const isFocused = stage === currentStage;
+      button.dataset.active = String(isFocused || isOpen);
+      button.setAttribute('aria-pressed', String(isOpen));
     });
   };
 
@@ -1088,7 +1082,10 @@ if (lensSection) {
       return;
     }
 
-    if (event.target instanceof HTMLElement && event.target.closest('.lens-portal')) {
+    if (
+      event.target instanceof HTMLElement &&
+      (event.target.closest('.lens-portal') || event.target.closest('[data-portal-overlay]'))
+    ) {
       return;
     }
 
@@ -1174,7 +1171,7 @@ if (lensSection) {
   };
 
   const applyPortalContent = (stage) => {
-    if (!portalModal) {
+    if (!portalOverlay) {
       return;
     }
 
@@ -1322,12 +1319,12 @@ if (lensSection) {
   };
 
   const openPortal = (stage, { force = false } = {}) => {
-    if (!portalModal) {
+    if (!portalOverlay) {
       return;
     }
 
     const key = portalScenes[stage] ? stage : 'default';
-    const alreadyOpen = !portalModal.hasAttribute('hidden');
+    const alreadyOpen = portalOverlay && !portalOverlay.hasAttribute('hidden');
 
     if (alreadyOpen && !force && portalSceneStage === key) {
       return;
@@ -1336,11 +1333,12 @@ if (lensSection) {
     stopPortalScene();
     portalSceneStage = key;
     applyPortalContent(key);
+    updatePortals();
 
     if (portalButtons.length) {
       portalButtons.forEach((button) => {
-        const isActive = button.dataset.portalStage === key;
-        button.setAttribute('aria-pressed', String(isActive));
+        const isMatch = button.dataset.portalStage === key;
+        button.setAttribute('aria-pressed', String(isMatch));
       });
 
       if (force) {
@@ -1351,27 +1349,27 @@ if (lensSection) {
       }
     }
 
-    portalModal.setAttribute('aria-hidden', 'false');
-    portalModal.removeAttribute('hidden');
-    portalModal.hidden = false;
+    if (portalOverlay) {
+      portalOverlay.hidden = false;
+      portalOverlay.removeAttribute('hidden');
+    }
 
     resizePortalCanvas();
     portalAnimationId = requestAnimationFrame(renderPortalScene);
 
-    const focusTarget = portalModal.querySelector('.lens-portal-modal__close');
+    const focusTarget = portalOverlay?.querySelector('.lens__portal-overlay-close');
     if (focusTarget instanceof HTMLElement) {
       focusTarget.focus({ preventScroll: true });
     }
   };
 
   const closePortal = () => {
-    if (!portalModal) {
+    if (!portalOverlay) {
       return;
     }
 
-    portalModal.setAttribute('aria-hidden', 'true');
-    portalModal.hidden = true;
-    portalModal.setAttribute('hidden', '');
+    portalOverlay.hidden = true;
+    portalOverlay.setAttribute('hidden', '');
     stopPortalScene();
     updatePortals();
 
@@ -1520,6 +1518,9 @@ if (lensSection) {
     targetTiltY = 0;
     tiltX = 0;
     tiltY = 0;
+    if (portalOverlay && !portalOverlay.hasAttribute('hidden')) {
+      closePortal();
+    }
     setRunningState(false);
 
     if (message) {
@@ -1598,14 +1599,12 @@ if (lensSection) {
     });
   });
 
-  if (portalModal) {
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && !portalModal.hasAttribute('hidden')) {
-        event.preventDefault();
-        closePortal();
-      }
-    });
-  }
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && portalOverlay && !portalOverlay.hasAttribute('hidden')) {
+      event.preventDefault();
+      closePortal();
+    }
+  });
 
   setRunningState(false);
   resizeCanvas();
@@ -1622,7 +1621,7 @@ if (lensSection) {
     updateStageHud();
     updatePortals();
 
-    if (portalModal && !portalModal.hasAttribute('hidden')) {
+    if (portalOverlay && !portalOverlay.hasAttribute('hidden')) {
       openPortal(currentStage, { force: true });
     }
   });
@@ -1651,7 +1650,7 @@ if (lensSection) {
     if (running) {
       stopLens({ message: null });
     }
-    if (portalModal && !portalModal.hasAttribute('hidden')) {
+    if (portalOverlay && !portalOverlay.hasAttribute('hidden')) {
       closePortal();
     }
   });

@@ -303,8 +303,15 @@ main {
   filter: saturate(0.7);
 }
 
+.lens-portal[data-active='true'] {
+  border-color: rgba(79, 240, 255, 0.52);
+  background: rgba(12, 24, 42, 0.55);
+  box-shadow: 0 14px 40px rgba(5, 15, 45, 0.44);
+}
+
 .lens-portal:hover,
-.lens-portal:focus-visible {
+.lens-portal:focus-visible,
+.lens-portal[aria-pressed='true'] {
   transform: translate3d(0, -2px, 0) scale(1);
   border-color: rgba(79, 240, 255, 0.6);
   background: rgba(5, 11, 22, 0.66);
@@ -469,128 +476,120 @@ main {
   line-height: 1.6;
 }
 
-.lens-portal-modal {
-  position: fixed;
-  inset: 0;
+.lens__portal-overlay {
+  position: absolute;
+  inset: clamp(1.2rem, 4vw, 2.4rem);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 24;
+  pointer-events: none;
+  z-index: 3;
 }
 
-.lens-portal-modal[aria-hidden='false'],
-.lens-portal-modal:not([hidden]) {
+.lens__portal-overlay:not([hidden]) {
   display: flex;
 }
 
-.lens-portal-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(2, 6, 14, 0.72);
-  backdrop-filter: blur(18px);
-}
-
-.lens-portal-modal__dialog {
-  position: relative;
-  width: min(920px, 95vw);
-  border-radius: clamp(20px, 6vw, 28px);
-  border: 1px solid rgba(79, 240, 255, 0.32);
-  background: linear-gradient(135deg, rgba(5, 11, 22, 0.92), rgba(5, 11, 22, 0.78));
-  box-shadow: 0 40px 120px rgba(5, 15, 45, 0.65);
+.lens__portal-overlay-inner {
+  width: min(540px, 90%);
+  border-radius: clamp(18px, 4vw, 24px);
+  background: linear-gradient(135deg, rgba(5, 11, 22, 0.86), rgba(5, 11, 22, 0.68));
+  border: 1px solid rgba(79, 240, 255, 0.24);
+  box-shadow: 0 28px 90px rgba(5, 15, 45, 0.58);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.lens-portal-modal__header {
-  display: flex;
+.lens__portal-overlay-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  padding: clamp(1rem, 3vw, 1.6rem) clamp(1.2rem, 3.6vw, 2.2rem);
-  border-bottom: 1px solid rgba(79, 240, 255, 0.22);
+  gap: 0.6rem;
+  padding: clamp(0.85rem, 3vw, 1.2rem) clamp(0.95rem, 3.5vw, 1.8rem);
+  border-bottom: 1px solid rgba(79, 240, 255, 0.18);
 }
 
-.lens-portal-modal__label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.lens-portal-modal__badge {
-  font-size: 0.75rem;
-  letter-spacing: 0.32rem;
+.lens__portal-overlay-badge {
+  font-size: 0.72rem;
+  letter-spacing: 0.28rem;
   text-transform: uppercase;
-  color: rgba(230, 236, 255, 0.58);
+  color: rgba(230, 236, 255, 0.52);
 }
 
-.lens-portal-modal__stage {
-  font-size: 1rem;
+.lens__portal-overlay-stage {
+  font-size: 0.95rem;
   font-weight: 600;
+  color: var(--color-text);
 }
 
-.lens-portal-modal__close {
+.lens__portal-overlay-close {
   border: none;
-  background: rgba(5, 11, 22, 0.6);
+  background: rgba(5, 11, 22, 0.55);
   color: var(--color-text);
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 999px;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
   display: grid;
   place-items: center;
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.lens-portal-modal__close:hover,
-.lens-portal-modal__close:focus-visible {
-  background: rgba(79, 240, 255, 0.24);
+.lens__portal-overlay-close:hover,
+.lens__portal-overlay-close:focus-visible {
+  background: rgba(79, 240, 255, 0.22);
   transform: rotate(6deg);
 }
 
-.lens-portal-modal__scene {
+.lens__portal-overlay-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-  gap: clamp(1.2rem, 3vw, 2rem);
-  padding: clamp(1.2rem, 4vw, 2.4rem);
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(0.9rem, 3vw, 1.4rem);
+  padding: clamp(1rem, 4vw, 1.8rem);
 }
 
-.lens-portal-canvas {
+@media (min-width: 720px) {
+  .lens__portal-overlay-body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  }
+}
+
+.lens__portal-overlay-canvas {
   width: 100%;
   height: auto;
-  border-radius: clamp(18px, 4vw, 24px);
-  border: 1px solid rgba(79, 240, 255, 0.22);
+  border-radius: clamp(16px, 3vw, 20px);
+  border: 1px solid rgba(79, 240, 255, 0.2);
   background: radial-gradient(circle, rgba(5, 11, 22, 0.9), rgba(5, 11, 22, 0.6));
-  box-shadow: inset 0 0 40px rgba(79, 240, 255, 0.2);
+  box-shadow: inset 0 0 36px rgba(79, 240, 255, 0.18);
 }
 
-.lens-portal-modal__info {
+.lens__portal-overlay-info {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.6rem, 2vw, 1rem);
-  justify-content: center;
+  gap: clamp(0.55rem, 2vw, 0.9rem);
 }
 
-.lens-portal-modal__title {
+.lens__portal-overlay-title {
   margin: 0;
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-size: clamp(1.4rem, 3.8vw, 2.1rem);
 }
 
-.lens-portal-modal__description {
+.lens__portal-overlay-description {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: var(--color-muted);
-  line-height: 1.75;
+  line-height: 1.7;
 }
 
-.lens-portal-modal__meta {
+.lens__portal-overlay-meta {
   margin: 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.28rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.26rem;
   text-transform: uppercase;
-  color: rgba(230, 236, 255, 0.6);
-}
-
-.lens-portal-modal[hidden] {
-  display: none;
+  color: rgba(230, 236, 255, 0.56);
 }
 
 @media (max-width: 768px) {
@@ -625,23 +624,26 @@ main {
     min-width: 0;
   }
 
+  .lens__portal-overlay-inner {
+    width: 100%;
+  }
+
+  .lens__portal-overlay-body {
+    padding: clamp(0.9rem, 6vw, 1.4rem);
+  }
+
+  .lens__portal-overlay-title {
+    font-size: clamp(1.3rem, 4.8vw, 2rem);
+  }
+
+  .lens__portal-overlay-close {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.05rem;
+  }
+
   .lens__handoff {
     grid-template-columns: 1fr;
-  }
-
-  .lens-portal-modal__scene {
-    grid-template-columns: 1fr;
-  }
-
-  .lens-portal-modal__dialog {
-    max-height: 92vh;
-    overflow-y: auto;
-  }
-
-  .lens-portal-modal__close {
-    width: 2.4rem;
-    height: 2.4rem;
-    font-size: 1.2rem;
   }
 }
 
