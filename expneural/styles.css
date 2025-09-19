@@ -252,6 +252,68 @@ main {
   pointer-events: none;
 }
 
+.lens__portals {
+  position: absolute;
+  inset: clamp(1.1rem, 3vw, 1.6rem);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2.2vw, 1.4rem);
+  pointer-events: none;
+}
+
+.lens-portal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(79, 240, 255, 0.32);
+  background: rgba(5, 11, 22, 0.66);
+  box-shadow: 0 14px 40px rgba(5, 15, 45, 0.5);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.lens-portal::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 14px;
+  border: 1px dashed rgba(79, 240, 255, 0.25);
+  pointer-events: none;
+}
+
+.lens-portal[data-active='false'] {
+  opacity: 0.38;
+  filter: saturate(0.4);
+}
+
+.lens-portal:hover,
+.lens-portal:focus-visible {
+  transform: translate3d(0, -4px, 0);
+  border-color: rgba(79, 240, 255, 0.65);
+  background: rgba(5, 11, 22, 0.82);
+}
+
+.lens-portal__badge {
+  font-size: 0.68rem;
+  letter-spacing: 0.38rem;
+  text-transform: uppercase;
+  color: rgba(230, 236, 255, 0.58);
+}
+
+.lens-portal__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .lens__hud {
   position: absolute;
   bottom: clamp(1.1rem, 3vw, 1.8rem);
@@ -381,6 +443,130 @@ main {
   line-height: 1.6;
 }
 
+.lens-portal-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 24;
+}
+
+.lens-portal-modal[aria-hidden='false'],
+.lens-portal-modal:not([hidden]) {
+  display: flex;
+}
+
+.lens-portal-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 6, 14, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.lens-portal-modal__dialog {
+  position: relative;
+  width: min(920px, 95vw);
+  border-radius: clamp(20px, 6vw, 28px);
+  border: 1px solid rgba(79, 240, 255, 0.32);
+  background: linear-gradient(135deg, rgba(5, 11, 22, 0.92), rgba(5, 11, 22, 0.78));
+  box-shadow: 0 40px 120px rgba(5, 15, 45, 0.65);
+  overflow: hidden;
+}
+
+.lens-portal-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1rem, 3vw, 1.6rem) clamp(1.2rem, 3.6vw, 2.2rem);
+  border-bottom: 1px solid rgba(79, 240, 255, 0.22);
+}
+
+.lens-portal-modal__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.lens-portal-modal__badge {
+  font-size: 0.75rem;
+  letter-spacing: 0.32rem;
+  text-transform: uppercase;
+  color: rgba(230, 236, 255, 0.58);
+}
+
+.lens-portal-modal__stage {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.lens-portal-modal__close {
+  border: none;
+  background: rgba(5, 11, 22, 0.6);
+  color: var(--color-text);
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.lens-portal-modal__close:hover,
+.lens-portal-modal__close:focus-visible {
+  background: rgba(79, 240, 255, 0.24);
+  transform: rotate(6deg);
+}
+
+.lens-portal-modal__scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  gap: clamp(1.2rem, 3vw, 2rem);
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+}
+
+.lens-portal-canvas {
+  width: 100%;
+  height: auto;
+  border-radius: clamp(18px, 4vw, 24px);
+  border: 1px solid rgba(79, 240, 255, 0.22);
+  background: radial-gradient(circle, rgba(5, 11, 22, 0.9), rgba(5, 11, 22, 0.6));
+  box-shadow: inset 0 0 40px rgba(79, 240, 255, 0.2);
+}
+
+.lens-portal-modal__info {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.6rem, 2vw, 1rem);
+  justify-content: center;
+}
+
+.lens-portal-modal__title {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.lens-portal-modal__description {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-muted);
+  line-height: 1.75;
+}
+
+.lens-portal-modal__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.28rem;
+  text-transform: uppercase;
+  color: rgba(230, 236, 255, 0.6);
+}
+
+.lens-portal-modal[hidden] {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .lens {
     padding-bottom: clamp(3rem, 10vw, 4rem);
@@ -402,8 +588,33 @@ main {
     justify-content: flex-start;
   }
 
+  .lens__portals {
+    inset: clamp(0.9rem, 5vw, 1.4rem);
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .lens-portal {
+    padding: 0.75rem 0.95rem;
+  }
+
   .lens__handoff {
     grid-template-columns: 1fr;
+  }
+
+  .lens-portal-modal__scene {
+    grid-template-columns: 1fr;
+  }
+
+  .lens-portal-modal__dialog {
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+
+  .lens-portal-modal__close {
+    width: 2.4rem;
+    height: 2.4rem;
+    font-size: 1.2rem;
   }
 }
 

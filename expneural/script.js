@@ -810,6 +810,21 @@ if (lensSection) {
   const stopBtn = lensSection.querySelector('[data-lens-action="stop"]');
 
   const ctx = canvasEl instanceof HTMLCanvasElement ? canvasEl.getContext('2d') : null;
+  const portalButtons = Array.from(lensSection.querySelectorAll('.lens-portal')).filter(
+    (button) => button instanceof HTMLButtonElement
+  );
+  const portalModal = lensSection.querySelector('[data-portal-modal]');
+  const portalStageLabelEl = portalModal?.querySelector('[data-portal-stage-label]');
+  const portalTitleEl = portalModal?.querySelector('[data-portal-title]');
+  const portalDescriptionEl = portalModal?.querySelector('[data-portal-description]');
+  const portalMetaEl = portalModal?.querySelector('[data-portal-meta]');
+  const portalCanvas = portalModal?.querySelector('.lens-portal-canvas');
+  const portalCtx = portalCanvas instanceof HTMLCanvasElement ? portalCanvas.getContext('2d') : null;
+  const portalDismissEls = portalModal
+    ? Array.from(portalModal.querySelectorAll('[data-portal-dismiss]')).filter(
+        (el) => el instanceof HTMLElement
+      )
+    : [];
 
   const stageThemes = {
     default: {
@@ -844,6 +859,93 @@ if (lensSection) {
     },
   };
 
+  const portalScenes = {
+    default: {
+      title: 'Immersion Gate',
+      description: 'A neutral anchor that echoes the neural field when no stage is in focus.',
+      meta: 'Immersion token • 0X0',
+      coreHue: 198,
+      accentHue: 186,
+      sparkHue: 264,
+      orbitCount: 14,
+      orbitSpread: 0.32,
+      waveSpeed: 0.45,
+      warp: 0.56,
+      sparkCount: 50,
+      sparkSpeed: 0.82,
+      sparkDrift: 1.05,
+      sparkSize: 3.6,
+    },
+    '01': {
+      title: 'Signal Vault',
+      description:
+        'Step inside the denoised vault where raw oscillations crystalize into magnetic relics.',
+      meta: 'Immersion token • 01A',
+      coreHue: 186,
+      accentHue: 42,
+      sparkHue: 212,
+      orbitCount: 12,
+      orbitSpread: 0.28,
+      waveSpeed: 0.36,
+      warp: 0.48,
+      sparkCount: 46,
+      sparkSpeed: 0.74,
+      sparkDrift: 0.96,
+      sparkSize: 3.8,
+    },
+    '02': {
+      title: 'Latent Cube',
+      description:
+        'Navigate the translucent atlas where embeddings tessellate into navigable attention planes.',
+      meta: 'Immersion token • 02L',
+      coreHue: 204,
+      accentHue: 312,
+      sparkHue: 168,
+      orbitCount: 16,
+      orbitSpread: 0.36,
+      waveSpeed: 0.48,
+      warp: 0.62,
+      sparkCount: 58,
+      sparkSpeed: 0.85,
+      sparkDrift: 1.12,
+      sparkSize: 3.2,
+    },
+    '03': {
+      title: 'Render Bloom',
+      description:
+        'Witness synaesthetic particles bloom into luminous waves synchronized with multisensory cues.',
+      meta: 'Immersion token • 03S',
+      coreHue: 288,
+      accentHue: 24,
+      sparkHue: 318,
+      orbitCount: 18,
+      orbitSpread: 0.4,
+      waveSpeed: 0.6,
+      warp: 0.74,
+      sparkCount: 64,
+      sparkSpeed: 0.98,
+      sparkDrift: 1.24,
+      sparkSize: 3.5,
+    },
+    '04': {
+      title: 'Reflection Loop',
+      description:
+        'Enter the adaptive feedback loop where audience resonance folds into regenerative echoes.',
+      meta: 'Immersion token • 04R',
+      coreHue: 336,
+      accentHue: 184,
+      sparkHue: 48,
+      orbitCount: 15,
+      orbitSpread: 0.34,
+      waveSpeed: 0.52,
+      warp: 0.68,
+      sparkCount: 52,
+      sparkSpeed: 0.88,
+      sparkDrift: 1.18,
+      sparkSize: 3.7,
+    },
+  };
+
   const pulses = Array.from({ length: 28 }, (_, index) => ({
     seed: index * 37.1,
     baseX: (index * 73) % 53 / 53,
@@ -859,6 +961,9 @@ if (lensSection) {
   let currentStage = '01';
   let displayedIntensity = 0.62;
   let targetIntensity = 0.62;
+  let portalAnimationId = null;
+  let portalSceneStage = null;
+  let lastPortalTrigger = null;
 
   const resizeCanvas = () => {
     if (!(canvasEl instanceof HTMLCanvasElement) || !ctx) {
@@ -884,6 +989,255 @@ if (lensSection) {
       stageLabel.textContent = theme.label;
     }
     targetIntensity = theme.depth;
+  };
+
+  const formatStageDescriptor = (stage) => {
+    const theme = stageThemes[stage] ?? stageThemes.default;
+    if (!stageThemes[stage] || stage === 'default') {
+      return theme.label;
+    }
+    return `Stage ${stage.padStart(2, '0')} • ${theme.label}`;
+  };
+
+  const updatePortals = () => {
+    if (!portalButtons.length) {
+      return;
+    }
+
+    portalButtons.forEach((button) => {
+      const stage = button.dataset.portalStage ?? '';
+      const isActive = stage === currentStage;
+      button.dataset.active = String(isActive);
+      button.disabled = !isActive;
+      button.tabIndex = isActive ? 0 : -1;
+      button.setAttribute('aria-pressed', String(isActive && portalSceneStage === stage));
+    });
+  };
+
+  const resizePortalCanvas = () => {
+    if (!(portalCanvas instanceof HTMLCanvasElement) || !portalCtx) {
+      return;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    const { clientWidth, clientHeight } = portalCanvas;
+    const width = Math.max(Math.floor(clientWidth), 1);
+    const height = Math.max(Math.floor(clientHeight), 1);
+    const needsResize = portalCanvas.width !== width * dpr || portalCanvas.height !== height * dpr;
+
+    if (needsResize) {
+      portalCanvas.width = width * dpr;
+      portalCanvas.height = height * dpr;
+      portalCtx.setTransform(1, 0, 0, 1, 0, 0);
+      portalCtx.scale(dpr, dpr);
+    }
+  };
+
+  const applyPortalContent = (stage) => {
+    if (!portalModal) {
+      return;
+    }
+
+    const descriptor = formatStageDescriptor(stage);
+    const scene = portalScenes[stage] ?? portalScenes.default;
+
+    if (portalStageLabelEl) {
+      portalStageLabelEl.textContent = descriptor;
+    }
+
+    if (portalTitleEl) {
+      portalTitleEl.textContent = scene.title;
+    }
+
+    if (portalDescriptionEl) {
+      portalDescriptionEl.textContent = scene.description;
+    }
+
+    if (portalMetaEl) {
+      portalMetaEl.textContent = scene.meta;
+    }
+  };
+
+  const renderPortalScene = (time) => {
+    if (!(portalCanvas instanceof HTMLCanvasElement) || !portalCtx || !portalSceneStage) {
+      return;
+    }
+
+    resizePortalCanvas();
+
+    const width = portalCanvas.clientWidth;
+    const height = portalCanvas.clientHeight;
+    const scene = portalScenes[portalSceneStage] ?? portalScenes.default;
+    const stageTheme = stageThemes[portalSceneStage] ?? stageThemes.default;
+    const t = time * 0.001;
+
+    portalCtx.clearRect(0, 0, width, height);
+
+    const backdrop = portalCtx.createRadialGradient(
+      width / 2,
+      height / 2,
+      width * 0.05,
+      width / 2,
+      height / 2,
+      Math.max(width, height) * 0.62
+    );
+    backdrop.addColorStop(0, `hsla(${scene.coreHue}, 98%, 72%, 0.38)`);
+    backdrop.addColorStop(0.45, `hsla(${stageTheme.hue}, 92%, 60%, 0.24)`);
+    backdrop.addColorStop(1, 'rgba(5, 11, 22, 0.94)');
+
+    portalCtx.fillStyle = 'rgba(5, 11, 22, 0.92)';
+    portalCtx.fillRect(0, 0, width, height);
+    portalCtx.fillStyle = backdrop;
+    portalCtx.fillRect(0, 0, width, height);
+
+    const orbitCount = scene.orbitCount ?? 12;
+    const orbitSpread = scene.orbitSpread ?? 0.32;
+    const waveSpeed = scene.waveSpeed ?? 0.46;
+    const warp = scene.warp ?? 0.6;
+
+    for (let i = 0; i < orbitCount; i += 1) {
+      const pct = i / orbitCount;
+      const angle = t * waveSpeed + pct * Math.PI * 2;
+      const baseRadius = Math.min(width, height) * (0.18 + orbitSpread * pct);
+      const wobble = Math.sin(t * (warp + pct * 0.4) + i) * 0.08;
+      const radiusX = baseRadius * (1 + wobble * 0.4);
+      const radiusY = baseRadius * (0.65 + wobble);
+
+      portalCtx.save();
+      portalCtx.translate(width / 2, height / 2);
+      portalCtx.rotate(angle * 0.6);
+      portalCtx.beginPath();
+      portalCtx.strokeStyle = `hsla(${scene.accentHue + pct * 24}, 95%, ${60 + pct * 20}%, ${0.22 + pct * 0.25})`;
+      portalCtx.lineWidth = 1.2 + pct * 2.4;
+      portalCtx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+      portalCtx.stroke();
+      portalCtx.restore();
+    }
+
+    const sparkCount = scene.sparkCount ?? 52;
+    const sparkSpeed = scene.sparkSpeed ?? 0.86;
+    const sparkDrift = scene.sparkDrift ?? 1.12;
+    const sparkSize = scene.sparkSize ?? 3.5;
+
+    for (let i = 0; i < sparkCount; i += 1) {
+      const phase = i / sparkCount;
+      const angle = phase * Math.PI * 2 + t * sparkSpeed;
+      const radial = (Math.sin(t * sparkDrift + i) * 0.5 + 0.5) * Math.min(width, height) * 0.42;
+      const x = width / 2 + Math.cos(angle) * radial;
+      const y = height / 2 + Math.sin(angle) * radial * (0.66 + Math.sin(angle + t) * 0.12);
+      const size = (0.7 + Math.sin(angle * 2.4 + t * 0.8) * 0.45) * sparkSize;
+
+      const sparkGradient = portalCtx.createRadialGradient(x, y, 0, x, y, size * 5.4);
+      sparkGradient.addColorStop(0, `hsla(${scene.sparkHue}, 100%, 78%, 0.55)`);
+      sparkGradient.addColorStop(0.6, `hsla(${scene.sparkHue + 40}, 96%, 68%, 0.22)`);
+      sparkGradient.addColorStop(1, 'rgba(5, 11, 22, 0)');
+
+      portalCtx.beginPath();
+      portalCtx.fillStyle = sparkGradient;
+      portalCtx.arc(x, y, size * 5.4, 0, Math.PI * 2);
+      portalCtx.fill();
+    }
+
+    const aperture = portalCtx.createRadialGradient(
+      width / 2,
+      height / 2,
+      0,
+      width / 2,
+      height / 2,
+      Math.min(width, height) * 0.26
+    );
+    aperture.addColorStop(0, `hsla(${scene.accentHue}, 100%, 76%, 0.58)`);
+    aperture.addColorStop(0.86, `hsla(${scene.coreHue}, 96%, 62%, 0.26)`);
+    aperture.addColorStop(1, 'rgba(5, 11, 22, 0)');
+
+    portalCtx.fillStyle = aperture;
+    portalCtx.beginPath();
+    portalCtx.arc(
+      width / 2,
+      height / 2,
+      Math.min(width, height) * (0.24 + Math.sin(t * 0.7) * 0.02),
+      0,
+      Math.PI * 2
+    );
+    portalCtx.fill();
+
+    portalAnimationId = requestAnimationFrame(renderPortalScene);
+  };
+
+  const stopPortalScene = () => {
+    if (portalAnimationId) {
+      cancelAnimationFrame(portalAnimationId);
+      portalAnimationId = null;
+    }
+
+    if (portalCanvas instanceof HTMLCanvasElement && portalCtx) {
+      portalCtx.clearRect(0, 0, portalCanvas.clientWidth, portalCanvas.clientHeight);
+    }
+
+    portalSceneStage = null;
+
+    if (portalButtons.length) {
+      portalButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    }
+  };
+
+  const openPortal = (stage, { force = false } = {}) => {
+    if (!portalModal) {
+      return;
+    }
+
+    const key = portalScenes[stage] ? stage : 'default';
+    const alreadyOpen = !portalModal.hasAttribute('hidden');
+
+    if (alreadyOpen && !force && portalSceneStage === key) {
+      return;
+    }
+
+    stopPortalScene();
+    portalSceneStage = key;
+    applyPortalContent(key);
+
+    if (portalButtons.length) {
+      portalButtons.forEach((button) => {
+        const isActive = button.dataset.portalStage === key;
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+
+      if (force) {
+        const replacement = portalButtons.find((button) => button.dataset.portalStage === key);
+        if (replacement) {
+          lastPortalTrigger = replacement;
+        }
+      }
+    }
+
+    portalModal.setAttribute('aria-hidden', 'false');
+    portalModal.removeAttribute('hidden');
+    portalModal.hidden = false;
+
+    resizePortalCanvas();
+    portalAnimationId = requestAnimationFrame(renderPortalScene);
+
+    const focusTarget = portalModal.querySelector('.lens-portal-modal__close');
+    if (focusTarget instanceof HTMLElement) {
+      focusTarget.focus({ preventScroll: true });
+    }
+  };
+
+  const closePortal = () => {
+    if (!portalModal) {
+      return;
+    }
+
+    portalModal.setAttribute('aria-hidden', 'true');
+    portalModal.hidden = true;
+    portalModal.setAttribute('hidden', '');
+    stopPortalScene();
+    updatePortals();
+
+    if (lastPortalTrigger instanceof HTMLElement) {
+      lastPortalTrigger.focus({ preventScroll: true });
+    }
   };
 
   const setRunningState = (nextRunning) => {
@@ -1031,9 +1385,33 @@ if (lensSection) {
     stopBtn.disabled = true;
   }
 
+  portalButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      lastPortalTrigger = button;
+      const stage = button.dataset.portalStage ?? currentStage;
+      openPortal(stage);
+    });
+  });
+
+  portalDismissEls.forEach((element) => {
+    element.addEventListener('click', () => {
+      closePortal();
+    });
+  });
+
+  if (portalModal) {
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !portalModal.hasAttribute('hidden')) {
+        event.preventDefault();
+        closePortal();
+      }
+    });
+  }
+
   setRunningState(false);
   resizeCanvas();
   updateStageHud();
+  updatePortals();
 
   window.addEventListener('neural-stagechange', (event) => {
     const nextStage = event.detail?.stage ?? null;
@@ -1043,16 +1421,25 @@ if (lensSection) {
       currentStage = 'default';
     }
     updateStageHud();
+    updatePortals();
+
+    if (portalModal && !portalModal.hasAttribute('hidden')) {
+      openPortal(currentStage, { force: true });
+    }
   });
 
   if (typeof ResizeObserver === 'function') {
     const resizeObserver = new ResizeObserver(() => {
       resizeCanvas();
+      resizePortalCanvas();
     });
 
     resizeObserver.observe(lensSection);
   } else {
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      resizePortalCanvas();
+    });
   }
 
   document.addEventListener('visibilitychange', () => {
@@ -1064,6 +1451,9 @@ if (lensSection) {
   window.addEventListener('pagehide', () => {
     if (running) {
       stopLens({ message: null });
+    }
+    if (portalModal && !portalModal.hasAttribute('hidden')) {
+      closePortal();
     }
   });
 
