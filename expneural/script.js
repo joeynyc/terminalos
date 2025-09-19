@@ -95,26 +95,53 @@ const injectCrestAudioReactiveValue = (value) => {
 };
 
 const initMicroDock = () => {
+  const updateTelemetry = () => {
+    if (!dockTelemetryLabel) {
+      return;
+    }
+    const baseLatency = 14 + Math.sin(Date.now() * 0.0012) * 4;
+    const jitter = Math.abs(Math.sin(Date.now() * 0.0006)) * 3;
+    dockTelemetryLabel.textContent = `Latency ${(baseLatency + jitter).toFixed(0)}ms`;
+  };
+
   if (dockTelemetryLabel) {
-    dockTelemetryTimer = window.setInterval(() => {
-      const baseLatency = 14 + Math.sin(Date.now() * 0.0012) * 4;
-      dockTelemetryLabel.textContent = `Latency ${baseLatency.toFixed(0)}ms`;
-    }, 2200);
+    updateTelemetry();
+    dockTelemetryTimer = window.setInterval(updateTelemetry, 2200);
   }
 
   soundToggleBtn?.addEventListener('click', () => {
     soundToggleBtn.classList.toggle('is-active');
-    soundToggleBtn.querySelector('.micro-dock__icon').textContent = soundToggleBtn.classList.contains('is-active') ? '🔇' : '🔊';
-    soundToggleBtn.querySelector('.micro-dock__label').textContent = soundToggleBtn.classList.contains('is-active')
-      ? 'Muted'
-      : 'Sound';
+    const icon = soundToggleBtn.querySelector('.micro-dock__icon');
+    const label = soundToggleBtn.querySelector('.micro-dock__label');
+    if (icon) {
+      icon.textContent = soundToggleBtn.classList.contains('is-active') ? '🔇' : '🔊';
+    }
+    if (label) {
+      label.textContent = soundToggleBtn.classList.contains('is-active') ? 'Muted' : 'Sound';
+    }
   });
 
   accessibilityBtn?.addEventListener('click', () => {
     accessibilityBtn.classList.toggle('is-active');
     const active = accessibilityBtn.classList.contains('is-active');
-    accessibilityBtn.querySelector('.micro-dock__label').textContent = active ? 'Access On' : 'Access';
+    const label = accessibilityBtn.querySelector('.micro-dock__label');
+    if (label) {
+      label.textContent = active ? 'Access On' : 'Access';
+    }
     document.body.classList.toggle('accessibility-mode', active);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!dockTelemetryLabel) {
+      return;
+    }
+    if (document.hidden) {
+      window.clearInterval(dockTelemetryTimer);
+      dockTelemetryTimer = null;
+    } else if (!dockTelemetryTimer) {
+      updateTelemetry();
+      dockTelemetryTimer = window.setInterval(updateTelemetry, 2200);
+    }
   });
 };
 
