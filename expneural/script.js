@@ -946,6 +946,64 @@ if (lensSection) {
     },
   };
 
+  const overlayProfiles = {
+    default: {
+      tintAlpha: 0.08,
+      pulseAlpha: 0.18,
+      beamAlpha: 0.24,
+      pulseRadius: 1,
+      tiltAmplitude: 0.14,
+      beamBase: 0.16,
+      beamScale: 0.18,
+      beamSpeed: 0.00055,
+      beamParallax: 0.18,
+    },
+    '01': {
+      tintAlpha: 0.1,
+      pulseAlpha: 0.22,
+      beamAlpha: 0.26,
+      pulseRadius: 1.06,
+      tiltAmplitude: 0.16,
+      beamBase: 0.18,
+      beamScale: 0.22,
+      beamSpeed: 0.0005,
+      beamParallax: 0.24,
+    },
+    '02': {
+      tintAlpha: 0.11,
+      pulseAlpha: 0.24,
+      beamAlpha: 0.24,
+      pulseRadius: 1.08,
+      tiltAmplitude: 0.18,
+      beamBase: 0.17,
+      beamScale: 0.24,
+      beamSpeed: 0.0006,
+      beamParallax: 0.2,
+    },
+    '03': {
+      tintAlpha: 0.14,
+      pulseAlpha: 0.3,
+      beamAlpha: 0.28,
+      pulseRadius: 1.22,
+      tiltAmplitude: 0.21,
+      beamBase: 0.18,
+      beamScale: 0.28,
+      beamSpeed: 0.0007,
+      beamParallax: 0.22,
+    },
+    '04': {
+      tintAlpha: 0.12,
+      pulseAlpha: 0.21,
+      beamAlpha: 0.3,
+      pulseRadius: 1.02,
+      tiltAmplitude: 0.19,
+      beamBase: 0.2,
+      beamScale: 0.22,
+      beamSpeed: 0.00058,
+      beamParallax: 0.3,
+    },
+  };
+
   const pulses = Array.from({ length: 28 }, (_, index) => ({
     seed: index * 37.1,
     baseX: (index * 73) % 53 / 53,
@@ -964,6 +1022,12 @@ if (lensSection) {
   let portalAnimationId = null;
   let portalSceneStage = null;
   let lastPortalTrigger = null;
+  let tiltX = 0;
+  let tiltY = 0;
+  let targetTiltX = 0;
+  let targetTiltY = 0;
+  let orientationEnabled = false;
+  let orientationPermissionDenied = false;
 
   const resizeCanvas = () => {
     if (!(canvasEl instanceof HTMLCanvasElement) || !ctx) {
@@ -991,6 +1055,10 @@ if (lensSection) {
     targetIntensity = theme.depth;
   };
 
+  const clampTilt = (value, min = -1, max = 1) => Math.min(Math.max(value, min), max);
+  const clamp01 = (value) => Math.min(Math.max(value, 0), 1);
+  const wrapUnit = (value) => ((value % 1) + 1) % 1;
+
   const formatStageDescriptor = (stage) => {
     const theme = stageThemes[stage] ?? stageThemes.default;
     if (!stageThemes[stage] || stage === 'default') {
@@ -1010,8 +1078,80 @@ if (lensSection) {
       button.dataset.active = String(isActive);
       button.disabled = !isActive;
       button.tabIndex = isActive ? 0 : -1;
+      button.setAttribute('aria-disabled', String(!isActive));
       button.setAttribute('aria-pressed', String(isActive && portalSceneStage === stage));
     });
+  };
+
+  const handlePointerTilt = (event) => {
+    if (orientationEnabled) {
+      return;
+    }
+
+    if (event.target instanceof HTMLElement && event.target.closest('.lens-portal')) {
+      return;
+    }
+
+    const rect = lensSection.getBoundingClientRect();
+    const x = clampTilt((event.clientX - rect.left) / rect.width * 2 - 1);
+    const y = clampTilt((event.clientY - rect.top) / rect.height * 2 - 1);
+    targetTiltX = x;
+    targetTiltY = y;
+  };
+
+  const resetPointerTilt = () => {
+    if (orientationEnabled) {
+      return;
+    }
+    targetTiltX = 0;
+    targetTiltY = 0;
+  };
+
+  const handleDeviceOrientation = (event) => {
+    const gamma = Number.isFinite(event.gamma) ? event.gamma : 0;
+    const beta = Number.isFinite(event.beta) ? event.beta : 0;
+    const nextX = gamma / 45;
+    const nextY = beta / 55;
+    targetTiltX = clampTilt(nextX);
+    targetTiltY = clampTilt(nextY);
+  };
+
+  const enableOrientationTracking = async () => {
+    if (orientationEnabled || orientationPermissionDenied) {
+      return orientationEnabled;
+    }
+
+    if ('DeviceOrientationEvent' in window) {
+      try {
+        const OrientationEventClass = window.DeviceOrientationEvent;
+        if (typeof OrientationEventClass?.requestPermission === 'function') {
+          const response = await OrientationEventClass.requestPermission();
+          if (response !== 'granted') {
+            orientationPermissionDenied = true;
+            return false;
+          }
+        }
+
+        window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+        orientationEnabled = true;
+        return true;
+      } catch (error) {
+        console.warn('Device orientation permission error', error);
+        orientationPermissionDenied = true;
+        return false;
+      }
+    }
+
+    orientationPermissionDenied = true;
+    return false;
+  };
+
+  const disableOrientationTracking = () => {
+    if (!orientationEnabled) {
+      return;
+    }
+    window.removeEventListener('deviceorientation', handleDeviceOrientation, true);
+    orientationEnabled = false;
   };
 
   const resizePortalCanvas = () => {
@@ -1261,31 +1401,50 @@ if (lensSection) {
     ctx.clearRect(0, 0, width, height);
 
     const theme = stageThemes[currentStage] ?? stageThemes.default;
+    const overlayProfile = overlayProfiles[currentStage] ?? overlayProfiles.default;
     const hue = theme.hue;
     const accentHue = theme.accentHue;
 
-    displayedIntensity += (targetIntensity - displayedIntensity) * 0.04;
-    const intensity = Math.max(0.35, Math.min(0.92, displayedIntensity));
+    displayedIntensity += (targetIntensity - displayedIntensity) * 0.045;
+    const intensity = clamp01(displayedIntensity);
+
+    tiltX += (targetTiltX - tiltX) * 0.08;
+    tiltY += (targetTiltY - tiltY) * 0.08;
 
     if (intensityLabel) {
       intensityLabel.textContent = `Intensity ${intensity.toFixed(2)}`;
     }
 
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = overlayProfile.tintAlpha;
+    const tintGradient = ctx.createLinearGradient(0, 0, width, height);
+    tintGradient.addColorStop(0, `hsla(${hue}, 96%, 68%, 1)`);
+    tintGradient.addColorStop(1, `hsla(${accentHue}, 92%, 66%, 1)`);
+    ctx.fillStyle = tintGradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+
+    const offsetX = tiltX * overlayProfile.tiltAmplitude;
+    const offsetY = tiltY * overlayProfile.tiltAmplitude;
+
+    ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = overlayProfile.pulseAlpha;
 
     pulses.forEach((pulse) => {
-      const t = time * 0.0008 + pulse.offset;
-      const jitter = Math.sin(t * pulse.rate * 2) * 0.12;
-      const x = (pulse.baseX + Math.sin(t * pulse.rate) * 0.18 + 1) % 1;
-      const y = (pulse.baseY + Math.cos(t * pulse.rate * 1.4) * 0.15 + 1) % 1;
-      const radius = (Math.sin(t * 1.6) * 0.18 + 0.26) * pulse.scale * (0.8 + intensity * 0.6);
-      const px = x * width;
-      const py = y * height;
-      const pr = radius * Math.max(width, height);
+      const pulseTime = time * 0.0008 + pulse.offset;
+      const jitter = Math.sin(pulseTime * pulse.rate * 2) * 0.1;
+      const xBase = pulse.baseX + Math.sin(pulseTime * pulse.rate) * 0.18 + offsetX;
+      const yBase = pulse.baseY + Math.cos(pulseTime * pulse.rate * 1.4) * 0.15 + offsetY;
+      const radius = (Math.sin(pulseTime * 1.6) * 0.18 + 0.26) * pulse.scale * (0.8 + intensity * 0.6);
+      const px = wrapUnit(xBase) * width;
+      const py = wrapUnit(yBase) * height;
+      const pr = radius * Math.max(width, height) * overlayProfile.pulseRadius;
 
-      const gradient = ctx.createRadialGradient(px, py, pr * 0.1, px, py, pr);
-      gradient.addColorStop(0, `hsla(${hue}, 95%, ${65 + jitter * 10}%, ${0.28 + intensity * 0.24})`);
-      gradient.addColorStop(0.65, `hsla(${accentHue}, 92%, ${68 + jitter * 6}%, ${0.18 + intensity * 0.18})`);
+      const gradient = ctx.createRadialGradient(px, py, pr * 0.08, px, py, pr);
+      gradient.addColorStop(0, `hsla(${hue}, 95%, ${66 + jitter * 12}%, ${0.22 + intensity * 0.18})`);
+      gradient.addColorStop(0.58, `hsla(${accentHue}, 92%, ${68 + jitter * 6}%, ${0.14 + intensity * 0.12})`);
       gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
       ctx.beginPath();
@@ -1294,19 +1453,42 @@ if (lensSection) {
       ctx.fill();
     });
 
-    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
 
-    const beamHeight = height * (0.12 + intensity * 0.15);
-    const beamOffset = (Math.sin(time * 0.0006) * 0.5 + 0.5) * (height - beamHeight);
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = overlayProfile.beamAlpha;
 
-    const beamGradient = ctx.createLinearGradient(0, beamOffset, 0, beamOffset + beamHeight);
-    beamGradient.addColorStop(0, `hsla(${accentHue}, 100%, 72%, 0)`);
-    beamGradient.addColorStop(0.32, `hsla(${hue}, 100%, 78%, ${0.2 + intensity * 0.18})`);
-    beamGradient.addColorStop(0.7, `hsla(${accentHue}, 90%, 70%, ${0.16 + intensity * 0.12})`);
+    const beamHeight = height * (overlayProfile.beamBase + intensity * overlayProfile.beamScale);
+    const beamCenterNorm = clamp01(
+      Math.sin(time * overlayProfile.beamSpeed) * 0.5 + 0.5 + tiltY * overlayProfile.beamParallax
+    );
+    const beamOffsetNorm = clamp01(beamCenterNorm - (beamHeight / height) * 0.5);
+    const beamY = beamOffsetNorm * (height - beamHeight);
+
+    const beamGradient = ctx.createLinearGradient(0, beamY, 0, beamY + beamHeight);
+    beamGradient.addColorStop(0, `hsla(${accentHue}, 100%, 74%, 0)`);
+    beamGradient.addColorStop(0.3, `hsla(${hue}, 100%, 76%, ${0.18 + intensity * 0.18})`);
+    beamGradient.addColorStop(0.75, `hsla(${accentHue}, 90%, 70%, ${0.14 + intensity * 0.14})`);
     beamGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
     ctx.fillStyle = beamGradient;
-    ctx.fillRect(0, beamOffset, width, beamHeight);
+    ctx.fillRect(0, beamY, width, beamHeight);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = overlayProfile.tintAlpha * 0.8;
+    const haloRadius = Math.min(width, height) * (0.22 + intensity * 0.06);
+    const haloX = width / 2 + tiltX * width * 0.08;
+    const haloY = height / 2 + tiltY * height * 0.08;
+    const haloGradient = ctx.createRadialGradient(haloX, haloY, haloRadius * 0.35, haloX, haloY, haloRadius);
+    haloGradient.addColorStop(0, `hsla(${hue}, 100%, 80%, 0.4)`);
+    haloGradient.addColorStop(0.65, `hsla(${accentHue}, 98%, 72%, 0.22)`);
+    haloGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = haloGradient;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
 
     if (running) {
       animationId = requestAnimationFrame(animateOverlay);
@@ -1333,6 +1515,11 @@ if (lensSection) {
     if (canvasEl instanceof HTMLCanvasElement && ctx) {
       ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
     }
+    disableOrientationTracking();
+    targetTiltX = 0;
+    targetTiltY = 0;
+    tiltX = 0;
+    tiltY = 0;
     setRunningState(false);
 
     if (message) {
@@ -1364,7 +1551,14 @@ if (lensSection) {
       await videoEl.play();
       videoEl.setAttribute('data-active', 'true');
       setRunningState(true);
-      setStatus('Neural lens live • move your device to sculpt the field');
+      const orientationEnabledNow = await enableOrientationTracking();
+      const liveStatus = orientationEnabledNow
+        ? 'Neural lens live • tilt to sculpt the field'
+        : 'Neural lens live • drag to sculpt the field';
+      setStatus(liveStatus);
+      if (orientationEnabledNow) {
+        resetPointerTilt();
+      }
       animationId = requestAnimationFrame(animateOverlay);
     } catch (error) {
       console.error('Neural lens camera error', error);
@@ -1384,6 +1578,11 @@ if (lensSection) {
     });
     stopBtn.disabled = true;
   }
+
+  lensSection.addEventListener('pointermove', handlePointerTilt);
+  lensSection.addEventListener('pointerleave', resetPointerTilt);
+  lensSection.addEventListener('pointercancel', resetPointerTilt);
+  lensSection.addEventListener('touchend', resetPointerTilt);
 
   portalButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -1457,5 +1656,5 @@ if (lensSection) {
     }
   });
 
-  setStatus('Ready to activate • camera off');
+  setStatus('Ready to activate • camera off • portals sync per stage');
 }
