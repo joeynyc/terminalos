@@ -87,24 +87,21 @@
         </div>
 
         <div class="lens__portal-overlay" data-portal-overlay hidden>
-          <div class="lens__portal-overlay-inner">
-            <div class="lens__portal-overlay-header">
-              <span class="lens__portal-overlay-badge">Stage Portal</span>
-              <span class="lens__portal-overlay-stage" data-portal-stage-label>Signal Capture</span>
-              <button class="lens__portal-overlay-close" type="button" data-portal-dismiss aria-label="Close portal">
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div class="lens__portal-overlay-body">
-              <canvas class="lens__portal-overlay-canvas" width="420" height="420" aria-hidden="true"></canvas>
-              <div class="lens__portal-overlay-info">
-                <h3 class="lens__portal-overlay-title" data-portal-title>Signal Vault</h3>
-                <p class="lens__portal-overlay-description" data-portal-description>
-                  Step inside the denoised chamber where raw oscillations crystallize into magnetic relics.
-                </p>
-                <p class="lens__portal-overlay-meta" data-portal-meta>Immersion token • 01A</p>
-              </div>
-            </div>
+          <div class="lens__portal-window">
+            <canvas class="lens__portal-canvas" width="420" height="420" aria-hidden="true"></canvas>
+            <div class="lens__portal-window-glow" aria-hidden="true"></div>
+            <button class="lens__portal-window-close" type="button" data-portal-dismiss aria-label="Close portal">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="lens__portal-window-info" role="status" aria-live="polite">
+            <span class="lens__portal-window-badge">Stage Portal</span>
+            <span class="lens__portal-window-stage" data-portal-stage-label>Signal Capture</span>
+            <span class="lens__portal-window-title" data-portal-title>Signal Vault</span>
+            <span class="lens__portal-window-description" data-portal-description>
+              Magnetic relics shimmer as denoised signals fold inward.
+            </span>
+            <span class="lens__portal-window-meta" data-portal-meta>Token • 01A</span>
           </div>
         </div>
       </div>

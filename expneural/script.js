@@ -810,6 +810,7 @@ if (lensSection) {
   const stopBtn = lensSection.querySelector('[data-lens-action="stop"]');
 
   const ctx = canvasEl instanceof HTMLCanvasElement ? canvasEl.getContext('2d') : null;
+  const portalCluster = lensSection.querySelector('.lens__portals');
   const portalButtons = Array.from(lensSection.querySelectorAll('.lens-portal')).filter(
     (button) => button instanceof HTMLButtonElement
   );
@@ -818,7 +819,7 @@ if (lensSection) {
   const portalTitleEl = portalOverlay?.querySelector('[data-portal-title]');
   const portalDescriptionEl = portalOverlay?.querySelector('[data-portal-description]');
   const portalMetaEl = portalOverlay?.querySelector('[data-portal-meta]');
-  const portalCanvas = portalOverlay?.querySelector('.lens__portal-overlay-canvas');
+  const portalCanvas = portalOverlay?.querySelector('.lens__portal-canvas');
   const portalCtx = portalCanvas instanceof HTMLCanvasElement ? portalCanvas.getContext('2d') : null;
   const portalDismissEls = portalOverlay
     ? Array.from(portalOverlay.querySelectorAll('[data-portal-dismiss]')).filter(
@@ -863,7 +864,8 @@ if (lensSection) {
     default: {
       title: 'Immersion Gate',
       description: 'A neutral anchor that echoes the neural field when no stage is in focus.',
-      meta: 'Immersion token • 0X0',
+      caption: 'Neural energy braids into a calm equilibrium.',
+      meta: 'Token • 0X0',
       coreHue: 198,
       accentHue: 186,
       sparkHue: 264,
@@ -880,7 +882,8 @@ if (lensSection) {
       title: 'Signal Vault',
       description:
         'Step inside the denoised vault where raw oscillations crystalize into magnetic relics.',
-      meta: 'Immersion token • 01A',
+      caption: 'Magnetic relics solidify as raw signals breathe.',
+      meta: 'Token • 01A',
       coreHue: 186,
       accentHue: 42,
       sparkHue: 212,
@@ -897,7 +900,8 @@ if (lensSection) {
       title: 'Latent Cube',
       description:
         'Navigate the translucent atlas where embeddings tessellate into navigable attention planes.',
-      meta: 'Immersion token • 02L',
+      caption: 'Attention planes fold into a glasslike cube.',
+      meta: 'Token • 02L',
       coreHue: 204,
       accentHue: 312,
       sparkHue: 168,
@@ -914,7 +918,8 @@ if (lensSection) {
       title: 'Render Bloom',
       description:
         'Witness synaesthetic particles bloom into luminous waves synchronized with multisensory cues.',
-      meta: 'Immersion token • 03S',
+      caption: 'Synaesthetic waves blossom in sync with light.',
+      meta: 'Token • 03S',
       coreHue: 288,
       accentHue: 24,
       sparkHue: 318,
@@ -931,7 +936,8 @@ if (lensSection) {
       title: 'Reflection Loop',
       description:
         'Enter the adaptive feedback loop where audience resonance folds into regenerative echoes.',
-      meta: 'Immersion token • 04R',
+      caption: 'Feedback ripples weave adaptive echoes.',
+      meta: 'Token • 04R',
       coreHue: 336,
       accentHue: 184,
       sparkHue: 48,
@@ -1187,7 +1193,7 @@ if (lensSection) {
     }
 
     if (portalDescriptionEl) {
-      portalDescriptionEl.textContent = scene.description;
+      portalDescriptionEl.textContent = scene.caption ?? scene.description;
     }
 
     if (portalMetaEl) {
@@ -1353,11 +1359,12 @@ if (lensSection) {
       portalOverlay.hidden = false;
       portalOverlay.removeAttribute('hidden');
     }
+    portalCluster?.setAttribute('data-open', 'true');
 
     resizePortalCanvas();
     portalAnimationId = requestAnimationFrame(renderPortalScene);
 
-    const focusTarget = portalOverlay?.querySelector('.lens__portal-overlay-close');
+    const focusTarget = portalOverlay?.querySelector('.lens__portal-window-close');
     if (focusTarget instanceof HTMLElement) {
       focusTarget.focus({ preventScroll: true });
     }
@@ -1370,6 +1377,7 @@ if (lensSection) {
 
     portalOverlay.hidden = true;
     portalOverlay.setAttribute('hidden', '');
+    portalCluster?.removeAttribute('data-open');
     stopPortalScene();
     updatePortals();
 
@@ -1598,6 +1606,14 @@ if (lensSection) {
       closePortal();
     });
   });
+
+  if (portalOverlay instanceof HTMLElement) {
+    portalOverlay.addEventListener('click', (event) => {
+      if (event.target === portalOverlay) {
+        closePortal();
+      }
+    });
+  }
 
   window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && portalOverlay && !portalOverlay.hasAttribute('hidden')) {
