@@ -11,11 +11,28 @@
 </head>
 <body>
   <header class="site-header">
-    <div class="site-brand">
-      <span class="site-brand__mark">EXPERIENCE</span>
-      <span class="site-brand__name">NEURAL</span>
+    <div class="site-brand" aria-label="Experience Neural">
+      <canvas class="site-brand__crest" width="128" height="128" aria-hidden="true"></canvas>
+      <div class="site-brand__label">
+        <span class="site-brand__mark">EXPERIENCE</span>
+        <span class="site-brand__name">NEURAL</span>
+      </div>
     </div>
     <a class="site-cta" href="#hero">Start Exploring</a>
+    <div class="micro-dock" role="group" aria-label="Quick controls">
+      <button class="micro-dock__chip" type="button" data-micro-sound>
+        <span class="micro-dock__icon" aria-hidden="true">🔊</span>
+        <span class="micro-dock__label">Sound</span>
+      </button>
+      <button class="micro-dock__chip" type="button" data-micro-accessibility>
+        <span class="micro-dock__icon" aria-hidden="true">♿</span>
+        <span class="micro-dock__label">Access</span>
+      </button>
+      <div class="micro-dock__chip" data-micro-telemetry>
+        <span class="micro-dock__icon" aria-hidden="true">⚡</span>
+        <span class="micro-dock__label" data-micro-telemetry-label>Latency 16ms</span>
+      </div>
+    </div>
   </header>
 
   <main>

@@ -1,5 +1,123 @@
 let soundboardController = null;
 
+const crestCanvas = document.querySelector('.site-brand__crest');
+let crestAnimationId = null;
+let crestAudioReactiveValue = 0;
+let crestScrollReactiveValue = 0;
+
+const dockTelemetryLabel = document.querySelector('[data-micro-telemetry-label]');
+const soundToggleBtn = document.querySelector('[data-micro-sound]');
+const accessibilityBtn = document.querySelector('[data-micro-accessibility]');
+let dockTelemetryTimer = null;
+
+const updateCrest = (timestamp) => {
+  if (!(crestCanvas instanceof HTMLCanvasElement)) {
+    return;
+  }
+
+  const ctx = crestCanvas.getContext('2d');
+  if (!ctx) {
+    return;
+  }
+
+  const { width, height } = crestCanvas;
+  const time = timestamp * 0.001;
+
+  crestScrollReactiveValue += (window.scrollY / (window.innerHeight * 2) - crestScrollReactiveValue) * 0.05;
+
+  const reactive = crestAudioReactiveValue * 0.7 + crestScrollReactiveValue * 0.3;
+  const beat = Math.sin(time * 2.2 + reactive * 6);
+  const pulse = 0.4 + reactive * 0.6 + Math.sin(time * 0.8) * 0.12;
+
+  ctx.clearRect(0, 0, width, height);
+
+  const gradient = ctx.createRadialGradient(width * 0.32, height * 0.28, width * 0.08, width / 2, height / 2, width * 0.46);
+  gradient.addColorStop(0, `rgba(79, 240, 255, ${0.18 + pulse * 0.12})`);
+  gradient.addColorStop(1, 'rgba(5, 11, 22, 0.92)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  const filamentCount = 22;
+  for (let i = 0; i < filamentCount; i += 1) {
+    const angle = (Math.PI * 2 * i) / filamentCount + time * 0.12;
+    const radius = width * (0.22 + Math.sin(time * 1.6 + i) * 0.04 + reactive * 0.06);
+    const cx = width / 2 + Math.cos(angle) * radius;
+    const cy = height / 2 + Math.sin(angle) * radius * 0.86;
+
+    const filamentGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.22);
+    filamentGradient.addColorStop(0, `rgba(79, 240, 255, ${0.28 + pulse * 0.2})`);
+    filamentGradient.addColorStop(1, 'rgba(79, 240, 255, 0)');
+
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = filamentGradient;
+    ctx.beginPath();
+    ctx.arc(cx, cy, width * (0.18 + pulse * 0.05), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const ringWidth = width * (0.06 + pulse * 0.02);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineWidth = ringWidth;
+  ctx.strokeStyle = `rgba(79, 240, 255, ${0.32 + pulse * 0.2})`;
+  ctx.beginPath();
+  ctx.arc(width / 2, height / 2, width * (0.38 + beat * 0.015), 0, Math.PI * 2);
+  ctx.stroke();
+
+  crestAnimationId = requestAnimationFrame(updateCrest);
+};
+
+const initCrest = () => {
+  if (!(crestCanvas instanceof HTMLCanvasElement)) {
+    return;
+  }
+
+  const resize = () => {
+    const dpr = window.devicePixelRatio || 1;
+    const width = crestCanvas.clientWidth;
+    const height = crestCanvas.clientHeight;
+    crestCanvas.width = Math.floor(width * dpr);
+    crestCanvas.height = Math.floor(height * dpr);
+    const ctx = crestCanvas.getContext('2d');
+    ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  resize();
+  window.addEventListener('resize', resize);
+  window.addEventListener('scroll', () => {
+    crestScrollReactiveValue += 0.04;
+  });
+
+  crestAnimationId = requestAnimationFrame(updateCrest);
+};
+
+const injectCrestAudioReactiveValue = (value) => {
+  crestAudioReactiveValue = value;
+};
+
+const initMicroDock = () => {
+  if (dockTelemetryLabel) {
+    dockTelemetryTimer = window.setInterval(() => {
+      const baseLatency = 14 + Math.sin(Date.now() * 0.0012) * 4;
+      dockTelemetryLabel.textContent = `Latency ${baseLatency.toFixed(0)}ms`;
+    }, 2200);
+  }
+
+  soundToggleBtn?.addEventListener('click', () => {
+    soundToggleBtn.classList.toggle('is-active');
+    soundToggleBtn.querySelector('.micro-dock__icon').textContent = soundToggleBtn.classList.contains('is-active') ? '🔇' : '🔊';
+    soundToggleBtn.querySelector('.micro-dock__label').textContent = soundToggleBtn.classList.contains('is-active')
+      ? 'Muted'
+      : 'Sound';
+  });
+
+  accessibilityBtn?.addEventListener('click', () => {
+    accessibilityBtn.classList.toggle('is-active');
+    const active = accessibilityBtn.classList.contains('is-active');
+    accessibilityBtn.querySelector('.micro-dock__label').textContent = active ? 'Access On' : 'Access';
+    document.body.classList.toggle('accessibility-mode', active);
+  });
+};
+
 const journeySection = document.querySelector('.journey');
 
 if (journeySection) {
@@ -621,6 +739,8 @@ function initSoundboard() {
 
 soundboardController = initSoundboard();
 soundboardController?.highlightStage('01');
+initCrest();
+initMicroDock();
 
 const labSection = document.querySelector('.lab');
 
