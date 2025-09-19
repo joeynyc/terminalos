@@ -185,10 +185,11 @@ main {
 
 .lens {
   position: relative;
-  padding: clamp(3.5rem, 8vw, 6rem) clamp(1.5rem, 5vw, 5rem) clamp(3rem, 8vw, 5rem);
+  padding: clamp(3rem, 7vw, 5.2rem) clamp(1.5rem, 5vw, 4.4rem) clamp(2.6rem, 7vw, 4.6rem);
   display: flex;
   flex-direction: column;
-  gap: clamp(1.8rem, 4vw, 2.6rem);
+  align-items: center;
+  gap: clamp(1.6rem, 3.6vw, 2.4rem);
   background:
     radial-gradient(circle at 14% 20%, rgba(79, 240, 255, 0.15), transparent 65%),
     radial-gradient(circle at 85% 78%, rgba(69, 108, 255, 0.22), transparent 70%),
@@ -226,13 +227,14 @@ main {
 
 .lens__viewport {
   position: relative;
-  width: min(960px, 100%);
+  width: min(560px, 86%);
   aspect-ratio: 3 / 4;
-  border-radius: clamp(22px, 5vw, 36px);
+  border-radius: clamp(18px, 3.6vw, 26px);
   overflow: hidden;
-  border: 1px solid rgba(79, 240, 255, 0.24);
-  background: rgba(5, 11, 22, 0.75);
-  box-shadow: 0 28px 80px rgba(5, 15, 45, 0.45);
+  border: 1px solid rgba(79, 240, 255, 0.22);
+  background: rgba(5, 11, 22, 0.78);
+  box-shadow: 0 24px 70px rgba(5, 15, 45, 0.42);
+  margin-inline: auto;
 }
 
 .lens__video {
@@ -254,17 +256,21 @@ main {
 
 .lens__portals {
   position: absolute;
-  bottom: calc(clamp(1.1rem, 3vw, 1.9rem) + env(safe-area-inset-bottom, 0px));
+  bottom: calc(clamp(1rem, 2.6vw, 1.6rem) + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.55rem, 2vw, 1rem);
+  gap: clamp(0.4rem, 1.6vw, 0.85rem);
   pointer-events: auto;
-  width: min(90%, 720px);
+  width: 100%;
+  max-width: clamp(320px, 78vw, 480px);
+  padding: 0 clamp(0.4rem, 2vw, 0.9rem);
 }
+
+
 
 .lens__portals[data-open='true'] {
   opacity: 0.25;
@@ -278,19 +284,19 @@ main {
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.4rem 0.65rem;
+  gap: 0.35rem 0.6rem;
   align-items: center;
-  padding: 0.68rem 1.05rem;
+  padding: 0.65rem 0.95rem;
   border-radius: 999px;
-  border: 1px solid rgba(79, 240, 255, 0.32);
+  border: 1px solid rgba(79, 240, 255, 0.3);
   background: rgba(5, 11, 22, 0.48);
   color: var(--color-text);
   cursor: pointer;
   font: inherit;
   pointer-events: auto;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 12px 32px rgba(5, 15, 45, 0.38);
-  min-width: clamp(10rem, 28vw, 13rem);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 28px rgba(5, 15, 45, 0.34);
+  min-width: clamp(8.6rem, 22vw, 10.4rem);
   transform: translate3d(0, 0, 0) scale(0.98);
   transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
 }
@@ -500,7 +506,7 @@ main {
 
 .lens__portal-window {
   position: relative;
-  width: clamp(14rem, 38vw, 20rem);
+  width: clamp(11.5rem, 32vw, 16rem);
   aspect-ratio: 1;
   border-radius: 50%;
   overflow: hidden;
@@ -556,7 +562,7 @@ main {
 
 .lens__portal-window-info {
   position: absolute;
-  bottom: clamp(0.6rem, 2vw, 1.4rem);
+  bottom: clamp(0.45rem, 1.8vw, 1.1rem);
   left: 50%;
   transform: translateX(-50%);
   display: inline-flex;
@@ -566,10 +572,10 @@ main {
   border-radius: 14px;
   background: rgba(5, 11, 22, 0.64);
   border: 1px solid rgba(79, 240, 255, 0.24);
-  box-shadow: 0 18px 48px rgba(5, 15, 45, 0.48);
+  box-shadow: 0 14px 36px rgba(5, 15, 45, 0.45);
   pointer-events: auto;
   text-align: center;
-  min-width: clamp(12rem, 46vw, 16rem);
+  min-width: clamp(11rem, 40vw, 15rem);
 }
 
 .lens__portal-window-badge {
@@ -608,8 +614,9 @@ main {
   }
 
   .lens__viewport {
-    aspect-ratio: 10 / 15;
-    border-radius: 26px;
+    width: min(94%, 460px);
+    aspect-ratio: 3 / 4;
+    border-radius: 24px;
   }
 
   .lens__hud {
@@ -625,12 +632,12 @@ main {
   }
 
   .lens__portals {
-    gap: 0.65rem;
-    width: min(100%, 520px);
+    gap: 0.55rem;
+    max-width: clamp(280px, 88vw, 420px);
   }
 
   .lens-portal {
-    padding: 0.7rem 0.95rem;
+    padding: 0.62rem 0.9rem;
     min-width: 0;
   }
 
