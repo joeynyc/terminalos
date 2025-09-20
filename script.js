@@ -1,3 +1,560 @@
+class BootSequence {
+    constructor(terminal) {
+        this.terminal = terminal;
+        this.overlay = document.getElementById('boot-overlay');
+        this.body = document.body;
+        this.linesContainer = document.getElementById('boot-lines');
+        this.timelineContainer = document.getElementById('boot-timeline');
+        this.statusElement = document.getElementById('boot-status');
+        this.skipButton = document.getElementById('boot-skip');
+        this.sequence = [
+            {
+                label: 'BIOS',
+                text: 'Waking Joey.OS // creative technologist credentials verified.',
+                status: 'Authenticating identity…',
+                highlight: true,
+                timelineIndex: 0
+            },
+            {
+                label: 'TELEMETRY',
+                text: 'Mapping obsessions: immersive terminals, narrative design, measurable impact.',
+                status: 'Mapping strengths…',
+                timelineIndex: 0
+            },
+            {
+                label: 'SENSORS',
+                text: 'Syncing live tools, games, and rapid prototyping utilities.',
+                status: 'Loading toolkit…',
+                timelineIndex: 1
+            },
+            {
+                label: 'MISSION',
+                text: 'Compiling cinematic case studies with outcomes, metrics, and takeaways.',
+                status: 'Preparing case studies…',
+                highlight: true,
+                timelineIndex: 1
+            },
+            {
+                label: 'HANDOFF',
+                text: 'Control panel online. Type `help` to explore or `case` for cinematic studies.',
+                status: 'Terminal ready. Awaiting input.',
+                highlight: true,
+                timelineIndex: 2
+            }
+        ];
+        this.timelineData = [
+            {
+                phase: 'Phase 01 — Discovery',
+                copy: 'Translate product vision into missions with technical guardrails and storytelling hooks.'
+            },
+            {
+                phase: 'Phase 02 — Engineering',
+                copy: 'Prototype fast, polish relentlessly, automate rituals, and keep humans in the loop.'
+            },
+            {
+                phase: 'Phase 03 — Impact',
+                copy: 'Ship experiences that earn adoption, measurable lift, and long-term delight.'
+            }
+        ];
+        this.storageKey = 'joeyBootSequencePlayed';
+        this.timers = [];
+        this.welcomeInjected = false;
+        this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+        this.handleGlobalKeydown = (event) => this.onKeydown(event);
+        this.bindEvents();
+    }
+
+    bindEvents() {
+        if (!this.overlay) return;
+
+        if (this.skipButton) {
+            this.skipButton.addEventListener('click', () => this.finish({ skipped: true }));
+        }
+
+        document.addEventListener('keydown', this.handleGlobalKeydown);
+    }
+
+    onKeydown(event) {
+        if (!this.isRunning()) return;
+
+        const key = event.key.toLowerCase();
+        if (key === ' ' || key === 'enter' || key === 'escape') {
+            event.preventDefault();
+            this.finish({ skipped: true });
+        }
+    }
+
+    isRunning() {
+        return this.overlay && !this.overlay.classList.contains('hidden') && this.body.classList.contains('boot-active');
+    }
+
+    clearTimers() {
+        this.timers.forEach(timer => clearTimeout(timer));
+        this.timers = [];
+    }
+
+    renderTimeline() {
+        if (!this.timelineContainer) return;
+
+        this.timelineContainer.innerHTML = '';
+        this.timelineSteps = this.timelineData.map((step) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'boot-timeline-step';
+
+            const phase = document.createElement('div');
+            phase.className = 'boot-timeline-phase';
+            phase.textContent = step.phase;
+
+            const copy = document.createElement('div');
+            copy.className = 'boot-timeline-copy';
+            copy.textContent = step.copy;
+
+            wrapper.appendChild(phase);
+            wrapper.appendChild(copy);
+            this.timelineContainer.appendChild(wrapper);
+            return wrapper;
+        });
+    }
+
+    announceLine(line, index) {
+        if (!this.linesContainer) return;
+
+        const lineElement = document.createElement('div');
+        lineElement.className = 'boot-line';
+        if (line.highlight) {
+            lineElement.classList.add('is-highlight');
+        }
+
+        const label = document.createElement('span');
+        label.className = 'boot-line-label';
+        label.textContent = line.label;
+
+        const copy = document.createElement('span');
+        copy.className = 'boot-line-copy';
+        copy.textContent = line.text;
+
+        lineElement.appendChild(label);
+        lineElement.appendChild(copy);
+        this.linesContainer.appendChild(lineElement);
+
+        if (this.statusElement && line.status) {
+            this.statusElement.textContent = line.status;
+        }
+
+        if (this.timelineSteps && this.timelineSteps.length) {
+            const activeIndex = Math.min(line.timelineIndex ?? index, this.timelineSteps.length - 1);
+            this.timelineSteps.forEach((step, stepIndex) => {
+                if (stepIndex <= activeIndex) {
+                    step.classList.add('is-active');
+                }
+            });
+        }
+    }
+
+    injectWelcome() {
+        if (this.welcomeInjected || !this.terminal || !this.terminal.addToOutput) {
+            if (this.terminal && this.terminal.input) {
+                this.terminal.input.focus();
+                this.terminal.updateCursorPosition();
+            }
+            return;
+        }
+
+        const welcomeLines = [
+            '<span class="success">Joey.OS launch sequence complete.</span>',
+            '<span class="info">Type \'help\' to preview the full mission control.</span>',
+            '<span class="info">Try \'projects\' for cinematic case studies or \'matrix\' for easter eggs.</span>'
+        ];
+
+        welcomeLines.forEach(line => this.terminal.addToOutput(line, 'command-output'));
+        this.welcomeInjected = true;
+
+        if (this.terminal.input) {
+            setTimeout(() => {
+                this.terminal.input.focus();
+                this.terminal.updateCursorPosition();
+            }, 200);
+        }
+    }
+
+    finish({ skipped = false } = {}) {
+        if (!this.overlay) {
+            this.injectWelcome();
+            return;
+        }
+
+        this.clearTimers();
+        this.overlay.classList.add('hidden');
+        this.overlay.setAttribute('aria-hidden', 'true');
+        this.body.classList.remove('boot-active');
+        sessionStorage.setItem(this.storageKey, '1');
+        document.removeEventListener('keydown', this.handleGlobalKeydown);
+        this.injectWelcome();
+
+        if (skipped && this.statusElement) {
+            this.statusElement.textContent = 'Terminal ready. Awaiting input.';
+        }
+    }
+
+    start() {
+        if (!this.overlay) {
+            this.injectWelcome();
+            return;
+        }
+
+        const alreadyPlayed = sessionStorage.getItem(this.storageKey);
+        const reduceMotion = this.prefersReducedMotion?.matches;
+
+        if (reduceMotion || alreadyPlayed) {
+            this.finish({ skipped: true });
+            return;
+        }
+
+        this.overlay.classList.remove('hidden');
+        this.overlay.setAttribute('aria-hidden', 'false');
+        this.body.classList.add('boot-active');
+
+        if (this.linesContainer) {
+            this.linesContainer.innerHTML = '';
+        }
+
+        this.renderTimeline();
+
+        this.sequence.forEach((line, index) => {
+            const timer = setTimeout(() => {
+                this.announceLine(line, index);
+                if (index === this.sequence.length - 1) {
+                    const finishTimer = setTimeout(() => this.finish(), 1400);
+                    this.timers.push(finishTimer);
+                }
+            }, index * 1800);
+
+            this.timers.push(timer);
+        });
+    }
+}
+
+class CaseStudyViewer {
+    constructor(terminal) {
+        this.terminal = terminal;
+        this.overlay = document.getElementById('case-overlay');
+        this.dialog = this.overlay ? this.overlay.querySelector('.case-dialog') : null;
+        this.closeButton = document.getElementById('case-close');
+        this.prevButton = document.getElementById('case-prev');
+        this.nextButton = document.getElementById('case-next');
+        this.cta = document.getElementById('case-cta');
+        this.metricsContainer = document.getElementById('case-metrics');
+        this.timelineContainer = document.getElementById('case-timeline');
+        this.highlightsContainer = document.getElementById('case-highlights');
+        this.titleElement = document.getElementById('case-title');
+        this.subtitleElement = document.getElementById('case-subtitle');
+        this.kickerElement = document.getElementById('case-kicker');
+        this.indexElement = document.getElementById('case-index');
+        this.activeIndex = 0;
+        this.focusReturnElement = null;
+
+        this.handleKeydown = (event) => this.onKeydown(event);
+
+        this.studies = [
+            {
+                id: 'browseros',
+                aliases: ['browser', 'os', 'desktop'],
+                kicker: 'Case Study 01',
+                title: 'BrowserOS — Web Desktop for Rapid Prototyping',
+                subtitle: 'Unified dozens of product demos into a responsive, multi-window OS experience that sales teams could launch in seconds.',
+                metrics: [
+                    { label: 'Role', value: 'Lead Engineer & Designer' },
+                    { label: 'Timeline', value: '6 weeks' },
+                    { label: 'Impact', value: '+64% demo engagement' }
+                ],
+                timeline: [
+                    { phase: 'Recon', copy: 'Interviewed solution engineers and mapped the friction that killed energy in remote demos.' },
+                    { phase: 'Build', copy: 'Crafted a window manager, live preview docking, and theming using vanilla JS with Houdini-level polish.' },
+                    { phase: 'Impact', copy: 'Enabled teams to spin up curated workspaces in 30 seconds, unlocking new enterprise pilots.' }
+                ],
+                focusStep: 2,
+                highlights: [
+                    'Multi-window layout engine with drag, resize, and persistent context.',
+                    'Edge-cached assets and offline mode for low-bandwidth meetings.',
+                    'Telemetry overlay that surfaced KPIs directly in the workspace UI.'
+                ],
+                cta: { href: 'browseros/index.html', label: 'Launch BrowserOS' }
+            },
+            {
+                id: 'vespera',
+                aliases: ['crypto', 'cryptowatch', 'mission'],
+                kicker: 'Case Study 02',
+                title: 'Vespera — Mission Control for Crypto Signals',
+                subtitle: 'Translated raw market data into an aerospace-grade dashboard so analysts could call trades with clarity.',
+                metrics: [
+                    { label: 'Role', value: 'Full-stack Engineer' },
+                    { label: 'Timeline', value: '5 weeks' },
+                    { label: 'Result', value: '-45% time-to-decision' }
+                ],
+                timeline: [
+                    { phase: 'Signal', copy: 'Studied analyst workflows and prioritized legibility over flashy noise.' },
+                    { phase: 'Systems', copy: 'Built streaming data pipelines and adaptive visual hierarchy with GPU-accelerated charts.' },
+                    { phase: 'Launch', copy: 'Delivered dark-room compliant UI with responsive controls for trading floors.' }
+                ],
+                focusStep: 2,
+                highlights: [
+                    'Command center layout with mission badges and anomaly alerts.',
+                    'GPU-accelerated charts with smooth scrub, replay, and predictive cues.',
+                    'Custom alert scripting so teams could codify strategies without dev support.'
+                ],
+                cta: { href: 'cryptowatch/index.html', label: 'View Vespera' }
+            },
+            {
+                id: 'focusclock',
+                aliases: ['focus', 'clock', 'timer'],
+                kicker: 'Case Study 03',
+                title: 'FocusClock — Offline Productivity Mission Control',
+                subtitle: 'Equipped remote teams with an offline-first sprint timer that keeps context, rituals, and notes in one view.',
+                metrics: [
+                    { label: 'Role', value: 'Product Engineer' },
+                    { label: 'Timeline', value: '3 weeks' },
+                    { label: 'Adoption', value: '87% weekly retention' }
+                ],
+                timeline: [
+                    { phase: 'Research', copy: 'Shadowed async teams across time zones to map meeting and deep work friction.' },
+                    { phase: 'Design', copy: 'Crafted a PWA with encrypted notes, ritual templates, and multi-sensory cues.' },
+                    { phase: 'Delivery', copy: 'Rolled out analytics and theme systems proving time saved per sprint.' }
+                ],
+                focusStep: 2,
+                highlights: [
+                    'Offline-first architecture with service workers and resilient storage.',
+                    'Real-time ritual cues tuned for deep focus across devices and lighting.',
+                    'Accessible keyboard controls and AA contrast across every theme.'
+                ],
+                cta: { href: 'tools/focusclock.html', label: 'Open FocusClock' }
+            }
+        ];
+
+        this.bindEvents();
+    }
+
+    canOpen() {
+        return Boolean(this.overlay);
+    }
+
+    bindEvents() {
+        if (!this.overlay) return;
+
+        if (this.closeButton) {
+            this.closeButton.addEventListener('click', () => this.close());
+        }
+
+        if (this.prevButton) {
+            this.prevButton.addEventListener('click', () => this.showPrevious());
+        }
+
+        if (this.nextButton) {
+            this.nextButton.addEventListener('click', () => this.showNext());
+        }
+
+        this.overlay.addEventListener('mousedown', (event) => {
+            if (event.target === this.overlay) {
+                this.close();
+            }
+        });
+
+        document.addEventListener('keydown', this.handleKeydown);
+    }
+
+    onKeydown(event) {
+        if (!this.isOpen()) return;
+
+        switch (event.key) {
+            case 'Escape':
+                event.preventDefault();
+                this.close();
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                this.showNext();
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                this.showPrevious();
+                break;
+            case 'Tab':
+                this.maintainFocus(event);
+                break;
+        }
+    }
+
+    isOpen() {
+        return this.overlay?.classList.contains('case-overlay--open');
+    }
+
+    maintainFocus(event) {
+        if (!this.overlay) return;
+
+        const focusableSelectors = 'button, [href], [tabindex]:not([tabindex="-1"])';
+        const focusable = Array.from(this.overlay.querySelectorAll(focusableSelectors))
+            .filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null);
+
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        } else if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        }
+    }
+
+    open(index = 0) {
+        if (!this.overlay) return;
+
+        const wasOpen = this.isOpen();
+        const safeIndex = Math.max(0, Math.min(index, this.studies.length - 1));
+        this.activeIndex = safeIndex;
+        this.render();
+
+        this.overlay.classList.add('case-overlay--open');
+        this.overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('case-study-open');
+
+        if (!wasOpen) {
+            this.focusReturnElement = document.activeElement;
+        }
+
+        requestAnimationFrame(() => {
+            if (this.closeButton) {
+                this.closeButton.focus();
+            }
+        });
+    }
+
+    close() {
+        if (!this.overlay) return;
+
+        this.overlay.classList.remove('case-overlay--open');
+        this.overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('case-study-open');
+
+        if (this.focusReturnElement) {
+            try {
+                this.focusReturnElement.focus({ preventScroll: true });
+            } catch (error) {
+                this.focusReturnElement.focus();
+            }
+        } else if (this.terminal?.input) {
+            this.terminal.input.focus();
+            this.terminal.updateCursorPosition();
+        }
+    }
+
+    showPrevious() {
+        const nextIndex = (this.activeIndex - 1 + this.studies.length) % this.studies.length;
+        this.open(nextIndex);
+    }
+
+    showNext() {
+        const nextIndex = (this.activeIndex + 1) % this.studies.length;
+        this.open(nextIndex);
+    }
+
+    findIndexById(id) {
+        if (!id) return -1;
+
+        const target = id.toLowerCase();
+        return this.studies.findIndex(study => {
+            if (study.id === target) return true;
+            return Array.isArray(study.aliases) && study.aliases.includes(target);
+        });
+    }
+
+    render() {
+        const study = this.studies[this.activeIndex];
+        if (!study) return;
+
+        if (this.kickerElement) {
+            this.kickerElement.textContent = study.kicker || `Case Study ${String(this.activeIndex + 1).padStart(2, '0')}`;
+        }
+
+        if (this.titleElement) {
+            this.titleElement.textContent = study.title;
+        }
+
+        if (this.subtitleElement) {
+            this.subtitleElement.textContent = study.subtitle || '';
+        }
+
+        if (this.metricsContainer) {
+            this.metricsContainer.innerHTML = '';
+            study.metrics?.forEach(metric => {
+                const metricEl = document.createElement('div');
+                metricEl.className = 'case-metric';
+
+                const label = document.createElement('span');
+                label.className = 'case-metric-label';
+                label.textContent = metric.label;
+
+                const value = document.createElement('span');
+                value.className = 'case-metric-value';
+                value.textContent = metric.value;
+
+                metricEl.appendChild(label);
+                metricEl.appendChild(value);
+                this.metricsContainer.appendChild(metricEl);
+            });
+        }
+
+        if (this.timelineContainer) {
+            this.timelineContainer.innerHTML = '';
+            const focusStep = typeof study.focusStep === 'number'
+                ? study.focusStep
+                : Math.max(0, (study.timeline?.length || 1) - 1);
+
+            study.timeline?.forEach((step, index) => {
+                const item = document.createElement('div');
+                item.className = 'case-timeline-step';
+                if (index === focusStep) {
+                    item.classList.add('is-current');
+                }
+
+                const phase = document.createElement('div');
+                phase.className = 'case-timeline-phase';
+                phase.textContent = step.phase;
+
+                const copy = document.createElement('div');
+                copy.className = 'case-timeline-copy';
+                copy.textContent = step.copy;
+
+                item.appendChild(phase);
+                item.appendChild(copy);
+                this.timelineContainer.appendChild(item);
+            });
+        }
+
+        if (this.highlightsContainer) {
+            this.highlightsContainer.innerHTML = '';
+            study.highlights?.forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                this.highlightsContainer.appendChild(li);
+            });
+        }
+
+        if (this.cta) {
+            this.cta.href = study.cta?.href || '#';
+            this.cta.textContent = study.cta?.label || 'View Project';
+        }
+
+        if (this.indexElement) {
+            const total = String(this.studies.length).padStart(2, '0');
+            const current = String(this.activeIndex + 1).padStart(2, '0');
+            this.indexElement.textContent = `${current} / ${total}`;
+        }
+    }
+}
+
 class Terminal {
     constructor() {
         this.output = document.getElementById('output');
@@ -8,7 +565,7 @@ class Terminal {
         this.isRoot = false;
         this.currentDirectory = '~';
         this.currentTheme = 'green';
-        
+
         // Mobile detection and device capabilities
         this.deviceInfo = this.detectDevice();
         this.isMobile = this.deviceInfo.isMobile;
@@ -34,7 +591,7 @@ class Terminal {
             cyan: { name: 'Aqua Cyan', color: '#00ffaa', description: 'Fresh and modern' },
             retro: { name: 'Orange Retro', color: '#ff8800', description: 'Classic 80s terminal' }
         };
-        
+
         this.commands = {
             help: () => this.showHelp(),
             about_me: () => this.showAbout(),
@@ -72,13 +629,17 @@ class Terminal {
             cryptowatch: () => this.openCryptowatch(),
             expneural: () => this.openExpneural(),
             browseros: () => this.openBrowserOS(),
-            svgviewer: () => this.openSVGViewer()
+            svgviewer: () => this.openSVGViewer(),
+            musicfactory: () => this.openMusicFactory(),
+            case: (args) => this.openCaseStudy(args)
         };
 
         this.init();
         this.loadTheme();
         this.initMobileFeatures();
         this.initNavigation();
+
+        this.caseStudyViewer = new CaseStudyViewer(this);
     }
 
     detectDevice() {
@@ -407,6 +968,7 @@ Available Commands:
 <span class="success">contact_joey</span>  - Get contact information
 <span class="success">skills</span>       - Show programming skills
 <span class="success">projects</span>     - Open projects portfolio page
+<span class="success">case [id]</span>    - Launch cinematic case studies deck
 <span class="success">blog</span>         - Open minimal blog page
 <span class="success">github</span>       - Open Govee-MCP repository
 <span class="success">rss</span>          - Browse Hacker News stories
@@ -419,6 +981,7 @@ Available Commands:
 <span class="success">cryptowatch</span>  - Launch cryptocurrency dashboard
 <span class="success">browseros</span>    - Launch web-based operating system
 <span class="success">svgviewer</span>    - Launch SVG gallery viewer
+<span class="success">musicfactory</span>  - Launch music production interface
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -628,7 +1191,12 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: Advanced SVG viewer with color analysis and dynamic theming
    └── Status: Integrated tool (type 'svgviewer')
 
-<span class="success">11. Govee MCP Server</span>
+<span class="success">11. Music Factory</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Music production and composition interface
+   └── Status: Integrated tool (type 'musicfactory')
+
+<span class="success">12. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1561,6 +2129,31 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         this.addToOutput('<span class="info">Opening projects portfolio in new tab...</span>', 'command-output');
         window.open('projects.html', '_blank');
         this.addToOutput('<span class="success">Projects portfolio opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">For the cinematic version, try the \'case\' command or use the Case Studies tab.</span>', 'command-output');
+    }
+
+    openCaseStudy(args = []) {
+        if (!this.caseStudyViewer || !this.caseStudyViewer.canOpen()) {
+            this.addToOutput('<span class="warning">Interactive case deck unavailable. Try the projects command instead.</span>', 'command-output');
+            return;
+        }
+
+        if (!args.length) {
+            this.caseStudyViewer.open();
+            this.addToOutput('<span class="info">Showing case studies. Use ←/→ or type \'case [id]\' for a direct jump.</span>', 'command-output');
+            return;
+        }
+
+        const target = String(args[0]).toLowerCase();
+        const index = this.caseStudyViewer.findIndexById(target);
+
+        if (index >= 0) {
+            this.caseStudyViewer.open(index);
+            this.addToOutput(`<span class="success">Loaded ${target} case study.</span>`, 'command-output');
+        } else {
+            this.addToOutput(`<span class="warning">Unknown case study: ${target}. Launching full deck instead.</span>`, 'command-output');
+            this.caseStudyViewer.open();
+        }
     }
 
     openGitHub() {
@@ -1624,6 +2217,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('svgviewer/index.html', '_blank');
         this.addToOutput('<span class="success">✅ SVG Viewer opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🖼️ Advanced SVG file viewer with color extraction and dynamic theming.</span>', 'command-output');
+    }
+
+    openMusicFactory() {
+        this.addToOutput('<span class="info">🎵 Launching Music Factory...</span>', 'command-output');
+        window.open('file:///C:/Users/joey/OneDrive/Desktop/musicfactory', '_blank');
+        this.addToOutput('<span class="success">✅ Music Factory opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">🎼 Music production and composition interface for creating digital music.</span>', 'command-output');
     }
 
     // ========================
@@ -1819,6 +2419,7 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 
 // Initialize terminal when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new Terminal();
+    const terminal = new Terminal();
+    const bootSequence = new BootSequence(terminal);
+    bootSequence.start();
 });
-
