@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SVG Gallery Viewer</title>
+  <style>
+    :root { --thumb: 180px; --gap: 14px; --bg: #0b0b0c; --fg: #eaeaea; --muted:#9aa0a6; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"; }
+
+    header {
+      position: sticky; top: 0; z-index: 5;
+      backdrop-filter: blur(8px);
+      background: color-mix(in oklab, var(--bg) 86%, #000 14% / 76%);
+      border-bottom: 1px solid #1f2023;
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 14px 18px; }
+    h1 { font-size: 18px; margin: 0 0 8px; letter-spacing: .3px; }
+
+    .controls { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .row > * { margin: 0; }
+
+    .file-input { display: inline-flex; align-items: center; gap: 10px; }
+    input[type="file"] { display: none; }
+    .btn { cursor: pointer; padding: 8px 12px; border-radius: 10px; border: 1px solid #2a2b2f; background: #151517; color: var(--fg); transition: .15s ease; }
+    .btn:hover { background: #1b1c1f; border-color: #34363b; }
+
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: #121316; border: 1px solid #2a2b2f; }
+    .pill label { font-size: 12px; color: var(--muted); }
+
+    .range { accent-color: var(--global-accent, #a9b1ff); transition: accent-color 0.3s ease; }
+
+    .search {
+      min-width: 220px;
+      padding: 8px 11px;
+      border-radius: 10px;
+      border: 1px solid #2a2b2f;
+      background: #101114;
+      color: var(--fg);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .toggles { display: flex; gap: 8px; }
+
+    .dropzone {
+      border: 1.5px dashed #35373d; border-radius: 14px; padding: 18px; margin: 12px auto 0; text-align: center; color: var(--muted);
+      background: repeating-linear-gradient(45deg, #0f1013, #0f1013 10px, #0e0f12 10px, #0e0f12 20px);
+    }
+    .dropzone.drag { border-color: #8aa0ff; color: #c7d0ff; background: #0e1020; }
+
+    .meta { display: flex; gap: 10px; align-items: center; color: var(--muted); font-size: 12px; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--thumb), 1fr)); gap: var(--gap); padding: 18px; }
+
+    .card {
+      position: relative;
+      border: 1px solid #222329;
+      background: #101114;
+      border-radius: 14px;
+      overflow: clip;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .thumb-wrap { position: relative; aspect-ratio: 1 / 1; display: grid; place-items: center; background: conic-gradient(from 0deg, #0a0b0d, #0c0d10);
+      /* checkerboard */
+      --c:#15161a; --d:#101217;
+      background:
+        linear-gradient(45deg, var(--d) 25%, transparent 25%) 0 0/16px 16px,
+        linear-gradient(-45deg, var(--d) 25%, transparent 25%) 0 0/16px 16px,
+        linear-gradient(45deg, transparent 75%, var(--d) 75%) 0 0/16px 16px,
+        linear-gradient(-45deg, transparent 75%, var(--d) 75%) 0 0/16px 16px,
+        repeating-conic-gradient(from 0deg, #0b0c0f 0% 25%, #0b0c10 0% 50%);
+    }
+    .thumb-wrap.dark { background: #0c0d10; }
+    .thumb-wrap.transparent { background: #0b0c0f; }
+
+    .thumb { max-width: 80%; max-height: 80%; object-fit: contain; }
+
+    .card .info { padding: 10px 12px; display: grid; gap: 6px; position: relative; }
+    .name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sub { font-size: 12px; color: var(--muted); }
+
+    .color-indicator {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+    }
+
+    .actions { display: flex; gap: 8px; margin-top: 6px; }
+    .actions a, .actions button { flex: 1; text-align: center; }
+
+    .footer { padding: 10px 18px; color: var(--muted); border-top: 1px solid #1f2023; display: flex; justify-content: space-between; align-items: center; }
+
+    .hide { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>SVG Gallery Viewer</h1>
+      <div class="controls">
+        <div class="row">
+          <label class="btn file-input">
+            <input id="file" type="file" multiple accept="image/svg+xml,.svg" />
+            ➕ Add SVGs
+          </label>
+          <button id="clear" class="btn" title="Remove all">🗑️ Clear</button>
+          <div class="pill">
+            <label for="zoom">Zoom</label>
+            <input id="zoom" class="range" type="range" min="120" max="320" value="180" />
+          </div>
+          <div class="pill">
+            <label for="gap">Gap</label>
+            <input id="gap" class="range" type="range" min="6" max="28" value="14" />
+          </div>
+          <div class="toggles">
+            <select id="bgMode" class="btn" title="Thumbnail background">
+              <option value="checker">Checkerboard</option>
+              <option value="transparent">Transparent</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        </div>
+        <input id="search" class="search" type="search" placeholder="Filter by filename…" />
+      </div>
+      <div id="drop" class="dropzone">Drag & drop SVG files here</div>
+      <div class="meta"><span id="count">0 files</span><span id="totalSize">0 KB</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="grid" class="grid" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <small>Local-only. Files never leave your browser. Previews use <code>&lt;img&gt;</code> for safety.</small>
+    <div>
+      <button id="exportList" class="btn">Export file list</button>
+    </div>
+  </footer>
+
+  <template id="cardTpl">
+    <article class="card" data-name="" data-size="0">
+      <div class="thumb-wrap checker"><img class="thumb" alt="SVG preview" /></div>
+      <div class="info">
+        <div class="name"></div>
+        <div class="sub"></div>
+        <div class="actions">
+          <a class="btn open" target="_blank" rel="noopener">Open</a>
+          <a class="btn download" download>Download</a>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    // Color extraction and analysis utilities
+    class ColorExtractor {
+      static async extractColors(svgUrl) {
+        try {
+          const response = await fetch(svgUrl);
+          const svgText = await response.text();
+
+          // Parse SVG and extract colors
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const colors = new Set();
+
+          // Extract from fill attributes
+          const fillElements = svgDoc.querySelectorAll('[fill]');
+          fillElements.forEach(el => {
+            const fill = el.getAttribute('fill');
+            if (fill && fill !== 'none' && !fill.includes('url(')) {
+              colors.add(fill);
+            }
+          });
+
+          // Extract from stroke attributes
+          const strokeElements = svgDoc.querySelectorAll('[stroke]');
+          strokeElements.forEach(el => {
+            const stroke = el.getAttribute('stroke');
+            if (stroke && stroke !== 'none' && !stroke.includes('url(')) {
+              colors.add(stroke);
+            }
+          });
+
+          // Extract from style attributes
+          const styledElements = svgDoc.querySelectorAll('[style]');
+          styledElements.forEach(el => {
+            const style = el.getAttribute('style');
+            const fillMatch = style.match(/fill:\s*([^;]+)/);
+            const strokeMatch = style.match(/stroke:\s*([^;]+)/);
+            if (fillMatch && fillMatch[1] !== 'none') colors.add(fillMatch[1].trim());
+            if (strokeMatch && strokeMatch[1] !== 'none') colors.add(strokeMatch[1].trim());
+          });
+
+          return Array.from(colors).filter(color =>
+            color !== 'currentColor' &&
+            color !== 'inherit' &&
+            !color.includes('var(')
+          );
+        } catch (error) {
+          console.warn('Color extraction failed:', error);
+          return [];
+        }
+      }
+
+      static hexToHsl(hex) {
+        // Convert hex to RGB first
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+
+        if (max === min) {
+          h = s = 0;
+        } else {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+          }
+          h /= 6;
+        }
+
+        return [h * 360, s * 100, l * 100];
+      }
+
+      static normalizeColor(color) {
+        // Create a temporary element to get computed color
+        const temp = document.createElement('div');
+        temp.style.color = color;
+        document.body.appendChild(temp);
+        const computed = getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+
+        // Extract RGB values
+        const rgbMatch = computed.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+          const r = parseInt(rgbMatch[1]);
+          const g = parseInt(rgbMatch[2]);
+          const b = parseInt(rgbMatch[3]);
+          return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        return color.startsWith('#') ? color : null;
+      }
+
+      static getDominantColor(colors) {
+        if (!colors.length) return null;
+
+        // Normalize colors and filter valid hex colors
+        const normalizedColors = colors
+          .map(color => this.normalizeColor(color))
+          .filter(color => color && color.match(/^#[0-9A-Fa-f]{6}$/));
+
+        if (!normalizedColors.length) return null;
+
+        // Find most vibrant color (highest saturation)
+        let dominantColor = normalizedColors[0];
+        let maxSaturation = 0;
+
+        normalizedColors.forEach(color => {
+          const [h, s, l] = this.hexToHsl(color);
+          // Prefer colors with good saturation and not too dark/light
+          const vibrancy = s * (1 - Math.abs(l - 50) / 50);
+          if (vibrancy > maxSaturation) {
+            maxSaturation = vibrancy;
+            dominantColor = color;
+          }
+        });
+
+        return dominantColor;
+      }
+
+      static getContrastRatio(color1, color2) {
+        const getLuminance = (color) => {
+          const rgb = [
+            parseInt(color.slice(1, 3), 16),
+            parseInt(color.slice(3, 5), 16),
+            parseInt(color.slice(5, 7), 16)
+          ].map(c => {
+            c = c / 255;
+            return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+        };
+
+        const lum1 = getLuminance(color1);
+        const lum2 = getLuminance(color2);
+        const brightest = Math.max(lum1, lum2);
+        const darkest = Math.min(lum1, lum2);
+
+        return (brightest + 0.05) / (darkest + 0.05);
+      }
+
+      static generateColorScheme(dominantColor) {
+        if (!dominantColor) return null;
+
+        const [h, s, l] = this.hexToHsl(dominantColor);
+
+        // Generate complementary and accent colors
+        const accent = `hsl(${h}, ${Math.max(s - 10, 30)}%, ${Math.min(l + 10, 80)}%)`;
+        const complement = `hsl(${(h + 180) % 360}, ${s * 0.7}%, ${l * 0.8}%)`;
+        const subtle = `hsl(${h}, ${s * 0.3}%, ${l * 0.4}%)`;
+
+        return {
+          primary: dominantColor,
+          accent,
+          complement,
+          subtle
+        };
+      }
+    }
+
+    const grid = $('#grid');
+    const fileInput = $('#file');
+    const drop = $('#drop');
+    const search = $('#search');
+    const clearBtn = $('#clear');
+    const zoom = $('#zoom');
+    const gap = $('#gap');
+    const count = $('#count');
+    const totalSize = $('#totalSize');
+    const bgMode = $('#bgMode');
+    const exportList = $('#exportList');
+
+    let filesState = []; // { name, size, url, type }
+
+    function fmtBytes(bytes){
+      if(bytes === 0) return '0 B';
+      const k = 1024, dm = 1, sizes = ['B','KB','MB','GB'];
+      const i = Math.min(Math.floor(Math.log(bytes)/Math.log(k)), sizes.length-1);
+      return parseFloat((bytes/Math.pow(k,i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function updateMeta(){
+      count.textContent = `${filesState.length} file${filesState.length!==1?'s':''}`;
+      const total = filesState.reduce((a,f)=>a+f.size,0);
+      totalSize.textContent = fmtBytes(total);
+    }
+
+    function setGridControls(){
+      document.documentElement.style.setProperty('--thumb', zoom.value+'px');
+      document.documentElement.style.setProperty('--gap', gap.value+'px');
+    }
+
+    function setThumbBg(){
+      $$('.thumb-wrap').forEach(el => {
+        el.classList.remove('checker','transparent','dark');
+        const v = bgMode.value;
+        if(v==='transparent') el.classList.add('transparent');
+        else if(v==='dark') el.classList.add('dark');
+        else el.classList.add('checker');
+      });
+    }
+
+    async function makeCard(file, url){
+      const t = document.getElementById('cardTpl');
+      const node = t.content.firstElementChild.cloneNode(true);
+      node.dataset.name = file.name.toLowerCase();
+      node.dataset.size = file.size;
+
+      node.querySelector('.name').textContent = file.name;
+      node.querySelector('.sub').textContent = `${fmtBytes(file.size)}`;
+
+      const img = node.querySelector('.thumb');
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.src = url;
+
+      const open = node.querySelector('.open');
+      open.href = url;
+      open.title = 'Open in new tab';
+
+      const dl = node.querySelector('.download');
+      dl.href = url;
+      dl.download = file.name;
+
+      // Extract colors and apply dynamic theming
+      try {
+        const colors = await ColorExtractor.extractColors(url);
+        const dominantColor = ColorExtractor.getDominantColor(colors);
+
+        if (dominantColor) {
+          const colorScheme = ColorExtractor.generateColorScheme(dominantColor);
+          applyCardColorScheme(node, colorScheme);
+        }
+      } catch (error) {
+        console.warn('Failed to extract colors for', file.name, error);
+      }
+
+      return node;
+    }
+
+    function applyCardColorScheme(card, colorScheme) {
+      const { primary, accent, complement, subtle } = colorScheme;
+
+      // Apply dynamic CSS custom properties to the card
+      card.style.setProperty('--card-accent', primary);
+      card.style.setProperty('--card-accent-subtle', subtle);
+      card.style.setProperty('--card-complement', complement);
+
+      // Add a subtle accent border
+      card.style.borderColor = subtle;
+
+      // Add color indicator dot
+      const colorDot = document.createElement('div');
+      colorDot.className = 'color-indicator';
+      colorDot.style.background = primary;
+      card.querySelector('.info').appendChild(colorDot);
+
+      // Enhance buttons with accent colors
+      const buttons = card.querySelectorAll('.btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          btn.style.borderColor = accent;
+          btn.style.boxShadow = `0 0 12px ${primary}20`;
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.style.borderColor = '';
+          btn.style.boxShadow = '';
+        });
+      });
+    }
+
+    async function addFiles(fileList){
+      const arr = Array.from(fileList).filter(f => f.type === 'image/svg+xml' || /\.svg$/i.test(f.name));
+      if(!arr.length) return;
+
+      for (const f of arr) {
+        const url = URL.createObjectURL(f);
+        filesState.push({ name: f.name, size: f.size, url, type: f.type });
+        const card = await makeCard(f, url);
+        grid.appendChild(card);
+      }
+
+      setThumbBg();
+      updateMeta();
+      applyFilter();
+      updateGlobalTheme();
+    }
+
+    function clearAll(){
+      filesState.forEach(f => URL.revokeObjectURL(f.url));
+      filesState = [];
+      grid.innerHTML = '';
+      updateMeta();
+      // Reset global theme
+      const root = document.documentElement;
+      root.style.removeProperty('--global-accent');
+      root.style.removeProperty('--global-subtle');
+    }
+
+    function applyFilter(){
+      const q = search.value.trim().toLowerCase();
+      $$('.card').forEach(card => {
+        const name = card.dataset.name;
+        card.classList.toggle('hide', q && !name.includes(q));
+      });
+    }
+
+    function updateGlobalTheme() {
+      // Extract dominant colors from all visible cards and create a contextual theme
+      const visibleCards = $$('.card:not(.hide)');
+      const allColors = [];
+
+      visibleCards.forEach(card => {
+        const cardAccent = card.style.getPropertyValue('--card-accent');
+        if (cardAccent) allColors.push(cardAccent);
+      });
+
+      if (allColors.length > 0) {
+        const globalDominant = ColorExtractor.getDominantColor(allColors);
+        if (globalDominant) {
+          const globalScheme = ColorExtractor.generateColorScheme(globalDominant);
+          applyGlobalColorScheme(globalScheme);
+        }
+      }
+    }
+
+    function applyGlobalColorScheme(colorScheme) {
+      const { primary, accent, subtle } = colorScheme;
+      const root = document.documentElement;
+
+      // Ensure good contrast with background
+      const contrastRatio = ColorExtractor.getContrastRatio(primary, '#0b0b0c');
+      const adjustedAccent = contrastRatio < 3 ? accent : primary;
+
+      // Apply subtle theming to header and UI elements
+      root.style.setProperty('--global-accent', adjustedAccent);
+      root.style.setProperty('--global-subtle', subtle);
+
+      // Update search input border on focus
+      const searchInput = $('#search');
+      searchInput.addEventListener('focus', () => {
+        searchInput.style.borderColor = adjustedAccent;
+        searchInput.style.boxShadow = `0 0 0 2px ${adjustedAccent}20`;
+      });
+      searchInput.addEventListener('blur', () => {
+        searchInput.style.borderColor = '';
+        searchInput.style.boxShadow = '';
+      });
+
+      // Update range inputs
+      $$('.range').forEach(range => {
+        range.style.accentColor = adjustedAccent;
+      });
+    }
+
+    // drag & drop
+    ['dragenter','dragover'].forEach(ev=>{
+      drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); });
+    });
+    ['dragleave','drop'].forEach(ev=>{
+      drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('drag'); });
+    });
+    drop.addEventListener('drop', e => { addFiles(e.dataTransfer.files); });
+
+    // input
+    fileInput.addEventListener('change', e => addFiles(e.target.files));
+
+    // controls
+    zoom.addEventListener('input', setGridControls);
+    gap.addEventListener('input', setGridControls);
+    bgMode.addEventListener('change', setThumbBg);
+    clearBtn.addEventListener('click', clearAll);
+    search.addEventListener('input', () => {
+      applyFilter();
+      updateGlobalTheme(); // Update theme when filter changes
+    });
+
+    // export list
+    exportList.addEventListener('click', () => {
+      const rows = filesState.map(f => ({ name: f.name, size_bytes: f.size }));
+      const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'svg-file-list.json'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 500);
+    });
+
+    // init
+    setGridControls();
+    updateMeta();
+  </script>
+</body>
+</html>

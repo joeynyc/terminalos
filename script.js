@@ -71,7 +71,8 @@ class Terminal {
             pindrop: () => this.openPindrop(),
             cryptowatch: () => this.openCryptowatch(),
             expneural: () => this.openExpneural(),
-            browseros: () => this.openBrowserOS()
+            browseros: () => this.openBrowserOS(),
+            svgviewer: () => this.openSVGViewer()
         };
 
         this.init();
@@ -417,6 +418,7 @@ Available Commands:
 <span class="success">pindrop</span>     - Launch draggable sticky notes board
 <span class="success">cryptowatch</span>  - Launch cryptocurrency dashboard
 <span class="success">browseros</span>    - Launch web-based operating system
+<span class="success">svgviewer</span>    - Launch SVG gallery viewer
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -621,7 +623,12 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: Web-based operating system with desktop environment
    └── Status: Integrated tool (type 'browseros')
 
-<span class="success">10. Govee MCP Server</span>
+<span class="success">10. SVG Gallery Viewer</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Advanced SVG viewer with color analysis and dynamic theming
+   └── Status: Integrated tool (type 'svgviewer')
+
+<span class="success">11. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1610,6 +1617,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('browseros/index.html', '_blank');
         this.addToOutput('<span class="success">✅ BrowserOS opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">💻 Web-based operating system interface with desktop environment.</span>', 'command-output');
+    }
+
+    openSVGViewer() {
+        this.addToOutput('<span class="info">🎨 Launching SVG Gallery Viewer...</span>', 'command-output');
+        window.open('svgviewer/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ SVG Viewer opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">🖼️ Advanced SVG file viewer with color extraction and dynamic theming.</span>', 'command-output');
     }
 
     // ========================
