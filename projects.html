@@ -24,10 +24,39 @@
             <div class="pill-content">MY PROJECTS</div>
         </div>
 
+        <!-- Search and Filter Controls -->
+        <div class="search-filter-container">
+            <div class="search-box">
+                <input type="text" id="project-search" placeholder="🔍 Search projects..." autocomplete="off">
+            </div>
+
+            <div class="filter-controls">
+                <button class="filter-btn active" data-category="all">
+                    All <span class="count" id="count-all">12</span>
+                </button>
+                <button class="filter-btn" data-category="featured">
+                    Featured <span class="count" id="count-featured">3</span>
+                </button>
+                <button class="filter-btn" data-category="tools">
+                    Tools <span class="count" id="count-tools">4</span>
+                </button>
+                <button class="filter-btn" data-category="interactive">
+                    Interactive <span class="count" id="count-interactive">3</span>
+                </button>
+                <button class="filter-btn" data-category="data">
+                    Data <span class="count" id="count-data">2</span>
+                </button>
+            </div>
+
+            <div class="results-info">
+                <span id="results-count">Showing 12 of 12 projects</span>
+            </div>
+        </div>
+
         <!-- Projects Grid -->
         <div class="projects-grid">
             <!-- Terminal Portfolio Website -->
-            <article class="project-card">
+            <article class="project-card" data-category="featured" data-tech="html css javascript terminal" data-status="live" data-name="Terminal Portfolio Website">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -78,7 +107,7 @@
             </article>
 
             <!-- SocialWithJoey.com -->
-            <article class="project-card">
+            <article class="project-card" data-category="featured" data-tech="web social platform" data-status="live" data-name="SocialWithJoey.com">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -121,7 +150,7 @@
             </article>
 
             <!-- FocusClock -->
-            <article class="project-card">
+            <article class="project-card" data-category="tools" data-tech="javascript productivity encryption" data-status="live" data-name="FocusClock">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -172,7 +201,7 @@
             </article>
 
             <!-- Git Cheatsheet -->
-            <article class="project-card">
+            <article class="project-card" data-category="tools" data-tech="git reference developer" data-status="live" data-name="Git Command Reference">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -223,7 +252,7 @@
             </article>
 
             <!-- JOT DOWN -->
-            <article class="project-card">
+            <article class="project-card" data-category="tools" data-tech="javascript workspace notes privacy" data-status="live" data-name="JOT DOWN">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -275,7 +304,7 @@
             </article>
 
             <!-- PinDrop -->
-            <article class="project-card">
+            <article class="project-card" data-category="tools" data-tech="javascript notes canvas visual" data-status="live" data-name="PinDrop">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -327,7 +356,7 @@
             </article>
 
             <!-- SVG Viewer -->
-            <article class="project-card">
+            <article class="project-card" data-category="tools" data-tech="javascript svg gallery analysis" data-status="live" data-name="SVG Gallery Viewer">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -379,7 +408,7 @@
             </article>
 
             <!-- Vespera Cryptocurrency Dashboard -->
-            <article class="project-card">
+            <article class="project-card" data-category="data" data-tech="javascript api crypto nasa" data-status="live" data-name="Vespera Cryptocurrency Dashboard">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -431,7 +460,7 @@
             </article>
 
             <!-- Experience Neural -->
-            <article class="project-card">
+            <article class="project-card" data-category="interactive" data-tech="javascript neural ai visualization" data-status="live" data-name="Experience Neural">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -485,7 +514,7 @@
             </article>
 
             <!-- BrowserOS -->
-            <article class="project-card">
+            <article class="project-card" data-category="featured" data-tech="javascript os desktop browser" data-status="live" data-name="BrowserOS">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -537,7 +566,7 @@
             </article>
 
             <!-- Music Factory -->
-            <article class="project-card">
+            <article class="project-card" data-category="interactive" data-tech="javascript audio music production" data-status="local" data-name="Music Factory">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -589,7 +618,7 @@
             </article>
 
             <!-- Govee MCP Server -->
-            <article class="project-card">
+            <article class="project-card" data-category="data" data-tech="python mcp iot ai" data-status="opensource" data-name="Govee MCP Server">
                 <div class="vignette-overlay"></div>
                 <div class="inner-border"></div>
 
@@ -645,5 +674,103 @@
     <footer class="site-footer">
         <p>&copy; 2025 Joey. Built with passion for clean code and elegant solutions.</p>
     </footer>
+
+    <script>
+        // Project Search and Filter Functionality
+        class ProjectsManager {
+            constructor() {
+                this.searchInput = document.getElementById('project-search');
+                this.filterButtons = document.querySelectorAll('.filter-btn');
+                this.projectCards = document.querySelectorAll('.project-card');
+                this.resultsCount = document.getElementById('results-count');
+                this.currentFilter = 'all';
+                this.currentSearch = '';
+
+                this.init();
+            }
+
+            init() {
+                // Search functionality
+                this.searchInput.addEventListener('input', (e) => {
+                    this.currentSearch = e.target.value.toLowerCase();
+                    this.filterProjects();
+                });
+
+                // Filter functionality
+                this.filterButtons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setActiveFilter(e.target);
+                        this.currentFilter = e.target.dataset.category;
+                        this.filterProjects();
+                    });
+                });
+
+                // Initialize counts
+                this.updateCounts();
+            }
+
+            setActiveFilter(activeBtn) {
+                this.filterButtons.forEach(btn => btn.classList.remove('active'));
+                activeBtn.classList.add('active');
+            }
+
+            filterProjects() {
+                let visibleCount = 0;
+
+                this.projectCards.forEach(card => {
+                    const matchesFilter = this.currentFilter === 'all' ||
+                                        card.dataset.category === this.currentFilter;
+
+                    const matchesSearch = this.currentSearch === '' ||
+                                        card.dataset.name.toLowerCase().includes(this.currentSearch) ||
+                                        card.dataset.tech.toLowerCase().includes(this.currentSearch);
+
+                    if (matchesFilter && matchesSearch) {
+                        card.style.display = 'block';
+                        card.style.animation = 'fadeIn 0.3s ease-in-out';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                this.updateResultsCount(visibleCount);
+            }
+
+            updateCounts() {
+                const counts = {
+                    all: this.projectCards.length,
+                    featured: 0,
+                    tools: 0,
+                    interactive: 0,
+                    data: 0
+                };
+
+                this.projectCards.forEach(card => {
+                    const category = card.dataset.category;
+                    if (counts[category] !== undefined) {
+                        counts[category]++;
+                    }
+                });
+
+                Object.keys(counts).forEach(category => {
+                    const countElement = document.getElementById(`count-${category}`);
+                    if (countElement) {
+                        countElement.textContent = counts[category];
+                    }
+                });
+            }
+
+            updateResultsCount(visible) {
+                const total = this.projectCards.length;
+                this.resultsCount.textContent = `Showing ${visible} of ${total} projects`;
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new ProjectsManager();
+        });
+    </script>
 </body>
 </html>
