@@ -771,7 +771,7 @@ body.case-study-open .terminal-container {
     mix-blend-mode: lighten;
     opacity: 0.35;
     pointer-events: none;
-    animation: bootNoise 6s infinite linear;
+    animation: bootNoise 4s infinite linear;
 }
 
 .boot-shell {
@@ -840,7 +840,7 @@ body.case-study-open .terminal-container {
 .boot-line {
     opacity: 0;
     transform: translateY(10px);
-    animation: bootLineIn 0.65s forwards;
+    animation: bootLineIn 0.4s forwards;
     display: flex;
     align-items: baseline;
     gap: 12px;

@@ -224,10 +224,10 @@ class BootSequence {
             const timer = setTimeout(() => {
                 this.announceLine(line, index);
                 if (index === this.sequence.length - 1) {
-                    const finishTimer = setTimeout(() => this.finish(), 1400);
+                    const finishTimer = setTimeout(() => this.finish(), 600);
                     this.timers.push(finishTimer);
                 }
-            }, index * 1800);
+            }, index * 700);
 
             this.timers.push(timer);
         });
