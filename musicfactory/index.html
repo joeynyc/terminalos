@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MusicFactory – Award-Ready Production Suite</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="noise-overlay" aria-hidden="true"></div>
+  <header class="hero" id="top">
+    <nav class="top-nav">
+      <div class="brand">MusicFactory</div>
+      <ul class="nav-links">
+        <li><a href="#personas">Personas</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#community">Community</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+      <div class="nav-cta">
+        <button class="btn ghost" type="button">Watch Demo</button>
+        <button class="btn primary" type="button">Start Free Trial</button>
+      </div>
+    </nav>
+
+    <section class="hero-content">
+      <div class="hero-copy">
+        <h1>Produce. Release. Headline.</h1>
+        <p>MusicFactory unifies creation, collaboration, distribution, and fan growth so every East Coast artist feels like tomorrow's main-stage act.</p>
+        <div class="hero-actions">
+          <button class="btn primary" type="button">Launch the Studio</button>
+          <button class="btn ghost" type="button">Explore the Story</button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <strong>24K</strong>
+            <span>Projects launched in beta</span>
+          </div>
+          <div class="stat-card">
+            <strong>+38%</strong>
+            <span>Average revenue lift per release</span>
+          </div>
+          <div class="stat-card">
+            <strong>4.9★</strong>
+            <span>Community-rated tool experience</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-card glass">
+          <div class="waveform" aria-hidden="true"></div>
+          <div class="playback-controls">
+            <button class="control-btn" aria-label="Play intro track">▶</button>
+            <div class="track-meta">
+              <span class="track-title">Brooklyn Skyline</span>
+              <span class="track-artist">Maya ft. Luis</span>
+            </div>
+          </div>
+          <div class="hero-highlights">
+            <div>
+              <h3>Unified Release Pipeline</h3>
+              <p>Distribution, storefront, CRM, and automations orchestrated for flawless drops.</p>
+            </div>
+            <div>
+              <h3>Live Collaboration</h3>
+              <p>Timestamped feedback, versioning, and real-time presence baked into every project.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="personas" id="personas">
+      <div class="section-heading">
+        <h2>Built for Every Hustle</h2>
+        <p>Toggle between our launch personas to see how the platform flexes around their grind.</p>
+      </div>
+      <div class="persona-switcher" role="tablist">
+        <button class="persona-tab active" data-persona="maya" role="tab" aria-selected="true">Maya · Bedroom Creator</button>
+        <button class="persona-tab" data-persona="luis" role="tab" aria-selected="false">Luis · Indie Artist</button>
+        <button class="persona-tab" data-persona="dana" role="tab" aria-selected="false">Dana · Studio Pro</button>
+      </div>
+      <div class="persona-panels">
+        <article class="persona-panel active" id="persona-maya" role="tabpanel">
+          <h3>Starter Creator Momentum</h3>
+          <ul>
+            <li>Guided sequencer templates tuned for lo-fi, drill, and hyperpop starters.</li>
+            <li>Community critique circles like <strong>Brooklyn Night Owls</strong> to surface feedback fast.</li>
+            <li>Auto-generated promo packs with TikTok-ready clips and captions.</li>
+            <li>Starter CRM playbook to capture first 100 superfans.</li>
+          </ul>
+        </article>
+        <article class="persona-panel" id="persona-luis" role="tabpanel">
+          <h3>Growth Artist Command Center</h3>
+          <ul>
+            <li>Import past catalog, sync merch SKUs, and relaunch bundles in minutes.</li>
+            <li>Fan CRM segments superfans vs. casual listeners with actionable insights.</li>
+            <li>AI tour routing suggestions based on conversion data and open dates.</li>
+            <li>Automation studio preloads email drips and social cadences.</li>
+          </ul>
+        </article>
+        <article class="persona-panel" id="persona-dana" role="tabpanel">
+          <h3>Studio Producer, Elevated</h3>
+          <ul>
+            <li>White-label portals keep clients informed with mix versions and approvals.</li>
+            <li>Mix assistant surfaces genre-specific polish presets and revision notes.</li>
+            <li>Revenue dashboards track campaigns, sync deals, and retainer renewals.</li>
+            <li>Team presence, task assignments, and analytics in one glassy HQ.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="feature-grid" id="tools">
+      <div class="section-heading">
+        <h2>Command the Full Stack of Music</h2>
+        <p>From first idea to award submission, every module is crafted for speed, insight, and unforgettable polish.</p>
+      </div>
+      <div class="grid">
+        <div class="feature-card glass">
+          <h3>Distribution Flow</h3>
+          <p>Schedule releases, auto-fill metadata, and send stems to streaming, social, and sync in one go.</p>
+          <span class="tag">All Personas</span>
+        </div>
+        <div class="feature-card glass">
+          <h3>Storefront Builder</h3>
+          <p>Launch merch drops, ticket bundles, and fan-exclusive experiences without leaving the dashboard.</p>
+          <span class="tag">Luis · Dana</span>
+        </div>
+        <div class="feature-card glass">
+          <h3>Fan Intelligence CRM</h3>
+          <p>Segment superfans, trigger loyalty rewards, and pull real ROI for every campaign.</p>
+          <span class="tag">Maya · Luis · Dana</span>
+        </div>
+        <div class="feature-card glass">
+          <h3>Automation Studio</h3>
+          <p>Drag-to-compose marketing journeys blending email, SMS, socials, and community prompts.</p>
+          <span class="tag">Luis · Dana</span>
+        </div>
+        <div class="feature-card glass">
+          <h3>Live Collaboration Rooms</h3>
+          <p>Realtime waveform comments, mix notes, and AI-suggested edits in shared studio spaces.</p>
+          <span class="tag">Maya · Dana</span>
+        </div>
+        <div class="feature-card glass">
+          <h3>Impact Analytics</h3>
+          <p>Measure release conversion, merch lift, and community engagement with award-ready reporting.</p>
+          <span class="tag">Leadership Ready</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="tool-lab" aria-label="Interactive Tool Suite">
+      <div class="section-heading">
+        <h2>Hands-On Tool Lab</h2>
+        <p>Explore the mock studio built for our awards jury. Each tool uses real Web Audio and dynamic data.</p>
+      </div>
+      <div class="lab-grid">
+        <div class="lab-card glass" id="sequencer-card">
+          <div class="lab-header">
+            <h3>BPM Beat Sequencer</h3>
+            <span class="lab-meta">Try it · 8-step grid · 90 / 120 / 140 BPM</span>
+          </div>
+          <div class="sequencer-controls">
+            <label>
+              Tempo
+              <input type="range" id="bpm" min="80" max="150" value="110" />
+              <span id="bpm-value">110</span> BPM
+            </label>
+            <button class="btn primary" id="toggle-play" type="button">Play Loop</button>
+            <button class="btn ghost" id="clear-grid" type="button">Clear</button>
+          </div>
+          <div class="sequencer-grid" role="group" aria-label="8 step sequencer">
+            <!-- grid generated via JS -->
+          </div>
+        </div>
+
+        <div class="lab-card glass" id="mix-card">
+          <div class="lab-header">
+            <h3>AI Mix Assistant</h3>
+            <span class="lab-meta">Preset suggestions to taste</span>
+          </div>
+          <div class="mix-presets" role="radiogroup">
+            <button class="mix-preset active" data-preset="warm">Warm Glow</button>
+            <button class="mix-preset" data-preset="club">Club Punch</button>
+            <button class="mix-preset" data-preset="cinematic">Cinematic Air</button>
+          </div>
+          <div class="mix-sliders">
+            <label>EQ Tilt <input type="range" id="eq-range" min="-12" max="12" value="0" /> <span id="eq-value">Neutral</span></label>
+            <label>Space <input type="range" id="reverb-range" min="0" max="100" value="25" /> <span id="reverb-value">Loft</span></label>
+            <label>Stereo Width <input type="range" id="width-range" min="0" max="100" value="60" /> <span id="width-value">Wide</span></label>
+          </div>
+          <div class="mix-output" aria-live="polite">
+            <h4>Mix Notes</h4>
+            <p id="mix-notes">Dialing in Warm Glow—gentle high lift, cozy mids, and boutique plate verb.</p>
+          </div>
+        </div>
+
+        <div class="lab-card glass" id="hook-card">
+          <div class="lab-header">
+            <h3>AI Hook Lab</h3>
+            <span class="lab-meta">Capture hooks in seconds</span>
+          </div>
+          <div class="hook-upload">
+            <label for="hook-file" class="upload-drop">
+              <input type="file" id="hook-file" accept="audio/*" />
+              <span class="upload-icon" aria-hidden="true">⭳</span>
+              <span class="upload-text">Drop a rough vocal or hum (30s max)</span>
+            </label>
+            <div class="hook-vibes" role="radiogroup" aria-label="Select vibe">
+              <button class="hook-vibe active" data-vibe="lofi">Lo-Fi Dream</button>
+              <button class="hook-vibe" data-vibe="drill">Brooklyn Drill</button>
+              <button class="hook-vibe" data-vibe="hyperpop">Hyperpop Rush</button>
+              <button class="hook-vibe" data-vibe="club">Club Anthem</button>
+            </div>
+          </div>
+          <div class="hook-suggestions">
+            <h4>Suggested Hooks</h4>
+            <ul id="hook-lines"></ul>
+          </div>
+          <div class="hook-actions">
+            <button class="btn primary" id="generate-hook" type="button">Generate Fresh Hooks</button>
+            <button class="btn ghost" id="copy-hooks" type="button">Copy All</button>
+          </div>
+        </div>
+
+        <div class="lab-card glass" id="visualizer-card">
+          <div class="lab-header">
+            <h3>StageDrop Visualizer</h3>
+            <span class="lab-meta">Audio-reactive holographics</span>
+          </div>
+          <canvas id="visualizer" width="640" height="320" aria-hidden="true"></canvas>
+          <div class="visualizer-controls">
+            <button class="btn primary" id="visualizer-theme" type="button">Switch Theme</button>
+            <p>Project-ready visuals driven by your loop. Swap palettes to match your show energy.</p>
+          </div>
+        </div>
+
+        <div class="lab-card glass" id="automation-card">
+          <div class="lab-header">
+            <h3>Marketing Automations</h3>
+            <span class="lab-meta">Luis + Dana live this daily</span>
+          </div>
+          <div class="automation-builder">
+            <div class="automation-step" draggable="true">
+              <span class="step-type">Trigger</span>
+              <p>New single release scheduled</p>
+            </div>
+            <div class="automation-step" draggable="true">
+              <span class="step-type">Email</span>
+              <p>Send “Behind the single” story to superfans</p>
+            </div>
+            <div class="automation-step" draggable="true">
+              <span class="step-type">SMS</span>
+              <p>Night-before show reminder to VIP list</p>
+            </div>
+            <div class="automation-step" draggable="true">
+              <span class="step-type">Task</span>
+              <p>Prompt Dana to upload BTS clip to community hub</p>
+            </div>
+          </div>
+          <div class="automation-insights">
+            <h4>Projected Impact</h4>
+            <ul>
+              <li><strong>+24%</strong> email open rate vs. baseline templates.</li>
+              <li><strong>+16%</strong> merch bundle attach in VIP audiences.</li>
+              <li><strong>75%</strong> of studios report reclaimed admin hours.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="community" id="community">
+      <div class="section-heading">
+        <h2>Community Pulse</h2>
+        <p>Creators across Brooklyn, Philly, and Boston push releases forward together in real time.</p>
+      </div>
+      <div class="community-grid">
+        <div class="activity-feed">
+          <h3>Live Feed</h3>
+          <ul id="activity-entries">
+            <li><span>12:21</span> Maya dropped <em>Night Shift II</em> to the critique circle.</li>
+            <li><span>12:05</span> Dana approved final masters for <em>Southie Summer</em>.</li>
+            <li><span>11:44</span> Luis sold 24 VIP bundles for tonight’s Philly show.</li>
+          </ul>
+        </div>
+        <div class="success-spotlight glass">
+          <h3>Spotlight</h3>
+          <p>“MusicFactory let us relaunch our catalog, sell out merch, and pitch sync in one weekend.”</p>
+          <span class="signature">— The Skyline Collective</span>
+          <button class="btn ghost" type="button">View Case Study</button>
+        </div>
+        <div class="events glass">
+          <h3>Sessions & Meetups</h3>
+          <ul>
+            <li><strong>Tonight</strong>: Brooklyn Night Owls feedback lounge · Virtual</li>
+            <li><strong>Thu</strong>: Philly Merch Lab with Luis · Hybrid</li>
+            <li><strong>Sat</strong>: Boston Sync Pitch Prep with Dana · In Studio</li>
+          </ul>
+          <button class="btn primary" type="button">Reserve a Seat</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+      <div class="section-heading">
+        <h2>Tiered to Grow With You</h2>
+        <p>Start free, scale into growth, and graduate into studio-grade operations without switching platforms.</p>
+      </div>
+      <div class="pricing-cards">
+        <div class="price-card glass">
+          <h3>Starter Creator</h3>
+          <p class="price">$0<span>/mo</span></p>
+          <ul>
+            <li>Beat sequencer + community critiques</li>
+            <li>Single release per month</li>
+            <li>Starter CRM up to 500 fans</li>
+          </ul>
+          <button class="btn primary" type="button">Claim Your Seat</button>
+        </div>
+        <div class="price-card glass featured">
+          <h3>Grow & Monetize</h3>
+          <p class="price">$149<span>/mo</span></p>
+          <ul>
+            <li>Unlimited releases + storefront sync</li>
+            <li>Automation studio & merch analytics</li>
+            <li>VIP community events + mentorship</li>
+          </ul>
+          <button class="btn primary" type="button">Start 30-Day Trial</button>
+        </div>
+        <div class="price-card glass">
+          <h3>Studio Pro</h3>
+          <p class="price">$799<span>/mo</span></p>
+          <ul>
+            <li>Client portals + white-label branding</li>
+            <li>Advanced analytics + revenue pipelines</li>
+            <li>Priority support & sync pitching team</li>
+          </ul>
+          <button class="btn ghost" type="button">Book a Tour</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="award-story">
+      <div class="section-heading">
+        <h2>Award Submission Narrative</h2>
+        <p>Our Webby-ready storyline centers on cultural impact, design craft, and measurable results.</p>
+      </div>
+      <div class="story-grid">
+        <article>
+          <h3>Problem</h3>
+          <p>East Coast creators patchwork tools and lose momentum between creation, promotion, and monetization.</p>
+        </article>
+        <article>
+          <h3>Solution</h3>
+          <p>A unified, persona-aware studio that wraps production, distribution, commerce, and community into a single polished experience.</p>
+        </article>
+        <article>
+          <h3>Innovation</h3>
+          <p>Web Audio-driven tooling, AI mix guidance, automation drag stack, and live community overlays deliver the future of indie resilience.</p>
+        </article>
+        <article>
+          <h3>Impact</h3>
+          <p>Beta cohorts report 38% revenue lift, 24-hour collaboration cycles, and export-ready assets that wow awards juries.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <div class="brand">MusicFactory</div>
+      <p>From bedroom epiphanies to stadium encores, crafted in Brooklyn · Philly · Boston.</p>
+    </div>
+    <div class="footer-links">
+      <a href="#top">Top</a>
+      <a href="#personas">Personas</a>
+      <a href="#tools">Tools</a>
+      <a href="#community">Community</a>
+    </div>
+    <div class="footer-meta">
+      <span>© 2024 MusicFactory</span>
+      <span>Privacy</span>
+      <span>Accessibility</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

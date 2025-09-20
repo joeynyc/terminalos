@@ -2221,7 +2221,7 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 
     openMusicFactory() {
         this.addToOutput('<span class="info">🎵 Launching Music Factory...</span>', 'command-output');
-        window.open('file:///C:/Users/joey/OneDrive/Desktop/musicfactory/web/index.html', '_blank');
+        window.open('musicfactory/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Music Factory opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🎼 Music production and composition interface for creating digital music.</span>', 'command-output');
     }
