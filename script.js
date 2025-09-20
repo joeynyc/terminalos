@@ -631,6 +631,7 @@ class Terminal {
             browseros: () => this.openBrowserOS(),
             svgviewer: () => this.openSVGViewer(),
             musicfactory: () => this.openMusicFactory(),
+            roadmap: () => this.showRoadmap(),
             case: (args) => this.openCaseStudy(args)
         };
 
@@ -967,6 +968,7 @@ Available Commands:
 <span class="success">show_tools</span>    - Display technical skills
 <span class="success">contact_joey</span>  - Get contact information
 <span class="success">skills</span>       - Show programming skills
+<span class="success">roadmap</span>      - View 90-day technical roadmap
 <span class="success">projects</span>     - Open projects portfolio page
 <span class="success">case [id]</span>    - Launch cinematic case studies deck
 <span class="success">blog</span>         - Open minimal blog page
@@ -1019,27 +1021,26 @@ ${this.isMobile ? '• Tap to focus input\n• Swipe up/down to scroll\n• Use 
 <span class="info">About Joey</span>
 ═══════════════
 
-Hey there! I'm Joey, a passionate developer who loves creating 
-innovative solutions and exploring new technologies.
-
 <span class="success">Background:</span>
-• Full-stack developer with expertise in modern web technologies
-• Problem solver with a keen eye for detail
-• Always learning and adapting to new challenges
+• Full-stack developer and automation engineer focused on AI-assisted workflows and high-leverage tooling. (<a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
+• Builds single-file web apps, CLI/terminal UIs, and agentic systems that integrate with local models and cloud APIs. (<a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
+• DevOps-minded: containers, CI/CD, reproducible environments, observability, and performance tuning. (<a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
+• Workstation: high-end GPU rig (RTX 4080), 64GB+ RAM, multi-NVMe, Windows + WSL2 + Docker for rapid iteration. (<a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
 
 <span class="success">Interests:</span>
-• Web Development & Software Engineering
-• Open Source Contribution
-• Cybersecurity & Ethical Hacking
-• Terminal/CLI Applications
-• Automation & DevOps
+• Local LLMs & Agents (Ollama, Open WebUI, LocalAI, Codex CLI) — prompt tooling, evaluation, automation hooks.
+• Web Platforms (React, Expo/React Native, TypeScript) — PWA, routing, state, offline primitives.
+• Systems & Automation (n8n, Playwright/MCP, Node/TS services) — scheduled jobs, headless orchestration.
+• DevOps (Docker, Compose, Git, CI/CD) — images, pipelines, artifact management.
+• Frontend Engineering (HTML/CSS, Tailwind, shadcn/ui, Framer Motion, Recharts) — accessible, performant UIs.
+• Graphics/Assets (SVG pipelines, icon systems, animated wordmarks).
 
 <span class="success">Philosophy:</span>
-"Code is poetry, and every bug is just a misplaced semicolon in the 
-grand symphony of software development."
+"Ship small, ship often. Automate the repeatable; craft the remarkable." (<a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
 
-<span class="warning">Fun Fact:</span> I built this entire terminal interface because 
-I believe the command line is the most elegant user interface ever created!
+<span class="warning">Fun Facts:</span>
+• Built a browser "OS," sticky-note apps, SVG viewers, and AR/interactive landing pages as portable single-file demos.
+• Runs agentic workflows to generate marketing assets, control IoT, and batch-process data locally.
         `;
         this.addToOutput(aboutText, 'command-output');
     }
@@ -1086,54 +1087,71 @@ I believe the command line is the most elegant user interface ever created!
 
     showContact() {
         const contactText = `
-<span class="info">Contact Information</span>
-═══════════════════════
+<span class="info">Contact</span>
+═══════════
 
-<span class="success">📧 Email:</span>     joey@terminal.dev
-<span class="success">🌐 Website:</span>   https://joey-terminal.dev
-<span class="success">💼 LinkedIn:</span>  linkedin.com/in/joey-dev
-<span class="success">🐙 GitHub:</span>    github.com/joey-terminal
-<span class="success">🐦 Twitter:</span>   @joey_codes
+<span class="success">📧 Email:</span>     <a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>
 
-<span class="success">📍 Location:</span>   Available for remote work globally
-<span class="success">⏰ Timezone:</span>   Always online in cyberspace
+<span class="warning">Primary Contact Method:</span>
+Email is the best way to reach me for all professional inquiries,
+technical discussions, project collaborations, and automation consulting.
 
-<span class="warning">Preferred Contact Method:</span>
-Email is the best way to reach me. I typically respond 
-within 24 hours (or faster if you include a good coding joke).
-
-<span class="info">Open for:</span>
-• Full-time opportunities
-• Freelance projects
-• Collaboration on open source
-• Tech discussions over coffee (virtual or real)
+<span class="info">Response Time:</span> Typically within 24 hours for technical inquiries.
         `;
         this.addToOutput(contactText, 'command-output');
     }
 
     showSkills() {
         const skillsText = `
-<span class="info">Programming Skills Matrix</span>
+<span class="info">Programming & Markup Matrix</span> (reach: <a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
+═══════════════════════════════════════════════════════════
+<span class="success">JavaScript/Node.js</span>        [███████████████▉ ] 95%
+<span class="success">HTML/CSS</span>                  [███████████████▉ ] 95%
+<span class="success">React / RN / Expo</span>         [██████████████   ] 90%
+<span class="success">TypeScript</span>                [█████████████▏   ] 86%
+<span class="success">Shopify Liquid/Templating</span> [██████████████▉ ] 92%
+<span class="success">Python (automation/data)</span>  [███████████▎     ] 76%
+<span class="success">SQL (analytics/reporting)</span> [████████████     ] 80%
+<span class="success">Bash/CLI & WSL2</span>           [████████████     ] 80%
+<span class="success">SEO/Schema/Perf</span>           [████████████▏    ] 82%
+<span class="success">SVG/Animation (CSS/JS)</span>    [████████████     ] 80%
+
+<span class="info">Ops / AI / Automation</span>
+═════════════════════════
+<span class="success">Docker & Compose</span>         [█████████████▏   ] 88%
+<span class="success">Windows + WSL2 Dev</span>       [█████████████▎   ] 89%
+<span class="success">n8n Workflows</span>            [██████████████   ] 90%
+<span class="success">Open WebUI/Ollama/Local</span>  [████████████     ] 80%
+<span class="success">Playwright MCP/Agents</span>    [███████████▌     ] 78%
+<span class="success">CI/CD & Git</span>              [███████████████  ] 92%
+<span class="success">Linux (admin basics)</span>     [███████████▊     ] 78%
+<span class="success">DNS/Email Auth (SPF/DMARC)</span>[████████████    ] 80%
+
+<span class="warning">Toolbelt (often used)</span>
 ═══════════════════════════════
-
-<span class="success">Python</span>           ████████████████████ 100%
-<span class="success">JavaScript</span>       ██████████████████░░  90%
-<span class="success">HTML/CSS</span>         ████████████████████ 100%
-<span class="success">React</span>            ████████████████░░░░  80%
-<span class="success">SQL</span>              ██████████████████░░  90%
-<span class="success">Git</span>              ████████████████████ 100%
-<span class="success">Linux</span>            ██████████████████░░  90%
-<span class="success">Docker</span>           ████████████░░░░░░░░  60%
-<span class="success">TypeScript</span>       ██████████████░░░░░░  70%
-<span class="success">Node.js</span>          ████████████████░░░░  80%
-
-<span class="warning">Soft Skills:</span>
-• Problem Solving: Expert Level
-• Team Collaboration: Highly Effective
-• Communication: Clear & Concise
-• Learning Agility: Rapid Adaptation
+• Languages: JS/TS, Python, SQL, Bash
+• Frameworks: React, Expo, Tailwind, shadcn/ui, Framer Motion, Recharts
+• AI: Codex CLI, Ollama, Open WebUI, LocalAI; model presets & prompt JSON specs
+• Automation: n8n, Playwright, headless Chromium, cron-style schedulers
+• DevOps: Docker/Compose, Git, CI pipelines, artifact/version management
+• Assets: SVG pipelines, icon sets, animated wordmarks
+(contact: <a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
         `;
         this.addToOutput(skillsText, 'command-output');
+    }
+
+    showRoadmap() {
+        const roadmapText = `
+<span class="info">roadmap --next-90-days</span>
+═══════════════════════════════
+1) Codex-powered Ops Agent: file ingest → reasoning → action runners (n8n & Playwright bridges).
+2) PWA foundation: installable shell, offline cache, background sync, structured routing.
+3) Local LLM toolkit: one-click model swap, evaluation harness, batch asset generator.
+4) Portable demo suite: SVG viewer, terminal UI starter, AR vignette — all single-file and downloadable.
+5) Telemetry: lightweight metrics for latency, error rates, and model/tool success.
+(inquiries → <a href="mailto:info@socialwithjoey.com">info@socialwithjoey.com</a>)
+        `;
+        this.addToOutput(roadmapText, 'command-output');
     }
 
     showProjects() {
