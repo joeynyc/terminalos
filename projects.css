@@ -555,6 +555,48 @@ body {
     font-style: italic;
 }
 
+/* BrowserOS mockup */
+.browseros-mockup {
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(20, 25, 35, 0.9) 0%, rgba(30, 35, 45, 0.9) 100%);
+    border-radius: 8px;
+}
+
+.browseros-header {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a9eff;
+    margin-bottom: 15px;
+    letter-spacing: 1.5px;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.browseros-desktop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.desktop-icon {
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+.browseros-taskbar {
+    font-size: 10px;
+    color: rgba(74, 158, 255, 0.8);
+    font-weight: 400;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
 /* Project content */
 .project-content {
     position: relative;

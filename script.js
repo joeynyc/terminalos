@@ -70,7 +70,8 @@ class Terminal {
             jotdown: () => this.openJotdown(),
             pindrop: () => this.openPindrop(),
             cryptowatch: () => this.openCryptowatch(),
-            expneural: () => this.openExpneural()
+            expneural: () => this.openExpneural(),
+            browseros: () => this.openBrowserOS()
         };
 
         this.init();
@@ -415,6 +416,7 @@ Available Commands:
 <span class="success">jotdown</span>     - Launch minimal modular workspace
 <span class="success">pindrop</span>     - Launch draggable sticky notes board
 <span class="success">cryptowatch</span>  - Launch cryptocurrency dashboard
+<span class="success">browseros</span>    - Launch web-based operating system
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -614,7 +616,12 @@ within 24 hours (or faster if you include a good coding joke).
    ├── Features: Interactive AI visualization platform with immersive experiences
    └── Status: Integrated tool (type 'expneural')
 
-<span class="success">9. Govee MCP Server</span>
+<span class="success">9. BrowserOS</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: Web-based operating system with desktop environment
+   └── Status: Integrated tool (type 'browseros')
+
+<span class="success">10. Govee MCP Server</span>
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
@@ -1596,6 +1603,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('expneural/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Experience Neural opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">✨ Interactive AI visualization platform with immersive neural network experiences.</span>', 'command-output');
+    }
+
+    openBrowserOS() {
+        this.addToOutput('<span class="info">🌐 Launching BrowserOS...</span>', 'command-output');
+        window.open('browseros/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ BrowserOS opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">💻 Web-based operating system interface with desktop environment.</span>', 'command-output');
     }
 
     // ========================

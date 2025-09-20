@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FluxOS // Browser Hacker Desktop</title>
+  <style>
+    :root {
+      --bg: #030712;
+      --bg-alt: rgba(10, 20, 40, 0.88);
+      --fg: #d0f6ff;
+      --fg-dim: #7adfff;
+      --accent: #20ffa7;
+      --accent-soft: rgba(32, 255, 167, 0.15);
+      --danger: #ff397a;
+      --shadow: 0 20px 60px rgba(0, 255, 170, 0.05);
+      --border: 1px solid rgba(32, 255, 167, 0.2);
+      --radius: 14px;
+      --glass: linear-gradient(165deg, rgba(5, 18, 30, 0.95) 0%, rgba(3, 12, 22, 0.65) 100%);
+      --transition: 200ms ease;
+      font-family: "Fira Code", "Cascadia Code", "Source Code Pro", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      position: relative;
+      background: radial-gradient(circle at top, rgba(32, 255, 167, 0.15), transparent 45%),
+        radial-gradient(circle at bottom right, rgba(122, 223, 255, 0.1), transparent 40%),
+        var(--bg);
+      color: var(--fg);
+      overflow: hidden;
+    }
+
+    a { color: inherit; }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #wallpaper {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #boot-screen {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(140deg, rgba(8, 26, 33, 0.95), rgba(1, 5, 10, 0.95));
+      z-index: 9999;
+      animation: boot-blink 1.2s steps(2, jump-none) infinite;
+    }
+
+    #boot-screen .logo {
+      font-size: 2.4rem;
+      letter-spacing: 0.4rem;
+      text-transform: uppercase;
+      text-shadow: 0 0 30px rgba(32, 255, 167, 0.8);
+    }
+
+    #boot-screen .progress {
+      margin-top: 1.5rem;
+      width: 240px;
+      height: 6px;
+      border: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    #boot-screen .progress div {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(32, 255, 167, 0.9), rgba(122, 223, 255, 0.95));
+      animation: boot-progress 3.6s ease forwards;
+    }
+
+    @keyframes boot-blink {
+      0%, 40%, 100% { opacity: 1; }
+      50% { opacity: 0.65; }
+    }
+
+    @keyframes boot-progress {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+
+    #desktop {
+      position: absolute;
+      inset: 0;
+      padding: 2vh 4vw 80px 4vw;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 28px;
+      align-content: start;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .desktop-icon {
+      background: rgba(8, 26, 33, 0.6);
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform var(--transition), border-color var(--transition);
+    }
+
+    .desktop-icon:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: rgba(32, 255, 167, 0.45);
+    }
+
+    .desktop-icon:hover .living-glyph {
+      transform: scale(1.08) rotate(-2deg);
+    }
+
+    .desktop-icon .icon {
+      font-size: 2rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .living-icon {
+      display: grid;
+      place-items: center;
+      height: 84px;
+      margin-bottom: 6px;
+    }
+
+    .living-glyph {
+      width: 78px;
+      height: 78px;
+      filter: drop-shadow(0 0 18px rgba(32, 255, 167, 0.35));
+      transition: transform var(--transition);
+    }
+
+    .living-glyph svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .living-glyph circle,
+    .living-glyph path,
+    .living-glyph polyline {
+      transition: stroke 220ms ease;
+    }
+
+    .living-glyph circle.core {
+      fill: rgba(32, 255, 167, 0.18);
+      stroke: rgba(32, 255, 167, 0.55);
+    }
+
+    .living-glyph path.wave {
+      stroke: rgba(122, 223, 255, 0.68);
+      stroke-width: 2.6;
+      fill: none;
+      stroke-linecap: round;
+    }
+
+    .living-glyph circle.orbit {
+      stroke: rgba(32, 255, 167, 0.3);
+      stroke-width: 1.6;
+      fill: none;
+      stroke-dasharray: 120;
+      stroke-linecap: round;
+    }
+
+    #taskbar {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 18px;
+      height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(6, 18, 25, 0.95), rgba(1, 7, 12, 0.9));
+      border: var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 18px;
+      box-shadow: 0 10px 45px rgba(32, 255, 167, 0.12);
+      backdrop-filter: blur(28px);
+      z-index: 3;
+    }
+
+    #launcher-btn {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      border: var(--border);
+      background: rgba(32, 255, 167, 0.08);
+      color: var(--accent);
+      cursor: pointer;
+      transition: transform var(--transition), background var(--transition);
+    }
+
+    #launcher-btn:hover {
+      transform: rotate(-8deg) scale(1.07);
+      background: rgba(32, 255, 167, 0.18);
+    }
+
+    #taskbar-windows {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .taskbar-item {
+      min-width: 110px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: var(--border);
+      background: rgba(5, 20, 33, 0.65);
+      color: var(--fg-dim);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition), border var(--transition);
+    }
+
+    .taskbar-item.active {
+      background: rgba(32, 255, 167, 0.2);
+      color: var(--fg);
+      border-color: rgba(32, 255, 167, 0.4);
+    }
+
+    #system-tray {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.85rem;
+      color: var(--fg-dim);
+    }
+
+    #clock {
+      letter-spacing: 0.08em;
+    }
+
+    .window {
+      position: absolute;
+      top: 15vh;
+      left: 15vw;
+      width: 540px;
+      min-width: 320px;
+      min-height: 320px;
+      background: var(--glass);
+      border: var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(32px);
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--transition);
+    }
+
+    .window-header {
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      background: rgba(3, 16, 24, 0.85);
+      border-bottom: var(--border);
+      cursor: grab;
+    }
+
+    .window-header:active {
+      cursor: grabbing;
+    }
+
+    .window-title {
+      flex: 1;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .window-controls button {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: var(--border);
+      background: rgba(32, 255, 167, 0.12);
+      color: var(--fg);
+      display: grid;
+      place-items: center;
+      font-size: 0.6rem;
+      cursor: pointer;
+      transition: transform var(--transition), background var(--transition), border var(--transition);
+    }
+
+    .window-controls button:hover {
+      transform: scale(1.15);
+      background: rgba(32, 255, 167, 0.3);
+    }
+
+    .window-controls button.danger:hover {
+      background: rgba(255, 57, 122, 0.35);
+      border-color: rgba(255, 57, 122, 0.6);
+    }
+
+    .window-body {
+      flex: 1;
+      overflow: hidden;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .window-body pre {
+      flex: 1;
+      margin: 0;
+      background: rgba(3, 12, 22, 0.7);
+      border: var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      overflow-y: auto;
+      font-size: 0.86rem;
+      line-height: 1.4;
+      color: var(--fg-dim);
+    }
+
+    .terminal-input {
+      width: 100%;
+      border: var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(3, 12, 20, 0.65);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      caret-color: var(--accent);
+    }
+
+    .file-tree {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-entry {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(3, 12, 20, 0.55);
+      border: var(--border);
+      cursor: pointer;
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    .file-entry:hover {
+      background: rgba(32, 255, 167, 0.16);
+      transform: translateX(6px);
+    }
+
+    .file-entry span.label {
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+    }
+
+    .editor-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .editor-area textarea {
+      flex: 1;
+      background: rgba(3, 12, 20, 0.65);
+      border: var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      resize: none;
+    }
+
+    .editor-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: var(--border);
+      background: rgba(32, 255, 167, 0.12);
+      color: var(--fg);
+      cursor: pointer;
+      transition: background var(--transition), border var(--transition), transform var(--transition);
+    }
+
+    .btn:hover {
+      background: rgba(32, 255, 167, 0.28);
+      transform: translateY(-2px);
+    }
+
+    .ai-log {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(3, 10, 18, 0.75);
+      border: var(--border);
+      border-radius: 12px;
+      overflow-y: auto;
+      box-shadow: inset 0 0 40px rgba(32, 255, 167, 0.05);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .ai-entry {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(5, 20, 32, 0.65);
+      border-left: 3px solid rgba(32, 255, 167, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      transform: translateY(12px);
+      animation: ai-entry-in 260ms ease forwards;
+    }
+
+    .ai-entry[data-level="warn"] {
+      border-left-color: #ffd166;
+      background: rgba(32, 23, 5, 0.4);
+    }
+
+    .ai-entry[data-level="alert"] {
+      border-left-color: var(--danger);
+      background: rgba(255, 57, 122, 0.12);
+      box-shadow: 0 0 35px rgba(255, 57, 122, 0.2);
+    }
+
+    .ai-entry .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--fg-dim);
+      margin-bottom: 6px;
+    }
+
+    .ai-entry .agent {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .ai-entry .payload {
+      color: var(--fg);
+    }
+
+    @keyframes ai-entry-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ai-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .panel {
+      position: absolute;
+      bottom: 90px;
+      left: 24px;
+      width: 320px;
+      background: var(--glass);
+      border: var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(28px);
+      z-index: 700;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      letter-spacing: 0.06em;
+      color: var(--fg-dim);
+    }
+
+    .launcher-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .launcher-item {
+      background: rgba(3, 12, 22, 0.6);
+      border: var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition);
+    }
+
+    .launcher-item:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(32, 255, 167, 0.4);
+    }
+
+    .launcher-glyph {
+      height: 64px;
+      display: grid;
+      place-items: center;
+    }
+
+    .launcher-glyph .living-glyph {
+      width: 64px;
+      height: 64px;
+    }
+
+    #notification-container {
+      position: absolute;
+      right: 28px;
+      bottom: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 320px;
+      z-index: 800;
+    }
+
+    .notification {
+      background: var(--glass);
+      border: var(--border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      animation: slide-up 250ms ease forwards;
+    }
+
+    .notification h4 {
+      margin: 0 0 8px 0;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    .notification p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--fg-dim);
+      line-height: 1.5;
+    }
+
+    @keyframes slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .window-body h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .window-body p {
+      margin: 0;
+      color: var(--fg-dim);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .window-body ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--fg-dim);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .status-led {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      box-shadow: 0 0 12px rgba(32, 255, 167, 0.8);
+      background: var(--accent);
+    }
+
+    .matrix {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(180deg, rgba(32, 255, 167, 0.04) 0px, rgba(32, 255, 167, 0.04) 2px, transparent 2px, transparent 22px);
+      opacity: 0.2;
+      mix-blend-mode: screen;
+      animation: scan 10s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(22px); }
+    }
+
+    .resizer {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      right: 4px;
+      bottom: 4px;
+      cursor: se-resize;
+      background: radial-gradient(circle, rgba(32, 255, 167, 0.8), rgba(32, 255, 167, 0));
+      opacity: 0.65;
+    }
+
+    .window.minimized {
+      transform: scale(0.92) translateY(100vh);
+    }
+
+    body.mobile-mode {
+      font-size: 15px;
+    }
+
+    body.mobile-mode #desktop {
+      padding: 11vh 20px 120px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      overflow-y: auto;
+      pointer-events: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body.mobile-mode .desktop-icon {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-align: left;
+      padding: 18px 20px;
+      border-radius: 18px;
+    }
+
+    body.mobile-mode .desktop-icon div:last-child {
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    body.mobile-mode .living-icon {
+      width: 84px;
+      height: 84px;
+      margin: 0;
+    }
+
+    body.mobile-mode #taskbar {
+      left: 18px;
+      right: 18px;
+      bottom: 24px;
+      height: 64px;
+      border-radius: 24px;
+    }
+
+    body.mobile-mode #launcher-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      font-size: 1.4rem;
+    }
+
+    .window.mobile-window {
+      position: fixed;
+      inset: 8vh 5vw 12vh 5vw;
+      width: auto !important;
+      height: auto !important;
+      min-width: unset;
+      min-height: unset;
+      border-radius: 24px;
+      animation: mobile-window-in 320ms ease forwards;
+      z-index: 900;
+    }
+
+    .window.mobile-window.minimized {
+      transform: translateY(110vh);
+    }
+
+    body.mobile-mode .window-header {
+      cursor: default;
+      padding: 0 20px;
+    }
+
+    body.mobile-mode .window-controls button {
+      width: 22px;
+      height: 22px;
+    }
+
+    body.mobile-mode .window-body {
+      padding: 20px;
+    }
+
+    body.mobile-mode #notification-container {
+      right: 18px;
+      bottom: 100px;
+      width: calc(100vw - 36px);
+      max-width: 420px;
+    }
+
+    body.mobile-mode #app-launcher {
+      bottom: auto;
+      left: 18px;
+      right: 18px;
+      top: 12vh;
+      width: auto;
+      max-height: calc(100vh - 24vh);
+      overflow-y: auto;
+      padding: 26px 22px;
+    }
+
+    body.mobile-mode .launcher-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    @keyframes mobile-window-in {
+      from {
+        opacity: 0;
+        transform: translateY(18vh) scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 960px) {
+      #desktop {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        padding: 3vh 5vw 80px 5vw;
+      }
+
+      .window {
+        width: 88vw;
+        left: 6vw;
+        top: 10vh;
+      }
+    }
+
+    textarea, input {
+      user-select: text;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="wallpaper"></canvas>
+  <div class="matrix"></div>
+  <div id="boot-screen">
+    <div>
+      <div class="logo">FLUXOS//CORE</div>
+      <div class="progress"><div></div></div>
+    </div>
+  </div>
+
+  <div id="desktop" class="hidden"></div>
+
+  <div id="taskbar" class="hidden">
+    <div id="launcher-btn">☰</div>
+    <div id="taskbar-windows"></div>
+    <div id="system-tray">
+      <span class="status-led"></span>
+      <span id="clock"></span>
+    </div>
+  </div>
+
+  <div id="app-launcher" class="panel hidden">
+    <h3>FluxOS Modules</h3>
+    <div class="launcher-grid" id="launcher-grid"></div>
+  </div>
+
+  <div id="notification-container"></div>
+
+  <script>
+    // FluxOS simulated filesystem and session state.
+    const fs = {
+      home: {
+        type: 'dir',
+        children: {
+          'README.md': {
+            type: 'file',
+            content: '# FluxOS\nWelcome to your browser-native hacker desktop.\nUse the launcher or icons to explore modules.'
+          },
+          'notes.txt': {
+            type: 'file',
+            content: 'todo:\n- explore flux terminal\n- customize theme\n- map more commands\n'
+          },
+          projects: {
+            type: 'dir',
+            children: {
+              'browser-os.txt': {
+                type: 'file',
+                content: 'Project log:\n> 13:37 system booted.\n> next: expand filesystem persistence.'
+              }
+            }
+          }
+        }
+      },
+      etc: {
+        type: 'dir',
+        children: {
+          'motd.txt': {
+            type: 'file',
+            content: 'FluxOS MOTD:\n  * strictly virtual\n  * intensely neon\n  * entirely yours\n'
+          }
+        }
+      }
+    };
+
+    const launcherBtn = document.getElementById('launcher-btn');
+    const appLauncher = document.getElementById('app-launcher');
+    const launcherGrid = document.getElementById('launcher-grid');
+    const taskbar = document.getElementById('taskbar');
+    const taskbarWindows = document.getElementById('taskbar-windows');
+    const desktop = document.getElementById('desktop');
+    const notificationContainer = document.getElementById('notification-container');
+    const wallpaperCanvas = document.getElementById('wallpaper');
+    const wallpaperCtx = wallpaperCanvas?.getContext('2d') || null;
+
+    const AI_LOG_KEY = 'fluxos.aiLog';
+    const AI_AGENTS_KEY = 'fluxos.aiAgents';
+    const AI_PHRASES_KEY = 'fluxos.aiPhrases';
+    const AI_LOG_LIMIT = 120;
+
+    const baseAiAgents = [
+      { id: 'sentinel', callSign: 'Sentinel-01', specialty: 'network sweep' },
+      { id: 'oracle', callSign: 'Oracle-09', specialty: 'predictive telemetry' },
+      { id: 'wraith', callSign: 'Wraith-7B', specialty: 'stealth detection' },
+      { id: 'hydra', callSign: 'Hydra-Δ', specialty: 'multi-vector analysis' }
+    ];
+
+    const baseAiMessages = {
+      info: [
+        () => `All subsystems nominal. Surface noise at ${Math.floor(Math.random() * 9) + 1}σ.`,
+        () => `Calibrated ${Math.floor(Math.random() * 64) + 32} new heuristics for anomaly triage.`,
+        () => `Pulse check: ${Math.floor(Math.random() * 30) + 60}% sandbox integrity within tolerance.`,
+        () => `Signal-to-noise ratio stabilized at ${Math.floor(Math.random() * 12) + 88}%.`,
+        () => `Telemetry buffer synced. ${Math.floor(Math.random() * 5) + 3}kb delta archived.`
+      ],
+      warn: [
+        () => `Detected entropy spike on port ${Math.floor(Math.random() * 4000) + 2000}. Investigating ghost traffic.`,
+        () => `Predictive model flags ${Math.floor(Math.random() * 12) + 1}% chance of credential spray. Hardening nodes.`,
+        () => `Hydra-Δ rerouting shards to isolate rogue thread ${Math.random().toString(36).slice(2, 6)}.`
+      ],
+      alert: [
+        () => `Intrusion signature matches BLACKICE pattern. Lockdown engaged for 90 seconds.`,
+        () => `Omega beacon tripped. Deploying countermeasures cycle ${Math.floor(Math.random() * 900) + 100}.`,
+        () => `Spectral echo confirmed inside DMZ layer. Recommending manual review.`
+      ]
+    };
+
+    let customAiAgents = loadAiAgents();
+    let aiAgents = [...baseAiAgents, ...customAiAgents];
+    let customAiPhrases = loadAiPhrases();
+    let aiLogStore = loadAiLog();
+    const aiSubscribers = new Set();
+    let aiSchedulerActive = false;
+    const glyphSubscribers = new Set();
+    let cpuLoad = Math.random() * 0.4 + 0.3;
+    let cpuTarget = cpuLoad;
+    let alertImpulse = 0;
+    let glyphEngineActive = false;
+    let wallpaperState = null;
+    let auroraPhase = Math.random() * Math.PI * 2;
+    const glyphProfiles = {
+      terminal: { waveSpeed: 0.02, waveGain: 30, coreBase: 13, coreGain: 20, orbitDash: 190, orbitTilt: -8, orbitRadius: 46 },
+      explorer: { waveOffset: 0.7, waveSpeed: 0.014, waveGain: 20, coreBase: 14, coreGain: 15, orbitDash: 150, orbitTilt: 6, orbitRadius: 42 },
+      editor: { waveOffset: 1.35, waveSpeed: 0.017, waveGain: 24, coreBase: 15, coreGain: 17, orbitDash: 170, orbitTilt: -4, orbitRadius: 44 },
+      intel: { waveOffset: 2.4, waveSpeed: 0.013, waveGain: 18, coreBase: 12, coreGain: 18, orbitDash: 140, orbitTilt: 9, orbitRadius: 40 },
+      aicore: { waveOffset: 3.2, waveSpeed: 0.024, waveGain: 34, coreBase: 13, coreGain: 22, orbitDash: 210, orbitTilt: 0, orbitRadius: 48, alertGain: 24 },
+      default: { waveSpeed: 0.015, waveGain: 22, coreBase: 13, coreGain: 18, orbitDash: 165, orbitTilt: 0, orbitRadius: 44 }
+    };
+
+    const apps = {
+      terminal: {
+        id: 'terminal',
+        title: 'Flux Terminal',
+        icon: '🖥️',
+        size: { width: 620, height: 420 },
+        createContent(windowEl) {
+          const log = document.createElement('pre');
+          log.innerHTML = 'flux@core:~$ type `help` for commands\n\n';
+          const input = document.createElement('input');
+          input.className = 'terminal-input';
+          input.placeholder = 'enter command';
+          input.autocomplete = 'off';
+
+          const history = [];
+          let historyIndex = -1;
+          const cwd = ['home'];
+
+          const commands = {
+            help() {
+              append(`commands:\n - help\n - clear\n - ls\n - cat <file>\n - open <app>\n - echo <text>\n - tree\n - sentinel <action> [args]\n`);
+            },
+            clear() {
+              log.textContent = '';
+            },
+            ls() {
+              const node = getNode(cwd);
+              if (node && node.type === 'dir') {
+                const entries = Object.keys(node.children).map((key) => {
+                  return node.children[key].type === 'dir' ? key + '/' : key;
+                });
+                append(entries.join('  '));
+              } else {
+                append('unable to read directory');
+              }
+            },
+            tree() {
+              append(renderTree(fs));
+            },
+            cat(path) {
+              const result = resolvePath(path, cwd);
+              if (result && result.type === 'file') {
+                append(result.content);
+              } else if (result && result.type === 'dir') {
+                append('cat: ' + path + ' is a directory');
+              } else {
+                append('cat: file not found');
+              }
+            },
+            echo(...text) {
+              append(text.join(' '));
+            },
+            open(app) {
+              if (!app) {
+                append('usage: open <appId>');
+                return;
+              }
+              if (apps[app]) {
+                launchApp(app);
+                append(`launching ${app}`);
+              } else {
+                append(`app not found: ${app}`);
+              }
+            },
+            sentinel(action, ...rest) {
+              if (!action || action === 'help') {
+                append(
+                  'usage:\n sentinel agent <callSign> [specialty]\n sentinel phrase <level> <message>\n sentinel list'
+                );
+                return;
+              }
+
+              if (action === 'agent') {
+                const [callSignRaw, ...specialtyParts] = rest;
+                if (!callSignRaw) {
+                  append('usage: sentinel agent <callSign> [specialty]');
+                  return;
+                }
+                const callSign = callSignRaw.trim();
+                if (!callSign) {
+                  append('sentinel: callSign required.');
+                  return;
+                }
+                const specialty = specialtyParts.join(' ').trim() || 'user scripted sentinel';
+                const agent = registerAIAgent(callSign, specialty);
+                if (!agent) {
+                  append(`sentinel: agent '${callSign}' already deployed.`);
+                  return;
+                }
+                append(`sentinel: ${agent.callSign} registered (${agent.id}) watching for ${agent.specialty}.`);
+                return;
+              }
+
+              if (action === 'phrase') {
+                const [levelRaw, ...messageParts] = rest;
+                const level = (levelRaw || '').toLowerCase();
+                if (!['info', 'warn', 'alert'].includes(level) || messageParts.length === 0) {
+                  append('usage: sentinel phrase <info|warn|alert> <message>');
+                  return;
+                }
+                const message = messageParts.join(' ').trim();
+                if (!message) {
+                  append('sentinel: message required.');
+                  return;
+                }
+                const registered = registerAIPhrase(level, message);
+                if (!registered) {
+                  append('sentinel: phrase already exists or level invalid.');
+                  return;
+                }
+                append(`sentinel: phrase armed under ${level.toUpperCase()}.`);
+                return;
+              }
+
+              if (action === 'list') {
+                const agentSummaries = aiAgents.map((agent) => `${agent.callSign} [${agent.specialty}]`);
+                const phraseCounts = ['info', 'warn', 'alert']
+                  .map((level) => `${level}: ${customAiPhrases[level].length} custom`)
+                  .join(' | ');
+                append(`sentinels:\n - ${agentSummaries.join('\n - ')}\nphrases: ${phraseCounts}`);
+                return;
+              }
+
+              append(`sentinel: unknown action '${action}'. try 'sentinel help'.`);
+            }
+          };
+
+          input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+              const value = input.value.trim();
+              if (!value) return;
+              append(`flux@core:${cwd.join('/')} $ ${value}`);
+              history.unshift(value);
+              historyIndex = -1;
+
+              const [cmd, ...args] = value.split(' ');
+              if (commands[cmd]) {
+                commands[cmd](...args);
+              } else {
+                append('command not found. try `help`');
+              }
+              input.value = '';
+              log.scrollTop = log.scrollHeight;
+            }
+
+            if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              if (history[historyIndex + 1]) {
+                historyIndex += 1;
+                input.value = history[historyIndex];
+              }
+            }
+
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              if (historyIndex > 0) {
+                historyIndex -= 1;
+                input.value = history[historyIndex];
+              } else {
+                historyIndex = -1;
+                input.value = '';
+              }
+            }
+          });
+
+          const container = windowEl.querySelector('.window-body');
+          container.appendChild(log);
+          container.appendChild(input);
+          input.focus();
+
+          function append(text) {
+            log.textContent += text + '\n';
+          }
+        }
+      },
+      explorer: {
+        id: 'explorer',
+        title: 'File Explorer',
+        icon: '🗂️',
+        size: { width: 520, height: 420 },
+        createContent(windowEl) {
+          const container = windowEl.querySelector('.window-body');
+          const tree = document.createElement('div');
+          tree.className = 'file-tree';
+          container.appendChild(tree);
+
+          const preview = document.createElement('pre');
+          preview.style.minHeight = '180px';
+          preview.textContent = 'Select a file to preview contents.';
+          container.appendChild(preview);
+
+          renderDirectory(fs, ['home'], tree, preview);
+        }
+      },
+      editor: {
+        id: 'editor',
+        title: 'NanoPad',
+        icon: '📝',
+        size: { width: 560, height: 440 },
+        createContent(windowEl) {
+          const container = windowEl.querySelector('.window-body');
+          const info = document.createElement('div');
+          info.textContent = 'Write freely. Use Ctrl+S or Save to persist to the virtual filesystem.';
+          info.style.fontSize = '0.8rem';
+          info.style.color = 'var(--fg-dim)';
+          container.appendChild(info);
+
+          const editor = document.createElement('div');
+          editor.className = 'editor-area';
+          const textarea = document.createElement('textarea');
+          textarea.value = '# Scratch buffer\nFeel the neon flow.\n';
+          editor.appendChild(textarea);
+
+          const actions = document.createElement('div');
+          actions.className = 'editor-actions';
+          const saveBtn = document.createElement('button');
+          saveBtn.className = 'btn';
+          saveBtn.textContent = 'Save to home/notes.txt';
+          actions.appendChild(saveBtn);
+          editor.appendChild(actions);
+          container.appendChild(editor);
+
+          const save = () => {
+            const target = fs.home.children['notes.txt'];
+            if (target && target.type === 'file') {
+              target.content = textarea.value;
+              notify('Editor', 'Saved to notes.txt');
+            }
+          };
+
+          saveBtn.addEventListener('click', save);
+          textarea.addEventListener('keydown', (event) => {
+            if (event.key === 's' && event.ctrlKey) {
+              event.preventDefault();
+              save();
+            }
+          });
+        }
+      },
+      intel: {
+        id: 'intel',
+        title: 'System Intel',
+        icon: '📊',
+        size: { width: 420, height: 360 },
+        createContent(windowEl) {
+          const container = windowEl.querySelector('.window-body');
+          const summary = document.createElement('div');
+          summary.innerHTML = `
+            <h2>FluxOS Telemetry</h2>
+            <p>Runtime diagnostics and environment snapshot.</p>
+            <ul>
+              <li>User Agent: ${navigator.userAgent}</li>
+              <li>Viewport: ${window.innerWidth} x ${window.innerHeight}</li>
+              <li>Locale: ${navigator.language}</li>
+            </ul>
+            <p>Status: <span style="color: var(--accent)">Nominal</span></p>
+          `;
+          container.appendChild(summary);
+        }
+      },
+      aicore: {
+        id: 'aicore',
+        title: 'AI Sentinels',
+        icon: '🤖',
+        size: { width: 520, height: 440 },
+        createContent(windowEl) {
+          const container = windowEl.querySelector('.window-body');
+          const briefing = document.createElement('div');
+          briefing.innerHTML = `
+            <h2>Sentinel Mesh</h2>
+            <p>Autonomous agents patrol the neon perimeter and surface actionable intel.</p>
+          `;
+          container.appendChild(briefing);
+
+          const log = document.createElement('div');
+          log.className = 'ai-log';
+          container.appendChild(log);
+
+          const controls = document.createElement('div');
+          controls.className = 'ai-controls';
+
+          const pulseBtn = document.createElement('button');
+          pulseBtn.className = 'btn';
+          pulseBtn.textContent = 'Ping Sentinels';
+
+          const anomalyBtn = document.createElement('button');
+          anomalyBtn.className = 'btn';
+          anomalyBtn.textContent = 'Force Anomaly';
+
+          controls.appendChild(pulseBtn);
+          controls.appendChild(anomalyBtn);
+          container.appendChild(controls);
+
+          renderAiHistory(log);
+          const unsubscribe = subscribeAI((packet) => renderAIEntry(log, packet));
+          windowEl.cleanup = () => unsubscribe();
+          emitAIPacket('info');
+
+          pulseBtn.addEventListener('click', () => {
+            emitAIPacket('info');
+          });
+
+          anomalyBtn.addEventListener('click', () => {
+            emitAIPacket('alert');
+          });
+        }
+      }
+    };
+
+    const desktopIcons = [
+      { appId: 'terminal', label: 'Flux Terminal' },
+      { appId: 'explorer', label: 'File Explorer' },
+      { appId: 'editor', label: 'NanoPad' },
+      { appId: 'intel', label: 'System Intel' },
+      { appId: 'aicore', label: 'AI Sentinels' }
+    ];
+
+    let zIndex = 100;
+    const openWindows = new Map();
+
+    const MOBILE_BREAKPOINT = 820;
+    const mobileQuery = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const pointerQuery = window.matchMedia('(pointer: coarse)');
+    const mobileState = {
+      active: false
+    };
+
+    attachMediaListener(mobileQuery);
+    attachMediaListener(pointerQuery);
+
+    function renderDesktopIcons() {
+      desktop.innerHTML = '';
+      desktopIcons.forEach(({ appId, label }) => {
+        const app = apps[appId];
+        if (!app) return;
+        const card = document.createElement('div');
+        card.className = 'desktop-icon';
+        const glyphHolder = document.createElement('div');
+        glyphHolder.className = 'living-icon';
+        glyphHolder.appendChild(createLivingGlyph(appId));
+
+        const text = document.createElement('div');
+        text.textContent = label;
+
+        card.appendChild(glyphHolder);
+        card.appendChild(text);
+        card.addEventListener('click', (event) => {
+          if (!mobileState.active) return;
+          event.preventDefault();
+          launchApp(appId);
+        });
+        card.addEventListener('dblclick', () => {
+          if (mobileState.active) return;
+          launchApp(appId);
+        });
+        desktop.appendChild(card);
+      });
+    }
+
+    function renderLauncher() {
+      launcherGrid.innerHTML = '';
+      Object.values(apps).forEach((app) => {
+        const entry = document.createElement('div');
+        entry.className = 'launcher-item';
+        const glyph = document.createElement('div');
+        glyph.className = 'launcher-glyph';
+        glyph.appendChild(createLivingGlyph(app.id));
+
+        const label = document.createElement('div');
+        label.textContent = app.title;
+
+        entry.appendChild(glyph);
+        entry.appendChild(label);
+        entry.addEventListener('click', () => {
+          launchApp(app.id);
+          setLauncher(false);
+        });
+        launcherGrid.appendChild(entry);
+      });
+    }
+
+    function setLauncher(state) {
+      if (state) {
+        appLauncher.classList.remove('hidden');
+      } else {
+        appLauncher.classList.add('hidden');
+      }
+    }
+
+    launcherBtn.addEventListener('click', () => {
+      const visible = !appLauncher.classList.contains('hidden');
+      setLauncher(!visible);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!appLauncher.contains(event.target) && event.target !== launcherBtn) {
+        setLauncher(false);
+      }
+    });
+
+    function launchApp(appId) {
+      const app = apps[appId];
+      if (!app) return;
+
+      if (openWindows.has(appId)) {
+        focusWindow(appId);
+        return;
+      }
+
+      const windowEl = document.createElement('div');
+      windowEl.className = 'window';
+      windowEl.style.width = (app.size?.width || 520) + 'px';
+      windowEl.style.height = (app.size?.height || 380) + 'px';
+      windowEl.dataset.app = appId;
+      windowEl.style.zIndex = zIndex++;
+
+      const header = document.createElement('div');
+      header.className = 'window-header';
+      header.innerHTML = `
+        <div class="window-title">${app.icon} ${app.title}</div>
+        <div class="window-controls">
+          <button data-action="minimize">–</button>
+          <button data-action="close" class="danger">×</button>
+        </div>
+      `;
+      windowEl.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = 'window-body';
+      windowEl.appendChild(body);
+
+      const resizer = document.createElement('div');
+      resizer.className = 'resizer';
+      windowEl.appendChild(resizer);
+
+      document.body.appendChild(windowEl);
+
+      makeWindowDraggable(windowEl, header);
+      makeWindowResizable(windowEl, resizer);
+      adaptWindowForMobile(windowEl, mobileState.active);
+
+      header.addEventListener('mousedown', () => focusWindow(appId));
+      windowEl.addEventListener('mousedown', () => focusWindow(appId));
+      header.addEventListener('touchstart', () => focusWindow(appId), { passive: true });
+      windowEl.addEventListener('touchstart', () => focusWindow(appId), { passive: true });
+
+      header.querySelectorAll('button').forEach((btn) => {
+        const action = btn.dataset.action;
+        btn.addEventListener('click', () => handleWindowAction(appId, action));
+      });
+
+      app.createContent(windowEl);
+      openWindows.set(appId, windowEl);
+      renderTaskbarItems();
+      focusWindow(appId);
+      notify('FluxOS', `${app.title} spawned.`);
+    }
+
+    function handleWindowAction(appId, action) {
+      const windowEl = openWindows.get(appId);
+      if (!windowEl) return;
+
+      if (action === 'close') {
+        if (typeof windowEl.cleanup === 'function') {
+          try {
+            windowEl.cleanup();
+          } catch (error) {
+            console.error('cleanup error', error);
+          }
+        }
+        windowEl.remove();
+        openWindows.delete(appId);
+        renderTaskbarItems();
+        notify('FluxOS', `${apps[appId].title} closed.`);
+      }
+
+      if (action === 'minimize') {
+        const minimized = windowEl.classList.toggle('minimized');
+        const button = taskbarWindows.querySelector(`[data-app="${appId}"]`);
+        if (button) {
+          button.classList.toggle('active', !minimized);
+        }
+      }
+    }
+
+    function renderTaskbarItems() {
+      taskbarWindows.innerHTML = '';
+      openWindows.forEach((windowEl, appId) => {
+        const button = document.createElement('div');
+        button.className = 'taskbar-item';
+        button.dataset.app = appId;
+        button.innerHTML = `<span class="status-led"></span><span>${apps[appId].title}</span>`;
+        button.addEventListener('click', () => {
+          const minimized = windowEl.classList.contains('minimized');
+          if (minimized) {
+            windowEl.classList.remove('minimized');
+            focusWindow(appId);
+            button.classList.add('active');
+          } else if (windowEl.style.zIndex < zIndex - 1) {
+            focusWindow(appId);
+            button.classList.add('active');
+          } else {
+            windowEl.classList.add('minimized');
+            button.classList.remove('active');
+          }
+        });
+        taskbarWindows.appendChild(button);
+      });
+    }
+
+    function focusWindow(appId) {
+      const windowEl = openWindows.get(appId);
+      if (!windowEl) return;
+      windowEl.classList.remove('minimized');
+      windowEl.style.zIndex = zIndex++;
+      taskbarWindows.querySelectorAll('.taskbar-item').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.app === appId);
+      });
+    }
+
+    function makeWindowDraggable(windowEl, handle) {
+      let offsetX = 0;
+      let offsetY = 0;
+      let isDragging = false;
+
+      handle.addEventListener('mousedown', (event) => {
+        if (mobileState.active) return;
+        isDragging = true;
+        const rect = windowEl.getBoundingClientRect();
+        offsetX = event.clientX - rect.left;
+        offsetY = event.clientY - rect.top;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      function onMouseMove(event) {
+        if (!isDragging) return;
+        const x = Math.min(window.innerWidth - 120, Math.max(20, event.clientX - offsetX));
+        const y = Math.min(window.innerHeight - 120, Math.max(20, event.clientY - offsetY));
+        windowEl.style.left = x + 'px';
+        windowEl.style.top = y + 'px';
+      }
+
+      function onMouseUp() {
+        isDragging = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+    }
+
+    function makeWindowResizable(windowEl, resizer) {
+      let isResizing = false;
+      let startWidth = 0;
+      let startHeight = 0;
+      let startX = 0;
+      let startY = 0;
+
+      resizer.addEventListener('mousedown', (event) => {
+        if (mobileState.active) return;
+        event.stopPropagation();
+        isResizing = true;
+        startWidth = windowEl.offsetWidth;
+        startHeight = windowEl.offsetHeight;
+        startX = event.clientX;
+        startY = event.clientY;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+      });
+
+      function onMouseMove(event) {
+        if (!isResizing) return;
+        const width = Math.max(320, startWidth + (event.clientX - startX));
+        const height = Math.max(280, startHeight + (event.clientY - startY));
+        windowEl.style.width = width + 'px';
+        windowEl.style.height = height + 'px';
+      }
+
+      function onMouseUp() {
+        isResizing = false;
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+    }
+
+    function getNode(pathArray) {
+      let node = fs;
+      for (const part of pathArray) {
+        if (!node || node.type === 'file') return null;
+        node = node[part] || (node.children && node.children[part]);
+      }
+      return node;
+    }
+
+    function resolvePath(path, cwd) {
+      if (!path) return getNode(cwd);
+      const segments = path.split('/');
+      const stack = path.startsWith('/') ? [] : [...cwd];
+      segments.forEach((segment) => {
+        if (segment === '' || segment === '.') return;
+        if (segment === '..') {
+          stack.pop();
+        } else {
+          stack.push(segment);
+        }
+      });
+      return getNode(stack);
+    }
+
+    function renderTree(node, indent = '') {
+      let output = '';
+      Object.keys(node).forEach((key) => {
+        const item = node[key];
+        if (item.type === 'file') {
+          output += `${indent}└─ ${key}\n`;
+        } else if (item.type === 'dir') {
+          output += `${indent}└─ ${key}/\n`;
+          output += renderTree(item.children, indent + '   ');
+        }
+      });
+      return output;
+    }
+
+    function renderDirectory(root, path, container, preview) {
+      container.innerHTML = '';
+      const node = resolvePath(path.join('/'), ['']);
+      if (!node || node.type !== 'dir') return;
+      Object.entries(node.children).forEach(([name, item]) => {
+        const entry = document.createElement('div');
+        entry.className = 'file-entry';
+        entry.innerHTML = `<span>${item.type === 'dir' ? '📁' : '📄'}</span><span class="label">${name}${item.type === 'dir' ? '/' : ''}</span>`;
+        entry.addEventListener('click', () => {
+          if (item.type === 'dir') {
+            path.push(name);
+            renderDirectory(root, path, container, preview);
+          } else {
+            preview.textContent = item.content;
+          }
+        });
+        container.appendChild(entry);
+      });
+      if (path.length > 1) {
+        const up = document.createElement('div');
+        up.className = 'file-entry';
+        up.innerHTML = '<span>↩️</span><span class="label">..</span>';
+        up.addEventListener('click', () => {
+          path.pop();
+          renderDirectory(root, path, container, preview);
+        });
+        container.insertBefore(up, container.firstChild);
+      }
+    }
+
+    function createLivingGlyph(appId) {
+      const profile = glyphProfiles[appId] || glyphProfiles.default;
+      const holder = document.createElement('div');
+      holder.className = 'living-glyph';
+
+      const svg = createSvg('svg');
+      svg.setAttribute('viewBox', '0 0 120 120');
+
+      const orbit = createSvg('circle');
+      orbit.classList.add('orbit');
+      orbit.setAttribute('cx', '60');
+      orbit.setAttribute('cy', '60');
+      orbit.setAttribute('r', profile.orbitRadius || 46);
+      orbit.setAttribute('stroke-dasharray', (profile.orbitDash || 160).toFixed(2));
+
+      const wave = createSvg('path');
+      wave.classList.add('wave');
+
+      const core = createSvg('circle');
+      core.classList.add('core');
+      core.setAttribute('cx', '60');
+      core.setAttribute('cy', '60');
+
+      svg.appendChild(orbit);
+      svg.appendChild(wave);
+      svg.appendChild(core);
+      holder.appendChild(svg);
+
+      let phase = profile.wavePhase ?? Math.random() * Math.PI * 2;
+
+      subscribeGlyph(({ cpu, pulse, now }) => {
+        phase += (profile.waveSpeed || 0.01) * (1 + cpu * 0.6);
+        const amplitude = (profile.waveBase || 14) + cpu * (profile.waveGain || 26) + pulse * (profile.alertGain || 18);
+        const offset = profile.waveOffset || 0;
+        wave.setAttribute('d', generateWavePath(amplitude, phase + offset));
+
+        const orbitTilt = (profile.orbitTilt || 0) + pulse * 18;
+        orbit.setAttribute('transform', `rotate(${orbitTilt.toFixed(2)} 60 60)`);
+        const dashOffset = (profile.orbitDash || 160) * (1.1 - cpu) + pulse * 22;
+        orbit.setAttribute('stroke-dashoffset', dashOffset.toFixed(2));
+
+        const coreBase = profile.coreBase || 12;
+        const coreGain = profile.coreGain || 18;
+        const radius = coreBase + cpu * coreGain + pulse * 9;
+        core.setAttribute('r', radius.toFixed(2));
+        core.setAttribute('fill', `rgba(32, 255, 167, ${Math.min(0.65, 0.18 + cpu * 0.4 + pulse * 0.5).toFixed(2)})`);
+        wave.setAttribute('stroke', pulse > 0.3 ? `rgba(255, 57, 122, ${(0.3 + pulse * 0.5).toFixed(2)})` : `rgba(122, 223, 255, ${(0.45 + cpu * 0.35).toFixed(2)})`);
+      });
+
+      return holder;
+    }
+
+    function subscribeGlyph(listener) {
+      glyphSubscribers.add(listener);
+      listener({ cpu: cpuLoad, pulse: alertImpulse, now: performance.now() });
+      return () => glyphSubscribers.delete(listener);
+    }
+
+    function createSvg(name) {
+      return document.createElementNS('http://www.w3.org/2000/svg', name);
+    }
+
+    function generateWavePath(amplitude, phase) {
+      const steps = 5;
+      const startX = 18;
+      const width = 84;
+      const points = [];
+      for (let i = 0; i <= steps; i++) {
+        const x = startX + (width / steps) * i;
+        const angle = phase + i * 0.9;
+        const base = Math.sin(angle) * amplitude * 0.45;
+        const harmonic = Math.cos(angle * 1.8) * amplitude * 0.12;
+        const y = 60 + base + harmonic;
+        points.push({ x, y });
+      }
+      let d = `M ${points[0].x.toFixed(2)} ${points[0].y.toFixed(2)}`;
+      for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const current = points[i];
+        const controlX = (prev.x + current.x) / 2;
+        d += ` Q ${controlX.toFixed(2)} ${prev.y.toFixed(2)} ${current.x.toFixed(2)} ${current.y.toFixed(2)}`;
+      }
+      return d;
+    }
+
+    function attachMediaListener(query) {
+      if (!query) return;
+      const handler = () => scheduleMobileSync();
+      if (typeof query.addEventListener === 'function') {
+        query.addEventListener('change', handler);
+      } else if (typeof query.addListener === 'function') {
+        query.addListener(handler);
+      }
+    }
+
+    let mobileSyncQueued = false;
+
+    function scheduleMobileSync() {
+      if (mobileSyncQueued) return;
+      mobileSyncQueued = true;
+      requestAnimationFrame(() => {
+        mobileSyncQueued = false;
+        updateMobileMode();
+      });
+    }
+
+    function evaluateMobileMode() {
+      return (
+        mobileQuery.matches ||
+        pointerQuery.matches ||
+        window.innerWidth <= MOBILE_BREAKPOINT
+      );
+    }
+
+    function updateMobileMode(force = false) {
+      const next = evaluateMobileMode();
+      if (!force && mobileState.active === next) return;
+      mobileState.active = next;
+      document.body.classList.toggle('mobile-mode', next);
+      openWindows.forEach((windowEl) => adaptWindowForMobile(windowEl, next));
+    }
+
+    function adaptWindowForMobile(windowEl, mobileActive) {
+      if (!windowEl) return;
+      const resizer = windowEl.querySelector('.resizer');
+      if (mobileActive) {
+        windowEl.classList.add('mobile-window');
+        windowEl.style.removeProperty('left');
+        windowEl.style.removeProperty('top');
+        if (resizer) resizer.style.display = 'none';
+      } else {
+        windowEl.classList.remove('mobile-window');
+        if (resizer) resizer.style.display = '';
+      }
+    }
+
+    function createWallpaperState(width, height) {
+      const horizon = height * 0.78;
+      const skyline = [];
+      let x = -60;
+      while (x < width + 120) {
+        const baseWidth = randomRange(width * 0.06, width * 0.12);
+        const baseHeight = randomRange(height * 0.18, height * 0.42);
+        skyline.push({
+          x,
+          width: baseWidth,
+          height: baseHeight,
+          waveAmp: randomRange(14, 28),
+          waveFreq: randomRange(1.6, 3.6),
+          speed: randomRange(0.00035, 0.00085),
+          phase: Math.random() * Math.PI * 2,
+          glitchLines: Array.from({ length: 3 }, () => Math.random())
+        });
+        x += baseWidth * randomRange(0.55, 0.85);
+      }
+
+      const starCount = Math.min(220, Math.floor((width * height) / 9000));
+      const stars = Array.from({ length: starCount }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height * 0.55,
+        size: randomRange(0.6, 1.6),
+        flicker: Math.random() * Math.PI * 2,
+        hue: randomRange(125, 165)
+      }));
+
+      return { width, height, horizon, skyline, stars };
+    }
+
+    function resizeWallpaper() {
+      if (!wallpaperCtx) return;
+      const dpr = window.devicePixelRatio || 1;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      wallpaperCanvas.width = width * dpr;
+      wallpaperCanvas.height = height * dpr;
+      wallpaperCanvas.style.width = width + 'px';
+      wallpaperCanvas.style.height = height + 'px';
+      wallpaperCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      wallpaperState = createWallpaperState(width, height);
+    }
+
+    function renderWallpaper(now) {
+      if (!wallpaperCtx || !wallpaperState) return;
+      const ctx = wallpaperCtx;
+      const { width, height, horizon, skyline, stars } = wallpaperState;
+      const time = now * 0.001;
+
+      const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+      bgGradient.addColorStop(0, '#02060f');
+      bgGradient.addColorStop(0.45, '#040b13');
+      bgGradient.addColorStop(1, '#010308');
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Star field
+      stars.forEach((star) => {
+        const twinkle = 0.35 + Math.sin(time * 0.8 + star.flicker) * 0.25 + cpuLoad * 0.2;
+        ctx.fillStyle = `hsla(${star.hue}, 98%, ${70 + alertImpulse * 22}%, ${Math.min(0.9, twinkle)})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Aurora sweep
+      auroraPhase += 0.00045 * (1 + cpuLoad * 0.8);
+      const auroraOffset = Math.sin(auroraPhase) * height * 0.04;
+      const auroraGradient = ctx.createLinearGradient(0, horizon - height * 0.55 + auroraOffset, 0, horizon - height * 0.15);
+      auroraGradient.addColorStop(0, `rgba(18, 55, 90, ${0.05 + cpuLoad * 0.08})`);
+      auroraGradient.addColorStop(0.4, `rgba(32, 255, 167, ${0.12 + cpuLoad * 0.16 + alertImpulse * 0.35})`);
+      auroraGradient.addColorStop(0.75, `rgba(122, 223, 255, ${0.08 + cpuLoad * 0.12 + alertImpulse * 0.2})`);
+      auroraGradient.addColorStop(1, 'rgba(2, 7, 14, 0)');
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = auroraGradient;
+      ctx.fillRect(-width * 0.1, horizon - height * 0.6 + auroraOffset, width * 1.2, height * 0.6);
+      ctx.restore();
+
+      // Skyline
+      const glowAlpha = 0.12 + cpuLoad * 0.18 + alertImpulse * 0.35;
+      skyline.forEach((building, index) => {
+        const { x, width: bw, height: bh, waveAmp, waveFreq, speed, phase, glitchLines } = building;
+        const segments = 6;
+        const amplitude = waveAmp * (0.35 + cpuLoad * 0.9) + alertImpulse * 45;
+        const peakOffset = Math.sin(time * (speed * 260) + phase) * amplitude * 0.4;
+
+        ctx.beginPath();
+        ctx.moveTo(x, horizon);
+        const points = [];
+        for (let i = 0; i <= segments; i++) {
+          const t = i / segments;
+          const px = x + bw * t;
+          const oscillation = Math.sin(time * (speed * 380) + phase + t * waveFreq * 2) * amplitude;
+          const harmonics = Math.cos(time * (speed * 140) + t * 7) * amplitude * 0.22;
+          const py = horizon - bh - peakOffset - oscillation - harmonics;
+          points.push({ x: px, y: py });
+          ctx.lineTo(px, py);
+        }
+        ctx.lineTo(x + bw, horizon);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(3, 12, 22, 0.88)';
+        ctx.fill();
+        ctx.strokeStyle = `rgba(32, 255, 167, ${(0.1 + glowAlpha * 0.6).toFixed(3)})`;
+        ctx.lineWidth = 1.1;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(122, 223, 255, ${(0.05 + glowAlpha * 0.6).toFixed(3)})`;
+        ctx.lineWidth = 0.9;
+        glitchLines.forEach((factor, idx) => {
+          const pointIndex = Math.min(points.length - 1, Math.floor(points.length * factor));
+          const baseY = points[pointIndex]?.y ?? (horizon - bh);
+          const jitter = Math.sin(time * (1.6 + idx)) * 6 + alertImpulse * 18;
+          const gy = baseY + jitter;
+          ctx.beginPath();
+          ctx.moveTo(x, gy);
+          ctx.lineTo(x + bw, gy + Math.sin(time * 4 + idx) * 6);
+          ctx.stroke();
+        });
+        ctx.restore();
+      });
+
+      const horizonGradient = ctx.createLinearGradient(0, horizon - 18, 0, horizon + 18);
+      horizonGradient.addColorStop(0, `rgba(32, 255, 167, ${glowAlpha * 0.8})`);
+      horizonGradient.addColorStop(0.5, `rgba(32, 255, 167, ${glowAlpha * 0.35})`);
+      horizonGradient.addColorStop(1, 'rgba(1, 3, 6, 0)');
+      ctx.fillStyle = horizonGradient;
+      ctx.fillRect(0, horizon - 18, width, 36);
+    }
+    function startCpuSimulator() {
+      setInterval(() => {
+        cpuTarget = Math.random() * 0.65 + 0.2;
+      }, 3600 + Math.random() * 1800);
+    }
+
+    function startGlyphEngine() {
+      if (glyphEngineActive) return;
+      glyphEngineActive = true;
+      const loop = () => {
+        const now = performance.now();
+        cpuLoad += (cpuTarget - cpuLoad) * 0.035;
+        alertImpulse = Math.max(0, alertImpulse * 0.92 - 0.002);
+        renderWallpaper(now);
+        glyphSubscribers.forEach((listener) => listener({ cpu: cpuLoad, pulse: alertImpulse, now }));
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
+
+    function subscribeAI(listener) {
+      aiSubscribers.add(listener);
+      return () => aiSubscribers.delete(listener);
+    }
+
+    function renderAiHistory(container) {
+      container.innerHTML = '';
+      aiLogStore.forEach((entry) => renderAIEntry(container, entry));
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function emitAIPacket(level) {
+      const packet = composeAiPacket(level);
+      recordAIPacket(packet);
+      return packet;
+    }
+
+    function composeAiPacket(level) {
+      const agent = aiAgents[Math.floor(Math.random() * aiAgents.length)];
+      const severity = level || rollSeverity();
+      const message = selectAiMessage(severity);
+      return {
+        level: severity,
+        agentId: agent.id,
+        callSign: agent.callSign,
+        specialty: agent.specialty,
+        message,
+        timestamp: new Date()
+      };
+    }
+
+    function rollSeverity() {
+      const roll = Math.random();
+      if (roll > 0.93) return 'alert';
+      if (roll > 0.76) return 'warn';
+      return 'info';
+    }
+
+    function recordAIPacket(packet) {
+      const normalized = {
+        level: packet.level,
+        agentId: packet.agentId,
+        callSign: packet.callSign,
+        message: packet.message,
+        timestamp: packet.timestamp instanceof Date ? packet.timestamp : new Date(packet.timestamp)
+      };
+      aiLogStore.push(normalized);
+      if (aiLogStore.length > AI_LOG_LIMIT) {
+        aiLogStore = aiLogStore.slice(-AI_LOG_LIMIT);
+      }
+      if (normalized.level === 'alert') {
+        alertImpulse = Math.min(1, alertImpulse + 0.7);
+      } else if (normalized.level === 'warn') {
+        alertImpulse = Math.min(1, alertImpulse + 0.35);
+      }
+      persistAiLog();
+      aiSubscribers.forEach((listener) => listener(normalized));
+      if (normalized.level === 'alert') {
+        notify('AI Sentinels', `${normalized.callSign}: ${normalized.message}`);
+      }
+    }
+
+    function renderAIEntry(container, packet) {
+      const entry = document.createElement('div');
+      entry.className = 'ai-entry';
+      entry.dataset.level = packet.level;
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const agentSpan = document.createElement('span');
+      agentSpan.className = 'agent';
+      agentSpan.textContent = packet.callSign;
+
+      const timeSpan = document.createElement('span');
+      timeSpan.textContent = formatTimestamp(packet.timestamp);
+
+      meta.appendChild(agentSpan);
+      meta.appendChild(timeSpan);
+
+      const payload = document.createElement('div');
+      payload.className = 'payload';
+      payload.textContent = packet.message;
+
+      entry.appendChild(meta);
+      entry.appendChild(payload);
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function formatTimestamp(date) {
+      const value = date instanceof Date ? date : new Date(date);
+      return value.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function randomBetween(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randomRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function loadAiLog() {
+      if (typeof localStorage === 'undefined') return [];
+      try {
+        const raw = localStorage.getItem(AI_LOG_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        const entries = parsed
+          .map((entry) => ({
+            level: entry.level || 'info',
+            agentId: entry.agentId || 'sentinel',
+            callSign: entry.callSign || 'Sentinel-01',
+            message: entry.message || '',
+            timestamp: entry.timestamp ? new Date(entry.timestamp) : new Date()
+          }))
+          .filter((entry) => entry.message);
+        return entries.slice(-AI_LOG_LIMIT);
+      } catch (error) {
+        console.warn('AI log load failed', error);
+        return [];
+      }
+    }
+
+    function persistAiLog() {
+      if (typeof localStorage === 'undefined') return;
+      try {
+        const payload = aiLogStore.slice(-AI_LOG_LIMIT).map((entry) => ({
+          level: entry.level,
+          agentId: entry.agentId,
+          callSign: entry.callSign,
+          message: entry.message,
+          timestamp: entry.timestamp instanceof Date ? entry.timestamp.toISOString() : entry.timestamp
+        }));
+        localStorage.setItem(AI_LOG_KEY, JSON.stringify(payload));
+      } catch (error) {
+        console.warn('AI log persist failed', error);
+      }
+    }
+
+    function loadAiAgents() {
+      if (typeof localStorage === 'undefined') return [];
+      try {
+        const raw = localStorage.getItem(AI_AGENTS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+          .map((agent) => ({
+            id: agent.id || `agent-${Math.random().toString(36).slice(2, 7)}`,
+            callSign: agent.callSign || 'Custom-Sentinel',
+            specialty: agent.specialty || 'user augmentation'
+          }))
+          .filter((agent) => agent.callSign);
+      } catch (error) {
+        console.warn('AI agents load failed', error);
+        return [];
+      }
+    }
+
+    function persistAiAgents() {
+      if (typeof localStorage === 'undefined') return;
+      try {
+        localStorage.setItem(AI_AGENTS_KEY, JSON.stringify(customAiAgents));
+      } catch (error) {
+        console.warn('AI agents persist failed', error);
+      }
+    }
+
+    function loadAiPhrases() {
+      if (typeof localStorage === 'undefined') {
+        return { info: [], warn: [], alert: [] };
+      }
+      try {
+        const raw = localStorage.getItem(AI_PHRASES_KEY);
+        if (!raw) return { info: [], warn: [], alert: [] };
+        const parsed = JSON.parse(raw);
+        return ['info', 'warn', 'alert'].reduce((acc, level) => {
+          const phrases = Array.isArray(parsed?.[level]) ? parsed[level] : [];
+          acc[level] = phrases.filter((phrase) => typeof phrase === 'string' && phrase.trim().length > 0);
+          return acc;
+        }, { info: [], warn: [], alert: [] });
+      } catch (error) {
+        console.warn('AI phrases load failed', error);
+        return { info: [], warn: [], alert: [] };
+      }
+    }
+
+    function persistAiPhrases() {
+      if (typeof localStorage === 'undefined') return;
+      try {
+        localStorage.setItem(AI_PHRASES_KEY, JSON.stringify(customAiPhrases));
+      } catch (error) {
+        console.warn('AI phrases persist failed', error);
+      }
+    }
+
+    function selectAiMessage(level) {
+      const bank = [
+        ...(baseAiMessages[level] || baseAiMessages.info),
+        ...(customAiPhrases[level] || []).map((phrase) => () => phrase)
+      ];
+      if (!bank.length) {
+        return '...';
+      }
+      const factory = bank[Math.floor(Math.random() * bank.length)];
+      return factory();
+    }
+
+    function registerAIAgent(callSign, specialty) {
+      const id = generateAgentId(callSign);
+      if (aiAgents.some((agent) => agent.callSign.toLowerCase() === callSign.toLowerCase())) {
+        return null;
+      }
+      const agent = { id, callSign, specialty };
+      customAiAgents.push(agent);
+      aiAgents = [...baseAiAgents, ...customAiAgents];
+      persistAiAgents();
+      return agent;
+    }
+
+    function registerAIPhrase(level, message) {
+      const bucket = customAiPhrases[level];
+      if (!bucket) return false;
+      const normalized = message.trim();
+      if (!normalized) return false;
+      if (bucket.some((phrase) => phrase.toLowerCase() === normalized.toLowerCase())) {
+        return false;
+      }
+      bucket.push(normalized);
+      persistAiPhrases();
+      return true;
+    }
+
+    function generateAgentId(seed = 'sentinel') {
+      const base = seed.replace(/[^a-z0-9]+/gi, '').slice(0, 6) || 'agent';
+      let suffix = 1;
+      let candidate = `${base.toLowerCase()}-${suffix}`;
+      while (aiAgents.some((agent) => agent.id === candidate)) {
+        suffix += 1;
+        candidate = `${base.toLowerCase()}-${suffix}`;
+      }
+      return candidate;
+    }
+
+    function startAiScheduler() {
+      if (aiSchedulerActive) return;
+      aiSchedulerActive = true;
+      emitAIPacket('info');
+      const loop = () => {
+        const delay = randomBetween(4200, 7800);
+        setTimeout(() => {
+          emitAIPacket();
+          loop();
+        }, delay);
+      };
+      loop();
+    }
+
+    function notify(title, message) {
+      const card = document.createElement('div');
+      card.className = 'notification';
+      card.innerHTML = `<h4>${title}</h4><p>${message}</p>`;
+      notificationContainer.appendChild(card);
+      setTimeout(() => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => card.remove(), 200);
+      }, 3200);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const formatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('clock').textContent = formatted;
+    }
+
+    setInterval(updateClock, 30_000);
+    updateClock();
+
+    updateMobileMode(true);
+    renderDesktopIcons();
+    renderLauncher();
+    resizeWallpaper();
+    renderWallpaper(performance.now());
+    startCpuSimulator();
+    startGlyphEngine();
+    startAiScheduler();
+
+    window.addEventListener('resize', () => {
+      resizeWallpaper();
+      scheduleMobileSync();
+      openWindows.forEach((windowEl) => {
+        const rect = windowEl.getBoundingClientRect();
+        const maxX = window.innerWidth - 120;
+        const maxY = window.innerHeight - 120;
+        if (rect.left > maxX) windowEl.style.left = maxX + 'px';
+        if (rect.top > maxY) windowEl.style.top = maxY + 'px';
+      });
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        setLauncher(false);
+      }
+    });
+
+    setTimeout(() => {
+      document.getElementById('boot-screen').classList.add('hidden');
+      desktop.classList.remove('hidden');
+      taskbar.classList.remove('hidden');
+      notify('FluxOS', 'System online. Welcome.');
+    }, 2600);
+
+    // TODO (roadmap):
+    // 1. Persist filesystem modifications to localStorage.
+    // 2. Add settings app for theming and wallpaper adjustments.
+    // 3. Implement notifications center history + clear button.
+    // 4. Expand terminal commands (mkdir, touch, edit) hooked to fs state.
+    // 5. Add network-style widget (fake processes / system monitor).
+  </script>
+</body>
+</html>
