@@ -630,6 +630,7 @@ class Terminal {
             browseros: () => this.openBrowserOS(),
             svgviewer: () => this.openSVGViewer(),
             musicfactory: () => this.openMusicFactory(),
+            worldclock: () => this.openWorldClock(),
             roadmap: () => this.showRoadmap(),
             case: (args) => this.openCaseStudy(args)
         };
@@ -983,6 +984,7 @@ Available Commands:
 <span class="success">browseros</span>    - Launch web-based operating system
 <span class="success">svgviewer</span>    - Launch SVG gallery viewer
 <span class="success">musicfactory</span>  - Launch music production interface
+<span class="success">worldclock</span>    - Launch global time zones viewer
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -2241,6 +2243,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('musicfactory/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Music Factory opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🎼 Music production and composition interface for creating digital music.</span>', 'command-output');
+    }
+
+    openWorldClock() {
+        this.addToOutput('<span class="info">🌍 Launching World Clock...</span>', 'command-output');
+        window.open('worldclock/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ World Clock opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">⏰ Global time zones viewer with real-time clock display.</span>', 'command-output');
     }
 
     // ========================

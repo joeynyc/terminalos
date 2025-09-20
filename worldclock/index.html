@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbit Atlas — Award Winning World Clock</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Sans:wght@400;500&display=swap');
+
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-tertiary: #1e293b;
+            --text-primary: #f8fafc;
+            --text-muted: rgba(226, 232, 240, 0.75);
+            --glass: rgba(15, 23, 42, 0.65);
+            --card-blur: blur(28px);
+            --gradient-aurora: conic-gradient(from 160deg at 50% 50%, #38bdf8 0deg, #7c3aed 140deg, #facc15 250deg, #38bdf8 360deg);
+            color-scheme: dark;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #020617 45%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(79, 70, 229, 0.35), transparent 55%),
+                        radial-gradient(circle at 80% 15%, rgba(16, 185, 129, 0.3), transparent 50%),
+                        radial-gradient(circle at 45% 75%, rgba(14, 165, 233, 0.25), transparent 55%);
+            opacity: 0.85;
+            z-index: -3;
+            filter: blur(10px);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(transparent 70%, rgba(2, 6, 23, 0.85)),
+                              url('https://grainy-gradients.vercel.app/noise.svg');
+            background-size: cover;
+            mix-blend-mode: soft-light;
+            opacity: 0.45;
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            padding-bottom: 120px;
+        }
+
+        header.site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 28px clamp(32px, 6vw, 80px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(22px);
+            background: linear-gradient(90deg, rgba(2, 6, 23, 0.92), rgba(2, 6, 23, 0.4));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .brandmark {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            letter-spacing: 0.38em;
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .brandmark::before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--gradient-aurora);
+            box-shadow: 0 0 24px rgba(59, 130, 246, 0.6);
+        }
+
+        .header-tools {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-field {
+            position: relative;
+            width: clamp(220px, 18vw, 320px);
+        }
+
+        .search-field input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 999px;
+            padding: 11px 44px 11px 18px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .search-field input::placeholder {
+            color: rgba(226, 232, 240, 0.55);
+        }
+
+        .search-field input:focus {
+            outline: none;
+            border-color: rgba(129, 140, 248, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background: rgba(30, 41, 59, 0.75);
+        }
+
+        .search-field svg {
+            position: absolute;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: rgba(148, 163, 184, 0.65);
+        }
+
+        .pill-button,
+        .ghost-button {
+            position: relative;
+            padding: 10px 22px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            background: rgba(30, 41, 59, 0.45);
+            color: #c7d2fe;
+            cursor: pointer;
+            transition: all 0.35s ease;
+            overflow: hidden;
+        }
+
+        .pill-button::after,
+        .ghost-button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(99, 102, 241, 0.35), rgba(74, 222, 128, 0.35));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .pill-button:hover,
+        .ghost-button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(165, 180, 252, 0.8);
+        }
+
+        .pill-button:hover::after,
+        .ghost-button:hover::after {
+            opacity: 1;
+        }
+
+        .hero {
+            margin-top: clamp(120px, 16vh, 200px);
+            padding: clamp(80px, 12vh, 140px) clamp(32px, 6vw, 80px) 90px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            align-items: center;
+            gap: 54px;
+        }
+
+        .hero-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .hero-eyebrow {
+            font-size: 13px;
+            letter-spacing: 0.48em;
+            text-transform: uppercase;
+            color: rgba(125, 211, 252, 0.85);
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(44px, 5vw, 66px);
+            line-height: 1.05;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            max-width: 540px;
+            font-size: 18px;
+            color: var(--text-muted);
+        }
+
+        .hero-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+
+        .hero-clock {
+            position: relative;
+            padding: 24px 28px;
+            min-width: 240px;
+            border-radius: 20px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            backdrop-filter: blur(14px);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.45);
+        }
+
+        .hero-clock::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .hero-clock-time {
+            font-size: clamp(40px, 4vw, 52px);
+            font-weight: 500;
+            letter-spacing: 0.08em;
+        }
+
+        .hero-clock-meta {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 14px;
+            color: rgba(226, 232, 240, 0.75);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-tags {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hero-tags span {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 999px;
+            font-size: 13px;
+            color: rgba(226, 232, 240, 0.75);
+            width: fit-content;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-tags span::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        }
+
+        .hero-visual {
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        .globe {
+            position: relative;
+            width: min(420px, 80vw);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.85), rgba(2, 6, 23, 0.85));
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(59, 130, 246, 0.35);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+        }
+
+        .globe::before {
+            content: '';
+            position: absolute;
+            inset: 18%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 60% 35%, rgba(15, 23, 42, 0.1), rgba(15, 23, 42, 0.95));
+            backdrop-filter: blur(35px);
+            mix-blend-mode: screen;
+        }
+
+        .globe::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('https://raw.githubusercontent.com/joeyhoer/misc-assets/main/worldmap-outline.svg');
+            background-size: cover;
+            opacity: 0.35;
+            mix-blend-mode: screen;
+        }
+
+        .globe-halo {
+            position: absolute;
+            inset: -14%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.32), transparent 70%);
+            filter: blur(20px);
+            z-index: -1;
+        }
+
+        .orbit {
+            position: absolute;
+            inset: 6%;
+            border-radius: 50%;
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            animation: rotate 28s linear infinite;
+        }
+
+        .orbit:nth-child(2) { inset: 18%; animation-duration: 32s; }
+        .orbit:nth-child(3) { inset: 30%; animation-duration: 36s; }
+        .orbit:nth-child(4) { inset: 42%; animation-duration: 42s; }
+
+        .orbit span {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transform: translateX(-50%);
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .insights {
+            padding: 0 clamp(32px, 6vw, 80px) 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .insight-card {
+            position: relative;
+            padding: 26px;
+            border-radius: 24px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(16px);
+            min-height: 170px;
+            overflow: hidden;
+        }
+
+        .insight-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.18), transparent);
+            mix-blend-mode: screen;
+            opacity: 0.6;
+        }
+
+        .insight-card h3 {
+            font-size: 15px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: rgba(125, 211, 252, 0.85);
+        }
+
+        .insight-card p {
+            margin-top: 16px;
+            font-size: 16px;
+            color: rgba(226, 232, 240, 0.82);
+            max-width: 260px;
+            line-height: 1.55;
+        }
+
+        .grid-section {
+            padding: 0 clamp(32px, 6vw, 80px);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .grid-header {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .grid-header h2 {
+            font-size: clamp(28px, 3vw, 42px);
+            font-weight: 500;
+        }
+
+        .grid-header p {
+            max-width: 540px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .city-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: clamp(20px, 3vw, 28px);
+        }
+
+        .city-card {
+            --accent-primary: rgba(99, 102, 241, 0.65);
+            --accent-secondary: rgba(59, 130, 246, 0.65);
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            min-height: 320px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 24px;
+            color: #f8fafc;
+            isolation: isolate;
+            transition: transform 0.35s ease, border-color 0.35s ease;
+        }
+
+        .city-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(165, 180, 252, 0.8);
+        }
+
+        .city-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            opacity: 0.5;
+            z-index: -5;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: xor;
+            transition: opacity 0.35s ease;
+        }
+
+        .city-card:hover::before {
+            opacity: 0.8;
+        }
+
+        .card-image {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            z-index: -3;
+            transition: opacity 0.6s ease;
+        }
+
+        .card-backdrop {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0) 10%, rgba(2, 6, 23, 0.75) 100%);
+            z-index: -2;
+        }
+
+        .card-glass {
+            position: absolute;
+            inset: 12px;
+            border-radius: 22px;
+            background: rgba(2, 6, 23, 0.35);
+            backdrop-filter: blur(12px);
+            z-index: -1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 14px;
+            color: rgba(226, 232, 240, 0.85);
+            font-size: 13px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .card-name {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-top: 22px;
+        }
+
+        .card-tagline {
+            margin-top: 12px;
+            font-size: 15px;
+            color: rgba(226, 232, 240, 0.75);
+            line-height: 1.5;
+        }
+
+        .time-row {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .time-display {
+            font-size: 34px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+        }
+
+        .date-display {
+            font-size: 14px;
+            letter-spacing: 0.08em;
+            color: rgba(226, 232, 240, 0.65);
+            text-transform: uppercase;
+        }
+
+        .card-meta {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(226, 232, 240, 0.75);
+        }
+
+        .day-night-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .empty-state {
+            margin-top: 40px;
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.45);
+            text-align: center;
+            color: rgba(226, 232, 240, 0.65);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(16px);
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            z-index: 50;
+        }
+
+        .modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            width: min(420px, 94vw);
+            border-radius: 32px;
+            padding: 38px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 40px 80px rgba(15, 23, 42, 0.55);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.28em;
+            font-size: 13px;
+            color: rgba(125, 211, 252, 0.85);
+        }
+
+        .modal-close {
+            appearance: none;
+            background: transparent;
+            border: none;
+            color: rgba(226, 232, 240, 0.75);
+            font-size: 26px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .modal-form {
+            margin-top: 28px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .modal-form label {
+            font-size: 13px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(226, 232, 240, 0.65);
+        }
+
+        .modal-form select,
+        .modal-form input[type="datetime-local"] {
+            width: 100%;
+            margin-top: 8px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.65);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .modal-result {
+            margin-top: 22px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: rgba(30, 41, 59, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            min-height: 72px;
+            display: grid;
+            gap: 12px;
+            font-size: 15px;
+            letter-spacing: 0.08em;
+        }
+
+        footer {
+            margin-top: 80px;
+            padding: 0 clamp(32px, 6vw, 80px) 60px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+            color: rgba(148, 163, 184, 0.8);
+            font-size: 13px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 980px) {
+            header.site-header {
+                flex-direction: column;
+                gap: 18px;
+                align-items: flex-start;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-clock {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-tools {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .pill-button,
+            .ghost-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .hero {
+                margin-top: 180px;
+                padding: 100px 24px 70px;
+            }
+
+            .insights,
+            .grid-section,
+            footer {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            header.site-header {
+                padding: 20px 18px;
+            }
+
+            .header-tools {
+                width: 100%;
+                gap: 12px;
+            }
+
+            .search-field {
+                width: 100%;
+            }
+
+            .hero {
+                margin-top: 200px;
+                padding: 96px 22px 64px;
+            }
+
+            .brandmark {
+                font-size: 13px;
+                letter-spacing: 0.22em;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brandmark {
+                font-size: 12px;
+                letter-spacing: 0.18em;
+            }
+
+            .hero-eyebrow {
+                letter-spacing: 0.26em;
+                font-size: 11px;
+            }
+
+            .hero {
+                margin-top: 220px;
+                padding: 90px 20px 64px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            header.site-header {
+                padding: 18px 14px;
+            }
+
+            .brandmark {
+                font-size: 11px;
+                letter-spacing: 0.14em;
+            }
+
+            .hero {
+                margin-top: 240px;
+                padding: 80px 18px 60px;
+            }
+
+            .hero-copy h1 {
+                font-size: clamp(34px, 9vw, 42px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="brandmark">Orbit Atlas</div>
+        <div class="header-tools">
+            <div class="search-field">
+                <input id="searchInput" type="search" placeholder="Search a city or time zone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="m20 20-3.5-3.5"></path>
+                </svg>
+            </div>
+            <button id="formatToggle" class="pill-button" type="button">24H</button>
+            <button id="converterBtn" class="ghost-button" type="button">Time Converter</button>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="hero">
+            <div class="hero-copy">
+                <span class="hero-eyebrow">Global Rhythm 2025</span>
+                <h1>Design-forward world timekeeping for curious minds.</h1>
+                <p class="hero-subtitle">Orbit Atlas visualises 24 curated cities with cinematic photography that transitions with the sun. Discover offsets at a glance, compare rhythms, and convert future moments without leaving the page.</p>
+                <div class="hero-metrics">
+                    <div class="hero-clock">
+                        <div class="hero-clock-time" id="heroLocalTime">--:--</div>
+                        <div class="hero-clock-meta">
+                            <span id="heroLocalDate">--</span>
+                            <span id="heroLocalZone">Detecting zone…</span>
+                            <span id="heroOffset">UTC ±00:00</span>
+                        </div>
+                    </div>
+                    <div class="hero-tags">
+                        <span>Day & Night cinematics</span>
+                        <span>Offset intelligence</span>
+                        <span>One-click conversion</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual" aria-hidden="true">
+                <div class="globe">
+                    <div class="globe-halo"></div>
+                    <div class="orbit"><span>New York</span></div>
+                    <div class="orbit"><span>London</span></div>
+                    <div class="orbit"><span>Tokyo</span></div>
+                    <div class="orbit"><span>Sydney</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="insights" aria-label="Feature highlights">
+            <article class="insight-card">
+                <h3>Live cadence</h3>
+                <p>Every card refreshes once per second, shifting photography from aurora dawns to midnight neon the instant the hour flips.</p>
+            </article>
+            <article class="insight-card">
+                <h3>Human context</h3>
+                <p>Offsets are translated into plain language, so teams always know who is ahead, who is catching up, and by how much.</p>
+            </article>
+            <article class="insight-card">
+                <h3>Future ready</h3>
+                <p>A built-in converter helps you plan meetings, launches, and hand-offs across the hemisphere in moments.</p>
+            </article>
+        </section>
+
+        <section class="grid-section" aria-labelledby="atlas-title">
+            <div class="grid-header">
+                <h2 id="atlas-title">Curated global atlas</h2>
+                <p>Search for a city and watch its card elevate. Each tile carries its own story, photography, and live offset callouts for radical clarity.</p>
+            </div>
+            <div id="cityGrid" class="city-grid" role="list"></div>
+            <div id="emptyState" class="empty-state" hidden>We couldn’t find that city yet. Try another search.</div>
+        </section>
+    </main>
+
+    <div id="converterModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="converterTitle">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="converterTitle">Time Converter</span>
+                <button id="closeModal" class="modal-close" type="button" aria-label="Close converter">×</button>
+            </div>
+            <form class="modal-form">
+                <label for="fromZone">From time zone</label>
+                <select id="fromZone"></select>
+
+                <label for="toZone">To time zone</label>
+                <select id="toZone"></select>
+
+                <label for="baseTime">Reference time (your device)</label>
+                <input id="baseTime" type="datetime-local">
+            </form>
+            <div id="conversionResult" class="modal-result">
+                <span>Select zones to reveal the conversion.</span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Orbit Atlas · Crafted for design awards</span>
+        <span>Live data refresh · 24 curated locales</span>
+    </footer>
+
+    <script>
+        const cities = [
+            {
+                name: 'New York',
+                timezone: 'America/New_York',
+                region: 'United States',
+                tagline: 'City lights pulse across the Hudson skyline.',
+                theme: { primary: '#3b82f6', secondary: '#a855f7' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'London',
+                timezone: 'Europe/London',
+                region: 'United Kingdom',
+                tagline: 'Morning mist meets the Thames and glass spires.',
+                theme: { primary: '#22d3ee', secondary: '#6366f1' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Paris',
+                timezone: 'Europe/Paris',
+                region: 'France',
+                tagline: 'The Seine glitters under art deco bridges and dawn.',
+                theme: { primary: '#f472b6', secondary: '#60a5fa' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Tokyo',
+                timezone: 'Asia/Tokyo',
+                region: 'Japan',
+                tagline: 'Neon kanji blurs with sunrise reflections.',
+                theme: { primary: '#a855f7', secondary: '#22d3ee' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1518544889280-6433a1a37b36?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Singapore',
+                timezone: 'Asia/Singapore',
+                region: 'Singapore',
+                tagline: 'Marina Bay mirror reflections greet every dawn.',
+                theme: { primary: '#34d399', secondary: '#60a5fa' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Sydney',
+                timezone: 'Australia/Sydney',
+                region: 'Australia',
+                tagline: 'Opera sails glow as Pacific hues sweep in.',
+                theme: { primary: '#38bdf8', secondary: '#f472b6' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d3?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d3?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Dubai',
+                timezone: 'Asia/Dubai',
+                region: 'United Arab Emirates',
+                tagline: 'Desert gold gradients meet sky-high silhouettes.',
+                theme: { primary: '#fbbf24', secondary: '#a855f7' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1523731407965-2430cd12f5e4?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Reykjavik',
+                timezone: 'Atlantic/Reykjavik',
+                region: 'Iceland',
+                tagline: 'Aurora ribbons pirouette over quiet harbours.',
+                theme: { primary: '#60a5fa', secondary: '#22d3ee' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1431440869543-efaf3388c585?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'São Paulo',
+                timezone: 'America/Sao_Paulo',
+                region: 'Brazil',
+                tagline: 'Skyline tapestries weave rhythm over Avenida Paulista.',
+                theme: { primary: '#fb7185', secondary: '#fb923c' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1526403223355-5427f88504b0?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Cape Town',
+                timezone: 'Africa/Johannesburg',
+                region: 'South Africa',
+                tagline: 'Atlantic blues wrap around Table Mountain mornings.',
+                theme: { primary: '#38bdf8', secondary: '#facc15' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1512314889357-e157c22f938d?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Los Angeles',
+                timezone: 'America/Los_Angeles',
+                region: 'United States',
+                tagline: 'Golden Hour glows stretch from downtown to the pier.',
+                theme: { primary: '#fbbf24', secondary: '#fb7185' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Seoul',
+                timezone: 'Asia/Seoul',
+                region: 'South Korea',
+                tagline: 'Han River reflections dance with neon heartbeats.',
+                theme: { primary: '#a855f7', secondary: '#38bdf8' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1508766206392-8bd5cf550d1c?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Hong Kong',
+                timezone: 'Asia/Hong_Kong',
+                region: 'China',
+                tagline: 'Vertical skylines shimmer through subtropical haze.',
+                theme: { primary: '#f472b6', secondary: '#22d3ee' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1497120573086-6219573cf71c?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1504805572947-34fad45aed93?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'San Francisco',
+                timezone: 'America/Los_Angeles',
+                region: 'United States',
+                tagline: 'Pacific fog drifts across a golden gateway.',
+                theme: { primary: '#60a5fa', secondary: '#fbbf24' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1473951574080-01fe45ec8643?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Delhi',
+                timezone: 'Asia/Kolkata',
+                region: 'India',
+                tagline: 'Amber haze and temple silhouettes greet each sunrise.',
+                theme: { primary: '#fb923c', secondary: '#facc15' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Bangkok',
+                timezone: 'Asia/Bangkok',
+                region: 'Thailand',
+                tagline: 'River barges trace light trails under starlit skies.',
+                theme: { primary: '#22d3ee', secondary: '#f472b6' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1518544889280-6433a1a37b36?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Berlin',
+                timezone: 'Europe/Berlin',
+                region: 'Germany',
+                tagline: 'Museum Island wakes beneath Bauhaus skylines.',
+                theme: { primary: '#38bdf8', secondary: '#6366f1' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1528825871115-3581a5387919?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1531256456869-ce942a665e80?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Toronto',
+                timezone: 'America/Toronto',
+                region: 'Canada',
+                tagline: 'Lake Ontario mirrors skyline constellations.',
+                theme: { primary: '#60a5fa', secondary: '#f472b6' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1504803547683-753f7ef50743?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Auckland',
+                timezone: 'Pacific/Auckland',
+                region: 'New Zealand',
+                tagline: 'Harbour sails glow beneath southern stars.',
+                theme: { primary: '#34d399', secondary: '#60a5fa' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Honolulu',
+                timezone: 'Pacific/Honolulu',
+                region: 'United States',
+                tagline: 'Palm silhouettes melt into volcanic horizons.',
+                theme: { primary: '#f472b6', secondary: '#34d399' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1430494422626-360f3e84013b?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Mexico City',
+                timezone: 'America/Mexico_City',
+                region: 'Mexico',
+                tagline: 'Zócalo energy hums under volcanic backdrops.',
+                theme: { primary: '#fb7185', secondary: '#22d3ee' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1530126483408-aa533e55bdb2?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Buenos Aires',
+                timezone: 'America/Argentina/Buenos_Aires',
+                region: 'Argentina',
+                tagline: 'Palermo blossoms meet midnight tango neon.',
+                theme: { primary: '#fb923c', secondary: '#60a5fa' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1526403223355-5427f88504b0?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Johannesburg',
+                timezone: 'Africa/Johannesburg',
+                region: 'South Africa',
+                tagline: 'Highveld light washes over sandstone skylines.',
+                theme: { primary: '#facc15', secondary: '#38bdf8' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1470123808288-1e59739f7351?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Cairo',
+                timezone: 'Africa/Cairo',
+                region: 'Egypt',
+                tagline: 'Cairo sands glow beneath Nile twilight arcs.',
+                theme: { primary: '#fb923c', secondary: '#facc15' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1476610182048-b716b8518aae?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Madrid',
+                timezone: 'Europe/Madrid',
+                region: 'Spain',
+                tagline: 'Sunlit plazas and midnight tapas energy.',
+                theme: { primary: '#f472b6', secondary: '#fb923c' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Lisbon',
+                timezone: 'Europe/Lisbon',
+                region: 'Portugal',
+                tagline: 'Azulejo blues drift across terracotta dawns.',
+                theme: { primary: '#38bdf8', secondary: '#fbbf24' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1494470776436-ea514047a0aa?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Moscow',
+                timezone: 'Europe/Moscow',
+                region: 'Russia',
+                tagline: 'St. Basil domes glow under polar nights.',
+                theme: { primary: '#6366f1', secondary: '#f472b6' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1505843513577-22bb7d21e455?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1400&q=80'
+                }
+            },
+            {
+                name: 'Anchorage',
+                timezone: 'America/Anchorage',
+                region: 'United States',
+                tagline: 'Snow-kissed peaks shimmer under endless dusk.',
+                theme: { primary: '#60a5fa', secondary: '#22d3ee' },
+                images: {
+                    day: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1400&q=80',
+                    night: 'https://images.unsplash.com/photo-1499244571948-7ccddb3583f1?auto=format&fit=crop&w=1400&q=80'
+                }
+            }
+        ];
+
+        let filteredCities = [...cities];
+        let is24Hour = true;
+        let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+        const heroLocalTimeEl = document.getElementById('heroLocalTime');
+        const heroLocalDateEl = document.getElementById('heroLocalDate');
+        const heroLocalZoneEl = document.getElementById('heroLocalZone');
+        const heroOffsetEl = document.getElementById('heroOffset');
+        const cityGrid = document.getElementById('cityGrid');
+        const emptyState = document.getElementById('emptyState');
+
+        function formatTime(date, use24Hour) {
+            const options = {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: !use24Hour
+            };
+            return date.toLocaleTimeString('en-US', options).replace(':', '·');
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+            }).toUpperCase();
+        }
+
+        function formatHeroDate(date) {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function isDaytime(hour) {
+            return hour >= 6 && hour < 18;
+        }
+
+        function prettifyZone(zone) {
+            if (!zone) return 'Universal Time';
+            return zone.replace(/_/g, ' ').replace(/\//g, ' · ');
+        }
+
+        function getTimeZoneLabel(zone) {
+            try {
+                const parts = Intl.DateTimeFormat('en-US', {
+                    timeZone: zone,
+                    timeZoneName: 'short'
+                }).formatToParts(new Date());
+                const namePart = parts.find(part => part.type === 'timeZoneName');
+                return namePart ? namePart.value.replace('GMT', 'UTC') : zone;
+            } catch (error) {
+                return zone;
+            }
+        }
+
+        function describeOffset(cityTime, referenceTime) {
+            const diffMinutes = Math.round((cityTime - referenceTime) / 60000);
+            if (diffMinutes === 0) {
+                return 'In sync with you';
+            }
+            const ahead = diffMinutes > 0;
+            const absMinutes = Math.abs(diffMinutes);
+            const hours = Math.floor(absMinutes / 60);
+            let minutes = absMinutes % 60;
+            if (minutes === 60) {
+                minutes = 0;
+            }
+            const parts = [];
+            if (hours) parts.push(`${hours}h`);
+            if (minutes) parts.push(`${minutes}m`);
+            return `${ahead ? 'Ahead' : 'Behind'} by ${parts.join(' ')}`;
+        }
+
+        function createCityCard(city) {
+            const card = document.createElement('article');
+            card.classList.add('city-card');
+            card.dataset.city = city.name;
+            card.setAttribute('role', 'listitem');
+            if (city.theme) {
+                card.style.setProperty('--accent-primary', city.theme.primary);
+                card.style.setProperty('--accent-secondary', city.theme.secondary);
+            }
+
+            const baseTime = new Date();
+            const localTime = new Date(baseTime.toLocaleString('en-US', { timeZone: city.timezone }));
+            const isDay = isDaytime(localTime.getHours());
+
+            const backgroundUrl = isDay ? city.images.day : city.images.night;
+
+            card.innerHTML = `
+                <div class="card-image" style="background-image: linear-gradient(180deg, rgba(2,6,23,0.2) 0%, rgba(2,6,23,0.8) 100%), url('${backgroundUrl}');"></div>
+                <div class="card-backdrop"></div>
+                <div class="card-glass"></div>
+                <div class="card-header">
+                    <span>${city.region}</span>
+                    <span data-role="offset">—</span>
+                </div>
+                <h3 class="card-name">${city.name}</h3>
+                <p class="card-tagline">${city.tagline}</p>
+                <div class="time-row">
+                    <div class="time-display" data-role="time">${formatTime(localTime, is24Hour)}</div>
+                    <div class="date-display" data-role="date">${formatDate(localTime)}</div>
+                </div>
+                <div class="card-meta">
+                    <span class="day-night-indicator">${isDay ? '☀ Sunlit' : '🌙 Nightfall'}</span>
+                    <span>${getTimeZoneLabel(city.timezone)}</span>
+                </div>
+            `;
+            return card;
+        }
+
+        function initializeGrid() {
+            cityGrid.innerHTML = '';
+            if (!filteredCities.length) {
+                emptyState.hidden = false;
+                return;
+            }
+
+            emptyState.hidden = true;
+            filteredCities.forEach(city => {
+                const card = createCityCard(city);
+                cityGrid.appendChild(card);
+            });
+        }
+
+        function updateHeroTime() {
+            const now = new Date();
+            const heroTime = new Date(now.toLocaleString('en-US', { timeZone: userTimeZone }));
+            heroLocalTimeEl.textContent = formatTime(heroTime, is24Hour);
+            heroLocalDateEl.textContent = formatHeroDate(heroTime);
+            heroLocalZoneEl.textContent = prettifyZone(userTimeZone);
+            heroOffsetEl.textContent = getTimeZoneLabel(userTimeZone);
+            return heroTime;
+        }
+
+        function updateTimes() {
+            const now = new Date();
+            const heroTime = updateHeroTime();
+
+            cities.forEach(city => {
+                const cityTime = new Date(now.toLocaleString('en-US', { timeZone: city.timezone }));
+                const card = document.querySelector(`.city-card[data-city="${city.name}"]`);
+                if (!card) return;
+                const timeElement = card.querySelector('[data-role="time"]');
+                const dateElement = card.querySelector('[data-role="date"]');
+                const offsetElement = card.querySelector('[data-role="offset"]');
+                const indicator = card.querySelector('.day-night-indicator');
+                const background = card.querySelector('.card-image');
+
+                if (timeElement) timeElement.textContent = formatTime(cityTime, is24Hour);
+                if (dateElement) dateElement.textContent = formatDate(cityTime);
+                if (offsetElement) offsetElement.textContent = describeOffset(cityTime, heroTime);
+
+                const isDay = isDaytime(cityTime.getHours());
+                if (indicator) indicator.textContent = isDay ? '☀ Sunlit' : '🌙 Nightfall';
+                if (background) {
+                    background.style.backgroundImage = `linear-gradient(180deg, rgba(2,6,23,0.2) 0%, rgba(2,6,23,0.8) 100%), url('${isDay ? city.images.day : city.images.night}')`;
+                }
+            });
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', event => {
+                const query = event.target.value.trim().toLowerCase();
+                if (!query) {
+                    filteredCities = [...cities];
+                } else {
+                    filteredCities = cities.filter(city =>
+                        city.name.toLowerCase().includes(query) ||
+                        city.region.toLowerCase().includes(query) ||
+                        city.timezone.toLowerCase().includes(query)
+                    );
+                }
+                initializeGrid();
+                updateTimes();
+            });
+        }
+
+        function setupFormatToggle() {
+            const formatToggle = document.getElementById('formatToggle');
+            formatToggle.addEventListener('click', () => {
+                is24Hour = !is24Hour;
+                formatToggle.textContent = is24Hour ? '24H' : '12H';
+                updateTimes();
+            });
+        }
+
+        function setupConverter() {
+            const converterBtn = document.getElementById('converterBtn');
+            const converterModal = document.getElementById('converterModal');
+            const closeModal = document.getElementById('closeModal');
+            const fromZone = document.getElementById('fromZone');
+            const toZone = document.getElementById('toZone');
+            const baseTime = document.getElementById('baseTime');
+            const conversionResult = document.getElementById('conversionResult');
+
+            // Populate timezones
+            cities.forEach(city => {
+                const optionFrom = new Option(`${city.name} · ${getTimeZoneLabel(city.timezone)}`, city.timezone);
+                const optionTo = new Option(`${city.name} · ${getTimeZoneLabel(city.timezone)}`, city.timezone);
+                fromZone.appendChild(optionFrom);
+                toZone.appendChild(optionTo);
+            });
+
+            fromZone.value = userTimeZone;
+            const localNow = new Date();
+            const offsetMinutes = localNow.getTimezoneOffset();
+            const localISOTime = new Date(localNow.getTime() - offsetMinutes * 60000).toISOString().slice(0, 16);
+            baseTime.value = localISOTime;
+
+            const updateConversion = () => {
+                if (!fromZone.value || !toZone.value || !baseTime.value) return;
+                const reference = new Date(baseTime.value);
+                const fromTime = new Date(reference.toLocaleString('en-US', { timeZone: fromZone.value }));
+                const toTime = new Date(reference.toLocaleString('en-US', { timeZone: toZone.value }));
+                const fromCity = cities.find(city => city.timezone === fromZone.value);
+                const toCity = cities.find(city => city.timezone === toZone.value);
+
+                conversionResult.innerHTML = `
+                    <div><strong>${fromCity ? fromCity.name : fromZone.value}:</strong> ${formatTime(fromTime, is24Hour)} · ${formatDate(fromTime)}</div>
+                    <div><strong>${toCity ? toCity.name : toZone.value}:</strong> ${formatTime(toTime, is24Hour)} · ${formatDate(toTime)}</div>
+                `;
+            };
+
+            converterBtn.addEventListener('click', () => {
+                converterModal.classList.add('active');
+                updateConversion();
+            });
+
+            closeModal.addEventListener('click', () => {
+                converterModal.classList.remove('active');
+            });
+
+            converterModal.addEventListener('click', event => {
+                if (event.target === converterModal) {
+                    converterModal.classList.remove('active');
+                }
+            });
+
+            [fromZone, toZone, baseTime].forEach(element => {
+                element.addEventListener('change', updateConversion);
+            });
+        }
+
+        function init() {
+            initializeGrid();
+            setupSearch();
+            setupFormatToggle();
+            setupConverter();
+            updateTimes();
+            setInterval(updateTimes, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
