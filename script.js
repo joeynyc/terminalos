@@ -202,10 +202,9 @@ class BootSequence {
             return;
         }
 
-        const alreadyPlayed = sessionStorage.getItem(this.storageKey);
         const reduceMotion = this.prefersReducedMotion?.matches;
 
-        if (reduceMotion || alreadyPlayed) {
+        if (reduceMotion) {
             this.finish({ skipped: true });
             return;
         }
