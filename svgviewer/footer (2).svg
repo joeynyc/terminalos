@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="120" viewBox="0 0 1600 120">
+  <defs>
+    <linearGradient id="accentGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7C6DFF"/>
+      <stop offset="50%" stop-color="#6EA8FF"/>
+      <stop offset="100%" stop-color="#46E0FF"/>
+    </linearGradient>
+    <mask id="fade">
+      <linearGradient id="fadeGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="white" stop-opacity="0"/>
+        <stop offset="20%" stop-color="white" stop-opacity="1"/>
+        <stop offset="80%" stop-color="white" stop-opacity="1"/>
+        <stop offset="100%" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+      <rect width="1600" height="120" fill="url(#fadeGrad)"/>
+    </mask>
+    <filter id="topGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect y="0" width="1600" height="2" fill="url(#accentGrad)" filter="url(#topGlow)">
+    <animate attributeName="width" values="400;1600;400" dur="7s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="-300" y="78" width="300" height="6" rx="3" fill="url(#accentGrad)" mask="url(#fade)">
+    <animate attributeName="x" from="-300" to="1600" dur="8s" repeatCount="indefinite"/>
+  </rect>
+  <g font-family="Poppins,Segoe UI,Inter,Arial,sans-serif" fill="#9AA4B2">
+    <text x="40" y="48" font-size="20">SVG Studio Pro</text>
+    <text x="40" y="88" font-size="14" opacity="0.8">© 2025 • Vector design • Preview • Animate</text>
+    <g text-anchor="end">
+      <text x="1560" y="48" font-size="16">Docs • Plugins • Support</text>
+      <text x="1560" y="88" font-size="14" opacity="0.8">v1.0 • Transparent</text>
+    </g>
+  </g>
+</svg>

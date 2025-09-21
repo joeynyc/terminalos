@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="480" viewBox="0 0 2200 480">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C6DFF">
+        <animate attributeName="offset" values="-0.2;1.2" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="50%" stop-color="#6EA8FF">
+        <animate attributeName="offset" values="0;1.4" dur="4s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" stop-color="#46E0FF">
+        <animate attributeName="offset" values="0.2;1.6" dur="4s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#7C6DFF" flood-opacity="0.45"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="20" flood-color="#6EA8FF" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <g filter="url(#glow)">
+    <text x="140" y="276" font-family="Poppins,Segoe UI,Inter,Arial,sans-serif" font-weight="800" font-size="220" letter-spacing="3" fill="url(#grad)">
+      SVG Studio Pro
+    </text>
+    <text x="148" y="364" font-family="IBM Plex Mono,Consolas,monospace" font-size="48" fill="#A5B4CC">
+      Vector design • Preview • Animate
+    </text>
+  </g>
+</svg>
