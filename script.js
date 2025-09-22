@@ -626,6 +626,7 @@ class Terminal {
             jotdown: () => this.openJotdown(),
             pindrop: () => this.openPindrop(),
             cryptowatch: () => this.openCryptowatch(),
+            docker: () => this.openDockerCheatsheet(),
             expneural: () => this.openExpneural(),
             browseros: () => this.openBrowserOS(),
             svgviewer: () => this.openSVGViewer(),
@@ -981,6 +982,7 @@ Available Commands:
 <span class="success">jotdown</span>     - Launch minimal modular workspace
 <span class="success">pindrop</span>     - Launch draggable sticky notes board
 <span class="success">cryptowatch</span>  - Launch cryptocurrency dashboard
+<span class="success">docker</span>       - Launch Docker command cheat sheet
 <span class="success">browseros</span>    - Launch web-based operating system
 <span class="success">svgviewer</span>    - Launch SVG gallery viewer
 <span class="success">musicfactory</span>  - Launch music production interface
@@ -2215,6 +2217,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('cryptowatch/index.html', '_blank');
         this.addToOutput('<span class="success">✅ Cryptowatch opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">🚀 NASA-inspired cryptocurrency mission control with live prices and analytics.</span>', 'command-output');
+    }
+
+    openDockerCheatsheet() {
+        this.addToOutput('<span class="info">🐳 Opening Docker command cheatsheet...</span>', 'command-output');
+        window.open('../dockercheetsheet/docker-cheatsheet.html', '_blank');
+        this.addToOutput('<span class="success">✅ Docker cheatsheet opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">📦 Complete reference for Docker commands, containers, and workflows.</span>', 'command-output');
     }
 
     openExpneural() {

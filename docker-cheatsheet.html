@@ -1,0 +1,3324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docker Command Cheatsheet • Windows &amp; WSL</title>
+  <meta name="description" content="Award-winning Docker command cheatsheet optimized for Windows and WSL teams." />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #040b16;
+      --bg-alt: #101b36;
+      --card-bg: rgba(13, 25, 46, 0.94);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #e8f1ff;
+      --muted: #9bb0cf;
+      --accent: #41c3ff;
+      --accent-strong: #7b61ff;
+      --success: #39d1a4;
+      --warn: #ffad4d;
+      --danger: #ff6a7a;
+      --shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+      --badge-windows: linear-gradient(120deg, #4fa5ff, #2d6bff);
+      --badge-wsl: linear-gradient(120deg, #1fd089, #0f915f);
+      --badge-all: linear-gradient(120deg, #ffd166, #f79824);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 10px;
+      font-family: "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 15% 10%, rgba(65, 195, 255, 0.35) 0%, transparent 60%),
+        radial-gradient(circle at 85% 0%, rgba(123, 97, 255, 0.45) 0%, transparent 65%),
+        linear-gradient(165deg, #040b16 0%, #091120 40%, #010409 100%);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    main.page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    @media (max-width: 768px) {
+      main.page {
+        padding: 32px 18px 64px;
+      }
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(65, 195, 255, 0.15), rgba(123, 97, 255, 0.15));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px);
+    }
+
+    .hero .eyebrow {
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin: 0 0 12px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 4vw, 3rem);
+      margin: 0 0 12px;
+      line-height: 1.1;
+    }
+
+    .hero .subhead {
+      margin: 0 0 22px;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .hero-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-highlights span {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .control-panel {
+      margin-top: 32px;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      background: rgba(12, 23, 44, 0.78);
+      border: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      align-items: start;
+    }
+
+    .control-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-block.stats {
+      justify-content: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .control-block label,
+    .control-block .control-label {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: rgba(232, 241, 255, 0.75);
+    }
+
+    .control-block.control-block-tags {
+      grid-column: 1 / -1;
+    }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-wrapper::before {
+      content: "\1F50D";
+      position: absolute;
+      left: 16px;
+      font-size: 0.95rem;
+      opacity: 0.6;
+    }
+
+    #search-input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: rgba(8, 16, 32, 0.96);
+      color: var(--text);
+      font-size: 1rem;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #search-input:focus {
+      outline: none;
+      border-color: rgba(65, 195, 255, 0.6);
+      box-shadow: 0 0 0 3px rgba(65, 195, 255, 0.2);
+    }
+
+    .env-toggle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag-toggle {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      transition: background 0.2s ease, transform 0.2s ease, border 0.2s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .toggle {
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .toggle.is-active {
+      background: linear-gradient(120deg, rgba(65, 195, 255, 0.34), rgba(123, 97, 255, 0.34));
+      border-color: rgba(65, 195, 255, 0.35);
+      box-shadow: 0 12px 24px rgba(65, 195, 255, 0.15);
+    }
+
+    .tag-toggle button {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(123, 97, 255, 0.12));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 20px rgba(4, 11, 22, 0.18);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .tag-toggle button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 30px rgba(65, 195, 255, 0.15);
+      background: linear-gradient(135deg, rgba(65, 195, 255, 0.22), rgba(123, 97, 255, 0.22));
+    }
+
+    .tag-toggle button.is-active {
+      background: linear-gradient(135deg, rgba(65, 195, 255, 0.38), rgba(123, 97, 255, 0.42));
+      border-color: rgba(65, 195, 255, 0.6);
+      box-shadow: 0 18px 36px rgba(65, 195, 255, 0.25);
+    }
+
+    .clear-button {
+      margin-top: 2px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      color: var(--muted);
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      grid-column: 1 / -1;
+      justify-self: start;
+      width: auto;
+      min-width: 0;
+    }
+
+    .clear-button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+
+    .playbook-panel {
+      margin-top: 40px;
+      padding: 28px;
+      border-radius: var(--radius-lg);
+      background: rgba(12, 23, 44, 0.78);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+      backdrop-filter: blur(22px);
+    }
+
+    .playbook-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .playbook-sidebar h2 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    .playbook-sidebar p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .playbook-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .playbook-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(8, 16, 32, 0.9);
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+      position: relative;
+      box-shadow: 0 12px 24px rgba(4, 11, 22, 0.25);
+    }
+
+    .playbook-card-title {
+      display: block;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .playbook-card span {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.01em;
+    }
+
+    .playbook-card-progress {
+      color: rgba(162, 222, 255, 0.85);
+    }
+
+    .playbook-card::after {
+      content: "→";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.4;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .playbook-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 36px rgba(65, 195, 255, 0.2);
+      border-color: rgba(65, 195, 255, 0.45);
+    }
+
+    .playbook-card:hover::after {
+      opacity: 0.7;
+      transform: translate(4px, -50%);
+    }
+
+    .playbook-card.is-active {
+      background: linear-gradient(135deg, rgba(65, 195, 255, 0.2), rgba(123, 97, 255, 0.28));
+      border-color: rgba(65, 195, 255, 0.6);
+      box-shadow: 0 22px 44px rgba(65, 195, 255, 0.22);
+    }
+
+    .playbook-card.is-active::after {
+      content: "✓";
+      opacity: 0.85;
+      transform: translateY(-50%);
+    }
+
+    .playbook-detail {
+      background: rgba(8, 16, 32, 0.88);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 260px;
+      position: relative;
+    }
+
+    .playbook-detail.empty {
+      justify-content: center;
+      color: var(--muted);
+    }
+
+    .playbook-detail h3 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .playbook-summary {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .playbook-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .meta-chip {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(232, 241, 255, 0.82);
+      font-size: 0.72rem;
+    }
+
+    .playbook-progress {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .playbook-progress-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(232, 241, 255, 0.7);
+    }
+
+    .playbook-progress-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .playbook-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: background 0.2s ease, transform 0.2s ease, border 0.2s ease;
+    }
+
+    .playbook-dot.is-complete {
+      background: var(--accent);
+      border-color: rgba(65, 195, 255, 0.7);
+      box-shadow: 0 0 0 2px rgba(65, 195, 255, 0.25);
+    }
+
+    .playbook-steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .playbook-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: border 0.2s ease, background 0.2s ease;
+    }
+
+    .playbook-step.is-complete {
+      border-color: rgba(65, 195, 255, 0.45);
+      background: rgba(65, 195, 255, 0.12);
+    }
+
+    .playbook-step label {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .playbook-step input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: var(--accent);
+    }
+
+    .playbook-step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .playbook-step-desc {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .playbook-actions {
+      margin-top: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .playbook-clear {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: border 0.2s ease, color 0.2s ease, background 0.2s ease;
+    }
+
+    .playbook-clear:hover {
+      border-color: rgba(65, 195, 255, 0.55);
+      color: var(--text);
+      background: rgba(65, 195, 255, 0.16);
+    }
+
+    #command-grid {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .section-block {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .section-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 22px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    article.command-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.3;
+    }
+
+    .env-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .env-badge {
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0b1020;
+      font-weight: 700;
+    }
+
+    .env-badge.env-windows {
+      background: var(--badge-windows);
+    }
+
+    .env-badge.env-wsl {
+      background: var(--badge-wsl);
+    }
+
+    .env-badge.env-all {
+      background: var(--badge-all);
+    }
+
+    .card-description {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+
+    .command-line {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    pre.command-text {
+      flex: 1;
+      margin: 0;
+      background: rgba(0, 0, 0, 0.38);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 0.94rem;
+      line-height: 1.45;
+    }
+
+    pre.command-text code {
+      font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
+      color: var(--text);
+    }
+
+    .copy-button {
+      align-self: center;
+      padding: 10px 14px;
+      background: rgba(65, 195, 255, 0.2);
+      border: 1px solid rgba(65, 195, 255, 0.35);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      min-width: 88px;
+    }
+
+    .copy-button:hover {
+      background: rgba(65, 195, 255, 0.3);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag-list .tag {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.76rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .tag-list .tag:hover {
+      background: rgba(65, 195, 255, 0.22);
+      color: var(--text);
+    }
+
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .callout.tip {
+      background: rgba(65, 195, 255, 0.1);
+      border-color: rgba(65, 195, 255, 0.25);
+      color: rgba(162, 222, 255, 0.94);
+    }
+
+    .callout.caution {
+      background: rgba(255, 109, 93, 0.12);
+      border-color: rgba(255, 109, 93, 0.4);
+      color: #ffc9c4;
+    }
+
+    .follow-up {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .follow-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+    }
+
+    .follow-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.96rem;
+      background: rgba(10, 18, 34, 0.75);
+    }
+
+    .legend {
+      margin-top: 56px;
+      background: rgba(11, 20, 38, 0.8);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 28px;
+    }
+
+    .legend h2 {
+      margin: 0 0 14px;
+      font-size: 1.3rem;
+    }
+
+    .legend ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .legend strong {
+      color: var(--text);
+    }
+
+    .footer {
+      margin-top: 48px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      background: rgba(65, 195, 255, 0.95);
+      color: #041021;
+      padding: 12px 20px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+      box-shadow: 0 18px 36px rgba(65, 195, 255, 0.25);
+    }
+
+    #toast.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 900px) {
+      .playbook-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero, .control-panel {
+        padding: 24px;
+      }
+
+      .playbook-panel {
+        padding: 24px;
+        gap: 22px;
+      }
+
+      .playbook-detail {
+        padding: 22px;
+      }
+
+      .tag-toggle {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 12px;
+      }
+
+      .tag-toggle button {
+        padding: 12px 14px;
+      }
+
+      .command-line {
+        flex-direction: column;
+      }
+
+      .copy-button {
+        align-self: flex-end;
+      }
+
+      #toast {
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, 16px);
+      }
+
+      #toast.is-visible {
+        transform: translate(-50%, 0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">Docker Mastery Toolkit</p>
+      <h1>Windows &amp; WSL Command Cheatsheet</h1>
+      <p class="subhead">Stay in flow with curated commands, ready-to-run flags, and environment-aware tips tailored for Windows Terminal, PowerShell, and WSL pros.</p>
+      <div class="hero-highlights">
+        <span>Environment-aware filters &amp; smart search</span>
+        <span>Copy-to-clipboard ready snippets</span>
+        <span>Compose, BuildKit, networking, and cleanup quick wins</span>
+      </div>
+    </header>
+
+    <section class="control-panel">
+      <div class="control-block">
+        <label for="search-input">Search arsenal</label>
+        <div class="search-wrapper">
+          <input id="search-input" type="search" placeholder="Search for build, compose, prune..." autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="control-block">
+        <span class="control-label">Environment focus</span>
+        <div class="env-toggle">
+          <button type="button" data-env="All" class="toggle is-active">Windows + WSL</button>
+          <button type="button" data-env="Windows" class="toggle">Windows</button>
+          <button type="button" data-env="WSL" class="toggle">WSL</button>
+        </div>
+      </div>
+
+      <div class="control-block control-block-tags">
+        <span class="control-label">Focus tags</span>
+        <div class="tag-toggle">
+          <button type="button" data-tag="setup">Setup</button>
+          <button type="button" data-tag="containers">Containers</button>
+          <button type="button" data-tag="images">Images</button>
+          <button type="button" data-tag="volumes">Volumes</button>
+          <button type="button" data-tag="network">Networking</button>
+          <button type="button" data-tag="compose">Compose</button>
+          <button type="button" data-tag="debug">Diagnostics</button>
+          <button type="button" data-tag="cleanup">Cleanup</button>
+          <button type="button" data-tag="registry">Registry</button>
+          <button type="button" data-tag="security">Security</button>
+          <button type="button" data-tag="productivity">Productivity</button>
+          <button type="button" data-tag="wsl">WSL</button>
+          <button type="button" data-tag="windows">Windows</button>
+          <button id="clear-filters" type="button" class="clear-button">Reset filters</button>
+        </div>
+      </div>
+
+      <div class="control-block stats">
+        <span id="result-count">0 commands ready</span>
+        <span id="active-tags">Tags: All</span>
+      </div>
+    </section>
+
+    <section class="playbook-panel">
+      <div class="playbook-sidebar">
+        <h2>Mission Playbooks</h2>
+        <p>Pick a scenario to auto-focus the cheatsheet and conquer your next Docker mission with guided steps.</p>
+        <div class="playbook-list" id="playbook-list"></div>
+      </div>
+      <div class="playbook-detail empty" id="playbook-detail">
+        <p>Select a mission to see guided checkpoints, live progress, and preloaded focus tags.</p>
+      </div>
+    </section>
+
+    <section id="command-grid"></section>
+
+    <section class="legend">
+      <h2>Make this playbook yours</h2>
+      <ul>
+        <li><strong>Filter with intent.</strong> Combine environment and tags to zoom in on Windows-only commands, WSL workflows, or full-stack Docker combos.</li>
+        <li><strong>Drill in fast.</strong> Click any tag chip on a card to toggle the same filter instantly.</li>
+        <li><strong>Copy clean snippets.</strong> Every command is formatted to paste straight into Windows Terminal, PowerShell, or your favourite WSL shell.</li>
+        <li><strong>Stay sharp.</strong> Tips surface pro-level shortcuts; cautions call out footguns before they bite.</li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <p>Built for builders shipping across Windows and WSL. Happy hacking!</p>
+    </footer>
+  </main>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script type="application/typescript" id="ts-cheatsheet">
+    type Environment = "All" | "Windows" | "WSL";
+
+    type CommandTag =
+      | "setup"
+      | "containers"
+      | "images"
+      | "volumes"
+      | "network"
+      | "compose"
+      | "debug"
+      | "context"
+      | "registry"
+      | "productivity"
+      | "cleanup"
+      | "security"
+      | "wsl"
+      | "windows";
+
+    interface CommandEntry {
+      id: string;
+      section: string;
+      title: string;
+      command: string;
+      description: string;
+      environment: Environment[];
+      tags: CommandTag[];
+      tip?: string;
+      caution?: string;
+      followUp?: string[];
+    }
+
+    interface PlaybookStep {
+      title: string;
+      description?: string;
+    }
+
+    interface Playbook {
+      id: string;
+      title: string;
+      summary: string;
+      tags: CommandTag[];
+      environment?: Environment;
+      steps: PlaybookStep[];
+    }
+
+    interface RenderState {
+      env: Environment;
+      search: string;
+      tags: Set<CommandTag>;
+      playbookId: string | null;
+    }
+
+    const SECTION_SEQUENCE: string[] = [
+      "Foundation",
+      "Containers",
+      "Images & Registry",
+      "Volumes & Files",
+      "Networking",
+      "Compose & Orchestration",
+      "Diagnostics & Cleanup",
+      "Productivity Boosters"
+    ];
+
+    const TAG_LABELS: Record<CommandTag, string> = {
+      setup: "Setup",
+      containers: "Containers",
+      images: "Images",
+      volumes: "Volumes",
+      network: "Networking",
+      compose: "Compose",
+      debug: "Diagnostics",
+      context: "Context",
+      registry: "Registry",
+      productivity: "Productivity",
+      cleanup: "Cleanup",
+      security: "Security",
+      wsl: "WSL",
+      windows: "Windows"
+    };
+
+    const ENV_LABELS: Record<Environment, string> = {
+      All: "Windows + WSL",
+      Windows: "Windows",
+      WSL: "WSL"
+    };
+
+    const commandData: CommandEntry[] = [
+      {
+        id: "foundation-wsl-install",
+        section: "Foundation",
+        title: "Install WSL with Ubuntu (PowerShell)",
+        command: "wsl --install -d Ubuntu",
+        description: "Bootstraps a Ubuntu distribution on WSL 2 so you can run the native Linux Docker engine without leaving Windows.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl"],
+        tip: "Reboot after the setup finishes, then launch Ubuntu to complete the first-time user creation."
+      },
+      {
+        id: "foundation-wsl-default-v2",
+        section: "Foundation",
+        title: "Ensure WSL uses version 2",
+        command: "wsl --set-default-version 2",
+        description: "Forces all newly installed distributions to run on the WSL 2 architecture, which delivers full Docker compatibility.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl"],
+        tip: "Confirm with `wsl -l -v` — the version column should read 2."
+      },
+      {
+        id: "foundation-wsl-list",
+        section: "Foundation",
+        title: "View installed WSL distributions",
+        command: "wsl -l -v",
+        description: "Lists each distribution and its WSL version so you can double-check Docker will target the correct backend.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl", "debug"],
+        tip: "Look for the * marker to spot the default distribution Docker Desktop will use."
+      },
+      {
+        id: "foundation-wsl-update",
+        section: "Foundation",
+        title: "Update the WSL kernel",
+        command: "wsl --update",
+        description: "Fetches and applies the latest WSL kernel, which can resolve Docker filesystem and networking quirks.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl", "security"],
+        caution: "Requires administrator privileges and a restart of WSL (`wsl --shutdown`)."
+      },
+      {
+        id: "foundation-wsl-shutdown",
+        section: "Foundation",
+        title: "Restart the WSL engine",
+        command: "wsl --shutdown",
+        description: "Gracefully stops all running WSL distributions — handy before restarting Docker Desktop or applying kernel updates.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl", "debug"],
+        tip: "Pair with `wsl --update` when troubleshooting stubborn networking issues."
+      },
+      {
+        id: "foundation-wsl-install-docker",
+        section: "Foundation",
+        title: "Install Docker engine inside WSL",
+        command: "sudo apt update && sudo apt install -y docker.io docker-buildx docker-compose-plugin",
+        description: "Installs the upstream Docker packages inside your Linux distribution — ideal for a lean CLI-only setup.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl", "compose"],
+        tip: "Ubuntu 22.04+ ships with BuildKit and Compose v2 out of the box."
+      },
+      {
+        id: "foundation-wsl-permissions",
+        section: "Foundation",
+        title: "Grant non-root Docker access (WSL)",
+        command: "sudo usermod -aG docker $USER",
+        description: "Adds your user to the docker group so you can run Docker commands without prefacing them with `sudo`.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl"],
+        caution: "Log out of the distro or run `newgrp docker` for the change to take effect."
+      },
+      {
+        id: "foundation-wsl-service-status",
+        section: "Foundation",
+        title: "Check Docker daemon status",
+        command: "sudo service docker status",
+        description: "Confirms the dockerd service is up inside WSL. Essential when commands hang or containers refuse to start.",
+        environment: ["WSL"],
+        tags: ["debug", "setup", "wsl"],
+        tip: "If it reads inactive, start it with `sudo service docker start`."
+      },
+      {
+        id: "foundation-wsl-service-start",
+        section: "Foundation",
+        title: "Start Docker daemon now",
+        command: "sudo service docker start",
+        description: "Manually starts dockerd when you run WSL without systemd or after a system restart.",
+        environment: ["WSL"],
+        tags: ["setup", "wsl"],
+        tip: "Enable systemd in `/etc/wsl.conf` for automatic startup on future sessions."
+      },
+      {
+        id: "foundation-windows-launch",
+        section: "Foundation",
+        title: "Launch Docker Desktop (PowerShell)",
+        command: "& \"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe\"",
+        description: "Starts Docker Desktop from PowerShell, letting you script startup in profiles or scheduled tasks.",
+        environment: ["Windows"],
+        tags: ["setup", "windows"],
+        tip: "Combine with `Start-Process -WindowStyle Hidden` to launch Docker quietly."
+      },
+      {
+        id: "foundation-windows-restart-service",
+        section: "Foundation",
+        title: "Restart Docker Desktop service",
+        command: "Get-Service com.docker.service | Restart-Service",
+        description: "Resets the background VM that powers Docker Desktop, clearing many stuck-startup issues.",
+        environment: ["Windows"],
+        tags: ["windows", "debug", "setup"],
+        caution: "Interrupts running containers; warn teammates before restarting shared environments."
+      },
+      {
+        id: "foundation-context-ls",
+        section: "Foundation",
+        title: "List Docker contexts",
+        command: "docker context ls",
+        description: "Shows every Docker endpoint your CLI can target — Desktop, remote SSH hosts, or cloud providers.",
+        environment: ["All"],
+        tags: ["context", "setup"],
+        tip: "Look for `desktop-linux` when using Docker Desktop and `default` when targeting the local socket."
+      },
+      {
+        id: "foundation-context-use",
+        section: "Foundation",
+        title: "Switch Docker context",
+        command: "docker context use default",
+        description: "Points the CLI to the local Docker engine. Swap to other contexts like `desktop-linux` or remote hosts as needed.",
+        environment: ["All"],
+        tags: ["context", "setup"],
+        tip: "Run `docker context inspect <name>` to verify the socket path and TLS settings."
+      },
+      {
+        id: "foundation-docker-version",
+        section: "Foundation",
+        title: "Check Docker client & server versions",
+        command: "docker version",
+        description: "Displays both client and server versions so you can confirm Windows, WSL, and Desktop are in sync.",
+        environment: ["All"],
+        tags: ["debug", "setup"],
+        tip: "Add `--format '{{json .}}'` to script version checks in CI."
+      },
+      {
+        id: "foundation-docker-info",
+        section: "Foundation",
+        title: "Inspect Docker engine configuration",
+        command: "docker info",
+        description: "Summarizes core settings — storage driver, default runtime, resource limits, and connected registries.",
+        environment: ["All"],
+        tags: ["debug", "setup"],
+        tip: "If BuildKit is disabled, set `DOCKER_BUILDKIT=1` to speed up builds."
+      },
+      {
+        id: "containers-ps-friendly",
+        section: "Containers",
+        title: "List running containers with friendly columns",
+        command: "docker ps --format \"table {{.Names}}\\t{{.Status}}\\t{{.Ports}}\"",
+        description: "Provides an at-a-glance table of active containers, their status, and exposed ports.",
+        environment: ["All"],
+        tags: ["containers", "debug"],
+        tip: "Append `--filter status=running` to target only healthy workloads."
+      },
+      {
+        id: "containers-ps-exited",
+        section: "Containers",
+        title: "Find stopped containers",
+        command: "docker ps -a --filter status=exited",
+        description: "Surfaces containers safe to prune, reducing clutter from throwaway runs.",
+        environment: ["All"],
+        tags: ["containers", "cleanup"],
+        tip: "Combine with `docker rm $(docker ps -qa --filter status=exited)` for bulk cleanup."
+      },
+      {
+        id: "containers-run-hello",
+        section: "Containers",
+        title: "Smoke test Docker engine",
+        command: "docker run --rm hello-world",
+        description: "Pulls and runs Docker's hello-world image to validate networking, DNS, and permissions.",
+        environment: ["All"],
+        tags: ["containers", "debug", "setup"],
+        tip: "Add `--platform linux/amd64` when building on ARM-based Windows hardware."
+      },
+      {
+        id: "containers-run-shell",
+        section: "Containers",
+        title: "Launch an interactive Ubuntu shell",
+        command: "docker run -it --rm ubuntu bash",
+        description: "Spins up a temporary container so you can test commands in a clean Linux environment.",
+        environment: ["All"],
+        tags: ["containers", "productivity"],
+        tip: "Use `--mount type=bind,src=\"${PWD}\",target=/workspace` to experiment against local code.",
+        followUp: ["exit"]
+      },
+      {
+        id: "containers-exec",
+        section: "Containers",
+        title: "Exec into a running container",
+        command: "docker exec -it <container> sh",
+        description: "Attach an interactive shell to a container without restarting it — perfect for live debugging.",
+        environment: ["All"],
+        tags: ["containers", "debug"],
+        tip: "Switch `sh` for `/bin/bash` or `powershell` depending on the image."
+      },
+      {
+        id: "containers-logs-follow",
+        section: "Containers",
+        title: "Stream container logs",
+        command: "docker logs -f --tail 100 <container>",
+        description: "Streams the latest container output, keeping you close to runtime behaviour.",
+        environment: ["All"],
+        tags: ["containers", "debug"],
+        tip: "Use `--since 10m` during incident response to focus on recent events."
+      },
+      {
+        id: "containers-stop",
+        section: "Containers",
+        title: "Gracefully stop a container",
+        command: "docker stop <container>",
+        description: "Sends SIGTERM followed by SIGKILL after the timeout to halt a container cleanly.",
+        environment: ["All"],
+        tags: ["containers"],
+        tip: "Adjust the timeout with `--time 30` for workloads that need extra shutdown time."
+      },
+      {
+        id: "containers-start",
+        section: "Containers",
+        title: "Restart a stopped container",
+        command: "docker start <container>",
+        description: "Revives containers without rebuilding images or re-running `docker run`.",
+        environment: ["All"],
+        tags: ["containers"],
+        tip: "Pair with `docker inspect <container> --format '{{.Id}}'` to script restarts."
+      },
+      {
+        id: "containers-rm",
+        section: "Containers",
+        title: "Remove a container",
+        command: "docker rm <container>",
+        description: "Deletes the container filesystem while keeping the image available for future runs.",
+        environment: ["All"],
+        tags: ["containers", "cleanup"],
+        caution: "Use `-f` to remove stubborn containers, but confirm nothing critical is running."
+      },
+      {
+        id: "containers-stats",
+        section: "Containers",
+        title: "Monitor live container resources",
+        command: "docker stats --all",
+        description: "Reports CPU, memory, and I/O metrics for active containers — almost like `top` for Docker.",
+        environment: ["All"],
+        tags: ["containers", "debug"],
+        tip: "Use `--format` to capture metrics in JSON for dashboards."
+      },
+      {
+        id: "containers-cp",
+        section: "Containers",
+        title: "Copy files out of a container",
+        command: "docker cp <container>:/var/log/app.log ./app.log",
+        description: "Extracts files for offline inspection without needing shell access inside the container.",
+        environment: ["All"],
+        tags: ["containers", "debug", "productivity"],
+        tip: "Reverse the order to copy files into a running container."
+      },
+      {
+        id: "images-ls",
+        section: "Images & Registry",
+        title: "List local images with size",
+        command: "docker image ls --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\"",
+        description: "Displays repository, tag, and size so you can spot outdated or heavyweight images.",
+        environment: ["All"],
+        tags: ["images", "cleanup"],
+        tip: "Add `--digests` to include image digests for supply-chain verification."
+      },
+      {
+        id: "images-pull",
+        section: "Images & Registry",
+        title: "Pull an image",
+        command: "docker pull <image>:<tag>",
+        description: "Fetches the specified image and tag from the registry, respecting the active Docker context.",
+        environment: ["All"],
+        tags: ["images", "registry"],
+        tip: "Set `DOCKER_DEFAULT_PLATFORM` to pull multi-architecture images predictably."
+      },
+      {
+        id: "images-build",
+        section: "Images & Registry",
+        title: "Build an image from the current directory",
+        command: "docker build -t <repo>:<tag> .",
+        description: "Packages your application into an image using the Dockerfile in the working directory.",
+        environment: ["All"],
+        tags: ["images", "productivity"],
+        tip: "Use `--progress=plain` to surface detailed BuildKit output during troubleshooting."
+      },
+      {
+        id: "images-buildx-multiarch",
+        section: "Images & Registry",
+        title: "Multi-platform BuildKit build",
+        command: "docker buildx build --platform linux/amd64,linux/arm64 -t <repo>:multi .",
+        description: "Leverages BuildKit to produce multi-architecture images from Windows or WSL with a single command.",
+        environment: ["All"],
+        tags: ["images", "registry", "productivity"],
+        tip: "Append `--push` to publish directly to a registry without storing every platform locally."
+      },
+      {
+        id: "images-tag",
+        section: "Images & Registry",
+        title: "Retag an image",
+        command: "docker tag <source-image> <registry>/<repo>:<tag>",
+        description: "Creates a new reference to an existing image so you can push it to another registry or version.",
+        environment: ["All"],
+        tags: ["images", "registry"],
+        tip: "Retag just before release to keep semantic versioning in sync."
+      },
+      {
+        id: "images-push",
+        section: "Images & Registry",
+        title: "Push to a registry",
+        command: "docker push <registry>/<repo>:<tag>",
+        description: "Uploads the tagged image to your registry, using credentials from `docker login`.",
+        environment: ["All"],
+        tags: ["images", "registry"],
+        tip: "For Azure or AWS CLIs, log in via platform tools before pushing."
+      },
+      {
+        id: "images-login",
+        section: "Images & Registry",
+        title: "Authenticate to a registry",
+        command: "docker login --username <user> <registry>",
+        description: "Stores encrypted credentials locally so pushes and pulls to private registries succeed.",
+        environment: ["All"],
+        tags: ["images", "registry", "security"],
+        tip: "Use access tokens instead of passwords wherever the registry supports them."
+      },
+      {
+        id: "images-prune",
+        section: "Images & Registry",
+        title: "Prune dangling images",
+        command: "docker image prune -a --filter \"until=72h\"",
+        description: "Frees disk space by removing images that have not been used in the last 72 hours.",
+        environment: ["All"],
+        tags: ["images", "cleanup"],
+        caution: "Double-check before pruning on CI agents that share caches across builds."
+      },
+      {
+        id: "images-history",
+        section: "Images & Registry",
+        title: "See image layer history",
+        command: "docker history --no-trunc <image>",
+        description: "Shows each layer's size and command so you can optimize Dockerfiles.",
+        environment: ["All"],
+        tags: ["images", "debug"],
+        tip: "Pipe through `grep` to identify layers that install build-only dependencies."
+      },
+      {
+        id: "volumes-ls",
+        section: "Volumes & Files",
+        title: "List volumes",
+        command: "docker volume ls",
+        description: "Displays named volumes so you can audit persistent storage attached to your containers.",
+        environment: ["All"],
+        tags: ["volumes"],
+        tip: "Use labels when creating volumes to track ownership across teams."
+      },
+      {
+        id: "volumes-inspect",
+        section: "Volumes & Files",
+        title: "Inspect a volume",
+        command: "docker volume inspect <name>",
+        description: "Outputs mount points and driver details — essential when debugging bind mounts between Windows and WSL.",
+        environment: ["All"],
+        tags: ["volumes", "debug"],
+        tip: "Add `--format '{{ .Mountpoint }}'` to quickly open the host folder."
+      },
+      {
+        id: "volumes-probe",
+        section: "Volumes & Files",
+        title: "Browse data inside a volume",
+        command: "docker run --rm -v <name>:/data busybox ls -al /data",
+        description: "Launches a disposable BusyBox container to inspect files stored in a named volume.",
+        environment: ["All"],
+        tags: ["volumes", "debug"],
+        tip: "Swap `ls` for `sh` to open an interactive shell inside the volume."
+      },
+      {
+        id: "volumes-bind",
+        section: "Volumes & Files",
+        title: "Bind mount the current folder",
+        command: "docker run --rm -v \"${PWD}:/workspace\" -w /workspace node:20 npm test",
+        description: "Mounts your project into a container so you can run Node tooling without installing it locally.",
+        environment: ["All"],
+        tags: ["volumes", "productivity"],
+        tip: "In Windows Command Prompt, replace `${PWD}` with `%cd%`; in WSL use `$(pwd)`."
+      },
+      {
+        id: "volumes-prune",
+        section: "Volumes & Files",
+        title: "Remove unused volumes",
+        command: "docker volume prune --force",
+        description: "Deletes dangling volumes, reclaiming disk space consumed by old compose projects.",
+        environment: ["All"],
+        tags: ["volumes", "cleanup"],
+        caution: "Volumes referenced by stopped containers will be deleted; back up data first."
+      },
+      {
+        id: "network-ls",
+        section: "Networking",
+        title: "List Docker networks",
+        command: "docker network ls",
+        description: "Shows bridge, host, and custom networks so you can reason about container connectivity.",
+        environment: ["All"],
+        tags: ["network"],
+        tip: "Use labels to distinguish ephemeral dev networks from shared infrastructure."
+      },
+      {
+        id: "network-create",
+        section: "Networking",
+        title: "Create a project-specific network",
+        command: "docker network create --driver bridge devnet",
+        description: "Sets up an isolated bridge network that keeps container traffic scoped to your project.",
+        environment: ["All"],
+        tags: ["network", "productivity"],
+        tip: "Compose stacks join automatically — keep names consistent across environments."
+      },
+      {
+        id: "network-run",
+        section: "Networking",
+        title: "Attach a container to a network",
+        command: "docker run --rm --network devnet --name api-scratch curlimages/curl curl http://db:5432",
+        description: "Tests connectivity between services on a custom network without editing compose files.",
+        environment: ["All"],
+        tags: ["network", "debug"],
+        tip: "Swap `curl` for `psql` or other client tools to validate protocols."
+      },
+      {
+        id: "network-inspect",
+        section: "Networking",
+        title: "Inspect a network",
+        command: "docker network inspect devnet",
+        description: "Reveals container attachments, IP ranges, and DNS aliases for a Docker network.",
+        environment: ["All"],
+        tags: ["network", "debug"],
+        tip: "Combine with `--format '{{json .Containers}}'` to include in incident reports."
+      },
+      {
+        id: "network-port",
+        section: "Networking",
+        title: "Check published ports",
+        command: "docker port <container>",
+        description: "Shows the host-to-container port mappings so you know which port to hit from Windows or WSL.",
+        environment: ["All"],
+        tags: ["network", "debug"],
+        tip: "Run from Windows Terminal to confirm the host port is exposed outside WSL."
+      },
+      {
+        id: "network-windows-firewall",
+        section: "Networking",
+        title: "Allow Docker 2375 (lab use only)",
+        command: "netsh advfirewall firewall add rule name=\"Docker 2375\" dir=in action=allow protocol=TCP localport=2375",
+        description: "Opens port 2375 so Windows-native tools can talk to an unsecured Docker socket.",
+        environment: ["Windows"],
+        tags: ["network", "debug", "windows"],
+        caution: "Only use on isolated networks — exposing 2375 without TLS grants full control to anyone on the host."
+      },
+      {
+        id: "network-wsl-docker-host",
+        section: "Networking",
+        title: "Point WSL CLI to Docker Desktop",
+        command: "export DOCKER_HOST=tcp://localhost:2375",
+        description: "Lets WSL-based CLI tools talk to Docker Desktop's engine when the Unix socket is unavailable.",
+        environment: ["WSL"],
+        tags: ["network", "wsl", "context"],
+        caution: "Enable the insecure 2375 option in Docker Desktop first; prefer `docker context` for production."
+      },
+      {
+        id: "compose-init",
+        section: "Compose & Orchestration",
+        title: "Bootstrap a Compose file",
+        command: "docker compose init",
+        description: "Starts an interactive wizard to create a Docker Compose file with sensible defaults.",
+        environment: ["All"],
+        tags: ["compose", "setup", "productivity"],
+        tip: "Answer the prompts from Windows or WSL — the file lands in the current directory."
+      },
+      {
+        id: "compose-up-detached",
+        section: "Compose & Orchestration",
+        title: "Start services in the background",
+        command: "docker compose up -d",
+        description: "Launches the services defined in `docker-compose.yml` in detached mode.",
+        environment: ["All"],
+        tags: ["compose", "containers"],
+        tip: "Add `--remove-orphans` to clean up services dropped from the file."
+      },
+      {
+        id: "compose-up-build",
+        section: "Compose & Orchestration",
+        title: "Rebuild images and start services",
+        command: "docker compose up --build",
+        description: "Forces image rebuilds before starting services, ensuring code changes are included.",
+        environment: ["All"],
+        tags: ["compose", "images"],
+        tip: "Pair with `--no-cache` when testing Dockerfile updates."
+      },
+      {
+        id: "compose-logs",
+        section: "Compose & Orchestration",
+        title: "Tail service logs",
+        command: "docker compose logs -f <service>",
+        description: "Aggregates logs from a single service or all services for fast troubleshooting.",
+        environment: ["All"],
+        tags: ["compose", "debug"],
+        tip: "Add `--since 5m` when chasing down recent regressions."
+      },
+      {
+        id: "compose-exec",
+        section: "Compose & Orchestration",
+        title: "Open a shell in a compose service",
+        command: "docker compose exec <service> sh",
+        description: "Executes commands inside a service container without rebuilding or restarting the stack.",
+        environment: ["All"],
+        tags: ["compose", "debug", "productivity"],
+        tip: "Use `-e NODE_ENV=development` to override environment variables for diagnostics."
+      },
+      {
+        id: "compose-config",
+        section: "Compose & Orchestration",
+        title: "Render the full Compose configuration",
+        command: "docker compose config",
+        description: "Flattens your Compose files into the final configuration Docker will apply.",
+        environment: ["All"],
+        tags: ["compose", "debug"],
+        tip: "Great for validating overrides before pushing changes to teammates."
+      },
+      {
+        id: "compose-down-volumes",
+        section: "Compose & Orchestration",
+        title: "Stop and clean up a stack",
+        command: "docker compose down --volumes --remove-orphans",
+        description: "Tears down services, networks, and volumes created by the current project.",
+        environment: ["All"],
+        tags: ["compose", "cleanup"],
+        caution: "Removing volumes deletes databases; export data first."
+      },
+      {
+        id: "compose-watch",
+        section: "Compose & Orchestration",
+        title: "Enable file watch rebuilds",
+        command: "docker compose watch",
+        description: "Auto-rebuilds and restarts services when source files change — perfect for iterative development.",
+        environment: ["All"],
+        tags: ["compose", "productivity"],
+        tip: "Mark hot-reload services with `watch` rules in Compose for granular control."
+      },
+      {
+        id: "diagnostics-system-df",
+        section: "Diagnostics & Cleanup",
+        title: "Summarize Docker disk usage",
+        command: "docker system df",
+        description: "Breaks down space used by images, containers, and volumes to spot runaway growth.",
+        environment: ["All"],
+        tags: ["cleanup", "debug"],
+        tip: "Run before and after cleanup tasks to quantify wins."
+      },
+      {
+        id: "diagnostics-system-prune",
+        section: "Diagnostics & Cleanup",
+        title: "Aggressively clean Docker resources",
+        command: "docker system prune -a --volumes",
+        description: "Removes stopped containers, dangling images, networks, and volumes for a fresh slate.",
+        environment: ["All"],
+        tags: ["cleanup"],
+        caution: "Irreversible — avoid on shared runners or when caches speed up builds."
+      },
+      {
+        id: "diagnostics-builder-prune",
+        section: "Diagnostics & Cleanup",
+        title: "Prune old BuildKit caches",
+        command: "docker builder prune --filter \"until=24h\"",
+        description: "Clears stale BuildKit cache entries so disk usage stays predictable.",
+        environment: ["All"],
+        tags: ["cleanup", "images"],
+        tip: "Use `--keep-storage 5GB` to leave hot layers untouched."
+      },
+      {
+        id: "diagnostics-inspect",
+        section: "Diagnostics & Cleanup",
+        title: "Inspect any Docker resource",
+        command: "docker inspect <resource>",
+        description: "Returns full JSON describing containers, images, networks, or volumes.",
+        environment: ["All"],
+        tags: ["debug"],
+        tip: "Pipe through `jq` or `ConvertFrom-Json` in PowerShell to extract specific fields."
+      },
+      {
+        id: "diagnostics-events",
+        section: "Diagnostics & Cleanup",
+        title: "Stream Docker events",
+        command: "docker events --since 1h",
+        description: "Watches Docker's event bus to capture container lifecycle changes and warnings.",
+        environment: ["All"],
+        tags: ["debug"],
+        tip: "Filter by `--filter type=container --filter event=restart` when chasing flapping services."
+      },
+      {
+        id: "diagnostics-wsl-status",
+        section: "Diagnostics & Cleanup",
+        title: "Check WSL health",
+        command: "wsl --status",
+        description: "Reports the default distribution, running state, and WSL version to spot configuration drift.",
+        environment: ["WSL"],
+        tags: ["wsl", "debug"],
+        tip: "If `Default Version` is 1, rerun `wsl --set-default-version 2`."
+      },
+      {
+        id: "diagnostics-wsl-terminate-docker",
+        section: "Diagnostics & Cleanup",
+        title: "Restart Docker Desktop's WSL distro",
+        command: "wsl --terminate docker-desktop",
+        description: "Force quits the hidden `docker-desktop` distro so Docker Desktop can relaunch it cleanly.",
+        environment: ["Windows"],
+        tags: ["windows", "debug"],
+        caution: "Interrupts running containers momentarily; pair with `wsl --shutdown` for a full reset."
+      },
+      {
+        id: "diagnostics-context-inspect",
+        section: "Diagnostics & Cleanup",
+        title: "Inspect Docker Desktop context",
+        command: "docker context inspect desktop-linux",
+        description: "Shows the socket path and credentials Docker Desktop exposes to WSL and Windows terminals.",
+        environment: ["All"],
+        tags: ["context", "debug"],
+        tip: "Use the `Endpoints.docker.Host` value to configure remote Docker tools."
+      },
+      {
+        id: "productivity-scan",
+        section: "Productivity Boosters",
+        title: "Scan images for vulnerabilities",
+        command: "docker scan <image>",
+        description: "Runs Snyk-powered security scans directly from the CLI.",
+        environment: ["All"],
+        tags: ["security", "productivity"],
+        tip: "Authenticate with `docker scan --login` once to reuse credentials."
+      },
+      {
+        id: "productivity-update-resources",
+        section: "Productivity Boosters",
+        title: "Tune container resource limits",
+        command: "docker update --memory 2g --cpus 1.5 <container>",
+        description: "Applies new resource limits to a running container without recreating it.",
+        environment: ["All"],
+        tags: ["productivity", "containers"],
+        caution: "The container may restart if you set limits below current usage."
+      },
+      {
+        id: "productivity-compose-cp",
+        section: "Productivity Boosters",
+        title: "Copy files with Docker Compose",
+        command: "docker compose cp <service>:/src/report.txt ./report.txt",
+        description: "Transfers files between services and your host without needing container IDs.",
+        environment: ["All"],
+        tags: ["compose", "productivity"],
+        tip: "Add `-a` to preserve file permissions on Linux-bound projects."
+      },
+      {
+        id: "productivity-buildx-bake",
+        section: "Productivity Boosters",
+        title: "Orchestrate builds with bake",
+        command: "docker buildx bake --set *.platform=linux/amd64,linux/arm64",
+        description: "Applies a build matrix defined in bake files for repeatable multi-platform builds.",
+        environment: ["All"],
+        tags: ["images", "productivity"],
+        tip: "Combine with `--load` locally or `--push` in CI pipelines."
+      },
+      {
+        id: "productivity-context-create",
+        section: "Productivity Boosters",
+        title: "Create a custom WSL context",
+        command: "docker context create wsl --docker \"host=unix:///var/run/docker.sock\"",
+        description: "Builds a named context that targets the native WSL socket, making it easy to switch between Desktop and distro engines.",
+        environment: ["WSL"],
+        tags: ["context", "wsl", "productivity"],
+        tip: "Use `docker context use wsl` before running heavy builds to stay inside Linux."
+      },
+      {
+        id: "productivity-windows-env",
+        section: "Productivity Boosters",
+        title: "Point Windows CLI to Linux engine",
+        command: "setx DOCKER_HOST npipe:////./pipe/dockerDesktopLinuxEngine",
+        description: "Persists the Docker host path so Windows-native terminals talk to Docker Desktop's Linux engine by default.",
+        environment: ["Windows"],
+        tags: ["windows", "context", "productivity"],
+        caution: "Restart terminals after running `setx`; the change does not affect current sessions."
+      },
+      {
+        id: "productivity-compose-ls",
+        section: "Productivity Boosters",
+        title: "List active compose projects",
+        command: "docker compose ls",
+        description: "Shows every compose project running on the current Docker engine, including ones launched by Docker Desktop.",
+        environment: ["All"],
+        tags: ["compose", "productivity"],
+        tip: "Use `--format '{{.Name}}\\t{{.Status}}'` for status dashboards."
+      }
+    ];
+
+    const playbookData: Playbook[] = [
+      {
+        id: "playbook-wsl-liftoff",
+        title: "WSL Docker Liftoff",
+        summary: "Provision WSL 2, install the Docker engine, and ship your first container without surprises.",
+        tags: ["setup", "wsl", "containers"],
+        environment: "WSL",
+        steps: [
+          {
+            title: "Install and upgrade WSL 2",
+            description: "From Windows Terminal run `wsl --install -d Ubuntu`, reboot, then confirm WSL 2 with `wsl --set-default-version 2`."
+          },
+          {
+            title: "Patch the kernel",
+            description: "Keep networking and filesystem smooth by executing `wsl --update` followed by `wsl --shutdown`."
+          },
+          {
+            title: "Install Docker inside WSL",
+            description: "Launch your distro and run `sudo apt update && sudo apt install -y docker.io docker-buildx docker-compose-plugin`."
+          },
+          {
+            title: "Grant access and validate",
+            description: "Add your user with `sudo usermod -aG docker $USER`, reopen the shell, and run `docker run --rm hello-world`."
+          }
+        ]
+      },
+      {
+        id: "playbook-compose-rescue",
+        title: "Compose Rescue Mission",
+        summary: "Diagnose and steady a flaky compose stack with structured triage steps.",
+        tags: ["compose", "debug", "cleanup"],
+        steps: [
+          {
+            title: "Map running projects",
+            description: "Audit active applications with `docker compose ls` to spot zombie stacks."
+          },
+          {
+            title: "Tail the failing service",
+            description: "Use `docker compose logs -f <service>` to capture stack traces as they happen."
+          },
+          {
+            title: "Rebuild with confidence",
+            description: "Trigger `docker compose up --build --remove-orphans` to bake in fixes and drop stale containers."
+          },
+          {
+            title: "Reset state safely",
+            description: "Finish with `docker compose down --volumes` and a targeted `docker volume prune --force` if needed."
+          }
+        ]
+      },
+      {
+        id: "playbook-multi-arch-release",
+        title: "Multi-arch Release Train",
+        summary: "Build, scan, and publish a production-ready multi-platform image in one flow.",
+        tags: ["images", "registry", "productivity", "security"],
+        steps: [
+          {
+            title: "Warm up BuildKit",
+            description: "Verify your builder with `docker buildx ls` and switch contexts if you need Desktop's Linux engine."
+          },
+          {
+            title: "Compile multi-platform artifacts",
+            description: "Run `docker buildx build --platform linux/amd64,linux/arm64 -t <repo>:candidate . --push` to publish both arches."
+          },
+          {
+            title: "Tag the release",
+            description: "Version the image with `docker tag <repo>:candidate <registry>/<repo>:<tag>` before pushing."
+          },
+          {
+            title: "Scan before ship",
+            description: "Execute `docker scan <registry>/<repo>:<tag>` and address critical findings on the spot."
+          }
+        ]
+      },
+      {
+        id: "playbook-cleanroom",
+        title: "Cleanroom Reset",
+        summary: "Reclaim disk space and clear drift across containers, images, and volumes.",
+        tags: ["cleanup", "images", "volumes"],
+        steps: [
+          {
+            title: "Quantify usage",
+            description: "Start with `docker system df` to see where space is going."
+          },
+          {
+            title: "Prune aggressively (with care)",
+            description: "Run `docker system prune -a --volumes` when you're ready for a blank slate."
+          },
+          {
+            title: "Trim build caches",
+            description: "Follow up with `docker builder prune --filter \"until=24h\"` to drop stale layers."
+          },
+          {
+            title: "Review surviving volumes",
+            description: "Finish the sweep via `docker volume ls` and inspect anything unexpected."
+          }
+        ]
+      }
+    ];
+
+    const playbookProgress = new Map<string, Set<number>>();
+
+    const state: RenderState = {
+      env: "All",
+      search: "",
+      tags: new Set<CommandTag>(),
+      playbookId: null
+    };
+
+    let commandGrid: HTMLElement;
+    let searchInput: HTMLInputElement;
+    let envButtons: HTMLButtonElement[] = [];
+    let tagButtons: HTMLButtonElement[] = [];
+    let resultCountEl: HTMLElement;
+    let activeTagsEl: HTMLElement;
+    let clearFiltersButton: HTMLButtonElement | null = null;
+    let toastEl: HTMLDivElement | null = null;
+    let toastTimer: number | undefined;
+    let playbookListEl: HTMLElement | null = null;
+    let playbookDetailEl: HTMLElement | null = null;
+    let previousEnv: Environment = "All";
+
+    initializeCheatSheet();
+
+    function initializeCheatSheet(): void {
+      const grid = document.querySelector<HTMLElement>("#command-grid");
+      const search = document.querySelector<HTMLInputElement>("#search-input");
+      const count = document.querySelector<HTMLElement>("#result-count");
+      const active = document.querySelector<HTMLElement>("#active-tags");
+      const toast = document.querySelector<HTMLDivElement>("#toast");
+      const clear = document.querySelector<HTMLButtonElement>("#clear-filters");
+      const playbookList = document.querySelector<HTMLElement>("#playbook-list");
+      const playbookDetail = document.querySelector<HTMLElement>("#playbook-detail");
+
+      if (!grid || !search || !count || !active || !playbookList || !playbookDetail) {
+        throw new Error("Cheatsheet markup is incomplete.");
+      }
+
+      commandGrid = grid;
+      searchInput = search;
+      resultCountEl = count;
+      activeTagsEl = active;
+      toastEl = toast ?? null;
+      clearFiltersButton = clear ?? null;
+      playbookListEl = playbookList;
+      playbookDetailEl = playbookDetail;
+
+      envButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-env]"));
+      tagButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-tag]"));
+
+      searchInput.addEventListener("input", () => {
+        if (state.playbookId) {
+          invalidateActivePlaybook();
+        }
+        state.search = searchInput.value;
+        render();
+      });
+
+      envButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const env = (button.dataset.env ?? "All") as Environment;
+          const nextEnv = state.env === env ? "All" : env;
+          if (state.playbookId) {
+            invalidateActivePlaybook();
+          }
+          state.env = nextEnv;
+          updateEnvButtons();
+          render();
+        });
+      });
+
+      tagButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const tag = button.dataset.tag as CommandTag | undefined;
+          if (!tag) {
+            return;
+          }
+          toggleTag(tag);
+        });
+      });
+
+      if (clearFiltersButton) {
+        clearFiltersButton.addEventListener("click", () => {
+          state.playbookId = null;
+          state.env = "All";
+          state.search = "";
+          state.tags.clear();
+          previousEnv = "All";
+          searchInput.value = "";
+          updateEnvButtons();
+          updateTagButtons();
+          render();
+        });
+      }
+
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function toggleTag(tag: CommandTag): void {
+      if (state.playbookId) {
+        invalidateActivePlaybook();
+      }
+      if (state.tags.has(tag)) {
+        state.tags.delete(tag);
+      } else {
+        state.tags.add(tag);
+      }
+      updateTagButtons();
+      render();
+    }
+
+    function updateEnvButtons(): void {
+      envButtons.forEach((button) => {
+        const env = (button.dataset.env ?? "All") as Environment;
+        const isActive = state.env === "All" ? env === "All" : state.env === env;
+        button.classList.toggle("is-active", isActive);
+      });
+    }
+
+    function updateTagButtons(): void {
+      tagButtons.forEach((button) => {
+        const tag = button.dataset.tag as CommandTag | undefined;
+        if (!tag) {
+          return;
+        }
+        button.classList.toggle("is-active", state.tags.has(tag));
+      });
+      renderTagSummary();
+    }
+
+    function render(): void {
+      const filtered = filterCommands(commandData, state);
+      renderCount(filtered.length);
+      renderTagSummary();
+      renderSections(filtered);
+      renderPlaybooks();
+    }
+
+    function renderPlaybooks(): void {
+      if (!playbookListEl || !playbookDetailEl) {
+        return;
+      }
+
+      playbookListEl.innerHTML = "";
+
+      playbookData.forEach((playbook) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "playbook-card";
+        const isActive = state.playbookId === playbook.id;
+        if (isActive) {
+          card.classList.add("is-active");
+        }
+        card.setAttribute("aria-pressed", String(isActive));
+
+        const title = document.createElement("div");
+        title.className = "playbook-card-title";
+        title.textContent = playbook.title;
+        card.appendChild(title);
+
+        const summary = document.createElement("span");
+        summary.textContent = playbook.summary;
+        card.appendChild(summary);
+
+        const progress = playbookProgress.get(playbook.id);
+        if (progress && progress.size > 0) {
+          const status = document.createElement("span");
+          status.className = "playbook-card-progress";
+          status.textContent = progress.size === playbook.steps.length
+            ? "Mission complete"
+            : `${progress.size}/${playbook.steps.length} checkpoints`;
+          card.appendChild(status);
+        }
+
+        card.addEventListener("click", () => {
+          activatePlaybook(playbook);
+        });
+
+        playbookListEl!.appendChild(card);
+      });
+
+      renderPlaybookDetail();
+    }
+
+    function renderPlaybookDetail(): void {
+      if (!playbookDetailEl) {
+        return;
+      }
+
+      playbookDetailEl.innerHTML = "";
+
+      if (!state.playbookId) {
+        playbookDetailEl.classList.add("empty");
+        const message = document.createElement("p");
+        message.textContent = "Select a mission to see guided checkpoints, live progress, and preloaded focus tags.";
+        playbookDetailEl.appendChild(message);
+        return;
+      }
+
+      const playbook = getPlaybookById(state.playbookId);
+      if (!playbook) {
+        playbookDetailEl.classList.add("empty");
+        const fallback = document.createElement("p");
+        fallback.textContent = "Pick a mission to load curated steps.";
+        playbookDetailEl.appendChild(fallback);
+        return;
+      }
+
+      playbookDetailEl.classList.remove("empty");
+
+      const heading = document.createElement("h3");
+      heading.textContent = playbook.title;
+      playbookDetailEl.appendChild(heading);
+
+      const summary = document.createElement("p");
+      summary.className = "playbook-summary";
+      summary.textContent = playbook.summary;
+      playbookDetailEl.appendChild(summary);
+
+      const meta = document.createElement("div");
+      meta.className = "playbook-meta";
+      if (playbook.environment) {
+        const envChip = document.createElement("span");
+        envChip.className = "meta-chip";
+        envChip.textContent = `Focus: ${ENV_LABELS[playbook.environment]}`;
+        meta.appendChild(envChip);
+      }
+      playbook.tags.forEach((tag) => {
+        const chip = document.createElement("span");
+        chip.className = "meta-chip";
+        chip.textContent = TAG_LABELS[tag];
+        meta.appendChild(chip);
+      });
+      playbookDetailEl.appendChild(meta);
+
+      const progress = getPlaybookProgress(playbook.id);
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "playbook-progress";
+      const progressLabel = document.createElement("span");
+      progressLabel.className = "playbook-progress-label";
+      progressLabel.textContent = `Progress ${progress.size}/${playbook.steps.length}`;
+      const dotsWrap = document.createElement("div");
+      dotsWrap.className = "playbook-progress-dots";
+      playbook.steps.forEach((_, index) => {
+        const dot = document.createElement("span");
+        dot.className = "playbook-dot";
+        if (progress.has(index)) {
+          dot.classList.add("is-complete");
+        }
+        dotsWrap.appendChild(dot);
+      });
+      progressWrap.appendChild(progressLabel);
+      progressWrap.appendChild(dotsWrap);
+      playbookDetailEl.appendChild(progressWrap);
+
+      const list = document.createElement("ul");
+      list.className = "playbook-steps";
+      playbook.steps.forEach((step, index) => {
+        const item = document.createElement("li");
+        item.className = "playbook-step";
+        const isComplete = progress.has(index);
+        if (isComplete) {
+          item.classList.add("is-complete");
+        }
+
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `${playbook.id}-step-${index}`;
+        checkbox.checked = isComplete;
+        checkbox.addEventListener("change", () => {
+          togglePlaybookStep(playbook.id, index, checkbox.checked);
+        });
+
+        const textWrap = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "playbook-step-title";
+        title.textContent = step.title;
+        textWrap.appendChild(title);
+        if (step.description) {
+          const desc = document.createElement("p");
+          desc.className = "playbook-step-desc";
+          desc.textContent = step.description;
+          textWrap.appendChild(desc);
+        }
+
+        label.appendChild(checkbox);
+        label.appendChild(textWrap);
+        item.appendChild(label);
+        list.appendChild(item);
+      });
+      playbookDetailEl.appendChild(list);
+
+      const actions = document.createElement("div");
+      actions.className = "playbook-actions";
+      const clearButton = document.createElement("button");
+      clearButton.type = "button";
+      clearButton.className = "playbook-clear";
+      clearButton.textContent = "Clear mission";
+      clearButton.addEventListener("click", () => {
+        clearPlaybook();
+      });
+      actions.appendChild(clearButton);
+      playbookDetailEl.appendChild(actions);
+    }
+
+    function activatePlaybook(playbook: Playbook): void {
+      if (!searchInput) {
+        return;
+      }
+
+      if (state.playbookId === playbook.id) {
+        clearPlaybook();
+        return;
+      }
+
+      previousEnv = state.env;
+      state.playbookId = playbook.id;
+      state.tags = new Set<CommandTag>(playbook.tags);
+      state.search = "";
+      searchInput.value = "";
+      if (playbook.environment) {
+        state.env = playbook.environment;
+      }
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function clearPlaybook(): void {
+      if (!searchInput) {
+        return;
+      }
+      state.playbookId = null;
+      state.tags.clear();
+      state.search = "";
+      searchInput.value = "";
+      state.env = previousEnv;
+      previousEnv = state.env;
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function invalidateActivePlaybook(): void {
+      state.playbookId = null;
+    }
+
+    function togglePlaybookStep(playbookId: string, index: number, isComplete: boolean): void {
+      const progress = getPlaybookProgress(playbookId);
+      if (isComplete) {
+        progress.add(index);
+      } else {
+        progress.delete(index);
+      }
+      renderPlaybooks();
+    }
+
+    function getPlaybookProgress(playbookId: string): Set<number> {
+      let progress = playbookProgress.get(playbookId);
+      if (!progress) {
+        progress = new Set<number>();
+        playbookProgress.set(playbookId, progress);
+      }
+      return progress;
+    }
+
+    function getPlaybookById(id: string): Playbook | undefined {
+      return playbookData.find((playbook) => playbook.id === id);
+    }
+
+    function renderCount(total: number): void {
+      const phrase = total === 1 ? "command" : "commands";
+      resultCountEl.textContent = `${total} ${phrase} ready`;
+    }
+
+    function renderTagSummary(): void {
+      if (state.tags.size === 0) {
+        activeTagsEl.textContent = "Tags: All";
+        return;
+      }
+      const labels = Array.from(state.tags).map((tag) => TAG_LABELS[tag]);
+      activeTagsEl.textContent = `Tags: ${labels.join(", ")}`;
+    }
+
+    function renderSections(entries: CommandEntry[]): void {
+      commandGrid.innerHTML = "";
+
+      if (entries.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = "<p>No commands match your filters yet. Adjust the environment or tags to widen the net.</p>";
+        commandGrid.appendChild(empty);
+        return;
+      }
+
+      const grouped = groupBySection(entries);
+
+      SECTION_SEQUENCE.forEach((section) => {
+        const group = grouped.get(section);
+        if (!group || group.length === 0) {
+          return;
+        }
+
+        const block = document.createElement("section");
+        block.className = "section-block";
+
+        const heading = document.createElement("div");
+        heading.className = "section-heading";
+
+        const title = document.createElement("h2");
+        title.textContent = section;
+        heading.appendChild(title);
+
+        const count = document.createElement("span");
+        count.className = "section-count";
+        count.textContent = String(group.length);
+        heading.appendChild(count);
+
+        block.appendChild(heading);
+
+        const grid = document.createElement("div");
+        grid.className = "card-grid";
+
+        group.forEach((entry) => {
+          grid.appendChild(createCard(entry));
+        });
+
+        block.appendChild(grid);
+        commandGrid.appendChild(block);
+      });
+    }
+
+    function groupBySection(entries: CommandEntry[]): Map<string, CommandEntry[]> {
+      const map = new Map<string, CommandEntry[]>();
+      entries.forEach((entry) => {
+        const existing = map.get(entry.section);
+        if (existing) {
+          existing.push(entry);
+        } else {
+          map.set(entry.section, [entry]);
+        }
+      });
+      return map;
+    }
+
+    function filterCommands(entries: CommandEntry[], current: RenderState): CommandEntry[] {
+      const searchTerm = current.search.trim().toLowerCase();
+      return entries.filter((entry) => {
+        if (!matchesEnvironment(entry, current.env)) {
+          return false;
+        }
+        if (current.tags.size > 0) {
+          for (const tag of current.tags) {
+            if (!entry.tags.includes(tag)) {
+              return false;
+            }
+          }
+        }
+        if (searchTerm.length > 0) {
+          const haystack = [
+            entry.title,
+            entry.command,
+            entry.description,
+            entry.tip ?? "",
+            entry.caution ?? "",
+            entry.section,
+            entry.tags.map((tag) => TAG_LABELS[tag]).join(" ")
+          ]
+            .join(" ")
+            .toLowerCase();
+          if (!haystack.includes(searchTerm)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function matchesEnvironment(entry: CommandEntry, env: Environment): boolean {
+      if (env === "All") {
+        return true;
+      }
+      if (entry.environment.includes("All")) {
+        return true;
+      }
+      return entry.environment.includes(env);
+    }
+
+    function createCard(entry: CommandEntry): HTMLElement {
+      const card = document.createElement("article");
+      card.className = "command-card";
+
+      const header = document.createElement("div");
+      header.className = "card-header";
+
+      const title = document.createElement("h3");
+      title.textContent = entry.title;
+      header.appendChild(title);
+
+      const envWrap = document.createElement("div");
+      envWrap.className = "env-badges";
+      resolveEnvironments(entry.environment).forEach((env) => {
+        const badge = document.createElement("span");
+        badge.className = `env-badge env-${env.toLowerCase()}`;
+        badge.textContent = ENV_LABELS[env];
+        envWrap.appendChild(badge);
+      });
+      header.appendChild(envWrap);
+      card.appendChild(header);
+
+      const description = document.createElement("p");
+      description.className = "card-description";
+      description.textContent = entry.description;
+      card.appendChild(description);
+
+      const commandRow = document.createElement("div");
+      commandRow.className = "command-line";
+
+      const pre = document.createElement("pre");
+      pre.className = "command-text";
+      const code = document.createElement("code");
+      code.textContent = entry.command;
+      pre.appendChild(code);
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "copy-button";
+      copyButton.textContent = "Copy";
+      copyButton.setAttribute("aria-label", "Copy command to clipboard");
+      copyButton.addEventListener("click", () => {
+        handleCopy(entry.command);
+      });
+
+      commandRow.appendChild(pre);
+      commandRow.appendChild(copyButton);
+      card.appendChild(commandRow);
+
+      const tagList = document.createElement("div");
+      tagList.className = "tag-list";
+      entry.tags.forEach((tag) => {
+        const tagChip = document.createElement("span");
+        tagChip.className = "tag";
+        tagChip.textContent = TAG_LABELS[tag];
+        tagChip.dataset.tag = tag;
+        tagChip.addEventListener("click", () => {
+          toggleTag(tag);
+        });
+        tagList.appendChild(tagChip);
+      });
+      card.appendChild(tagList);
+
+      if (entry.tip) {
+        const tip = document.createElement("div");
+        tip.className = "callout tip";
+        tip.textContent = entry.tip;
+        card.appendChild(tip);
+      }
+
+      if (entry.caution) {
+        const caution = document.createElement("div");
+        caution.className = "callout caution";
+        caution.textContent = entry.caution;
+        card.appendChild(caution);
+      }
+
+      if (entry.followUp && entry.followUp.length > 0) {
+        const follow = document.createElement("div");
+        follow.className = "follow-up";
+
+        const label = document.createElement("span");
+        label.className = "follow-label";
+        label.textContent = "Follow with";
+        follow.appendChild(label);
+
+        entry.followUp.forEach((next) => {
+          const chip = document.createElement("code");
+          chip.className = "follow-chip";
+          chip.textContent = next;
+          follow.appendChild(chip);
+        });
+
+        card.appendChild(follow);
+      }
+
+      return card;
+    }
+
+    function resolveEnvironments(envs: Environment[]): Environment[] {
+      if (envs.includes("All")) {
+        return ["Windows", "WSL"];
+      }
+      const unique = new Set<Environment>();
+      envs.forEach((env) => unique.add(env));
+      return Array.from(unique);
+    }
+
+    function handleCopy(text: string): void {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => showToast("Command copied"))
+          .catch(() => {
+            fallbackCopy(text);
+            showToast("Command copied");
+          });
+        return;
+      }
+      fallbackCopy(text);
+      showToast("Command copied");
+    }
+
+    function fallbackCopy(text: string): void {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(message: string): void {
+      if (!toastEl) {
+        return;
+      }
+      toastEl.textContent = message;
+      toastEl.classList.add("is-visible");
+      if (toastTimer) {
+        window.clearTimeout(toastTimer);
+      }
+      toastTimer = window.setTimeout(() => {
+        toastEl?.classList.remove("is-visible");
+      }, 1800);
+    }
+  </script>
+
+  <script type="module">
+    const SECTION_SEQUENCE = [
+      "Foundation",
+      "Containers",
+      "Images & Registry",
+      "Volumes & Files",
+      "Networking",
+      "Compose & Orchestration",
+      "Diagnostics & Cleanup",
+      "Productivity Boosters"
+    ];
+
+    const TAG_LABELS = {
+      setup: "Setup",
+      containers: "Containers",
+      images: "Images",
+      volumes: "Volumes",
+      network: "Networking",
+      compose: "Compose",
+      debug: "Diagnostics",
+      context: "Context",
+      registry: "Registry",
+      productivity: "Productivity",
+      cleanup: "Cleanup",
+      security: "Security",
+      wsl: "WSL",
+      windows: "Windows"
+    };
+
+    const ENV_LABELS = {
+      All: "Windows + WSL",
+      Windows: "Windows",
+      WSL: "WSL"
+    };
+
+    const commandData = [
+      { id: "foundation-wsl-install", section: "Foundation", title: "Install WSL with Ubuntu (PowerShell)", command: "wsl --install -d Ubuntu", description: "Bootstraps a Ubuntu distribution on WSL 2 so you can run the native Linux Docker engine without leaving Windows.", environment: ["WSL"], tags: ["setup", "wsl"], tip: "Reboot after the setup finishes, then launch Ubuntu to complete the first-time user creation." },
+      { id: "foundation-wsl-default-v2", section: "Foundation", title: "Ensure WSL uses version 2", command: "wsl --set-default-version 2", description: "Forces all newly installed distributions to run on the WSL 2 architecture, which delivers full Docker compatibility.", environment: ["WSL"], tags: ["setup", "wsl"], tip: "Confirm with `wsl -l -v` — the version column should read 2." },
+      { id: "foundation-wsl-list", section: "Foundation", title: "View installed WSL distributions", command: "wsl -l -v", description: "Lists each distribution and its WSL version so you can double-check Docker will target the correct backend.", environment: ["WSL"], tags: ["setup", "wsl", "debug"], tip: "Look for the * marker to spot the default distribution Docker Desktop will use." },
+      { id: "foundation-wsl-update", section: "Foundation", title: "Update the WSL kernel", command: "wsl --update", description: "Fetches and applies the latest WSL kernel, which can resolve Docker filesystem and networking quirks.", environment: ["WSL"], tags: ["setup", "wsl", "security"], caution: "Requires administrator privileges and a restart of WSL (`wsl --shutdown`)." },
+      { id: "foundation-wsl-shutdown", section: "Foundation", title: "Restart the WSL engine", command: "wsl --shutdown", description: "Gracefully stops all running WSL distributions — handy before restarting Docker Desktop or applying kernel updates.", environment: ["WSL"], tags: ["setup", "wsl", "debug"], tip: "Pair with `wsl --update` when troubleshooting stubborn networking issues." },
+      { id: "foundation-wsl-install-docker", section: "Foundation", title: "Install Docker engine inside WSL", command: "sudo apt update && sudo apt install -y docker.io docker-buildx docker-compose-plugin", description: "Installs the upstream Docker packages inside your Linux distribution — ideal for a lean CLI-only setup.", environment: ["WSL"], tags: ["setup", "wsl", "compose"], tip: "Ubuntu 22.04+ ships with BuildKit and Compose v2 out of the box." },
+      { id: "foundation-wsl-permissions", section: "Foundation", title: "Grant non-root Docker access (WSL)", command: "sudo usermod -aG docker $USER", description: "Adds your user to the docker group so you can run Docker commands without prefacing them with `sudo`.", environment: ["WSL"], tags: ["setup", "wsl"], caution: "Log out of the distro or run `newgrp docker` for the change to take effect." },
+      { id: "foundation-wsl-service-status", section: "Foundation", title: "Check Docker daemon status", command: "sudo service docker status", description: "Confirms the dockerd service is up inside WSL. Essential when commands hang or containers refuse to start.", environment: ["WSL"], tags: ["debug", "setup", "wsl"], tip: "If it reads inactive, start it with `sudo service docker start`." },
+      { id: "foundation-wsl-service-start", section: "Foundation", title: "Start Docker daemon now", command: "sudo service docker start", description: "Manually starts dockerd when you run WSL without systemd or after a system restart.", environment: ["WSL"], tags: ["setup", "wsl"], tip: "Enable systemd in `/etc/wsl.conf` for automatic startup on future sessions." },
+      { id: "foundation-windows-launch", section: "Foundation", title: "Launch Docker Desktop (PowerShell)", command: "& \"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe\"", description: "Starts Docker Desktop from PowerShell, letting you script startup in profiles or scheduled tasks.", environment: ["Windows"], tags: ["setup", "windows"], tip: "Combine with `Start-Process -WindowStyle Hidden` to launch Docker quietly." },
+      { id: "foundation-windows-restart-service", section: "Foundation", title: "Restart Docker Desktop service", command: "Get-Service com.docker.service | Restart-Service", description: "Resets the background VM that powers Docker Desktop, clearing many stuck-startup issues.", environment: ["Windows"], tags: ["windows", "debug", "setup"], caution: "Interrupts running containers; warn teammates before restarting shared environments." },
+      { id: "foundation-context-ls", section: "Foundation", title: "List Docker contexts", command: "docker context ls", description: "Shows every Docker endpoint your CLI can target — Desktop, remote SSH hosts, or cloud providers.", environment: ["All"], tags: ["context", "setup"], tip: "Look for `desktop-linux` when using Docker Desktop and `default` when targeting the local socket." },
+      { id: "foundation-context-use", section: "Foundation", title: "Switch Docker context", command: "docker context use default", description: "Points the CLI to the local Docker engine. Swap to other contexts like `desktop-linux` or remote hosts as needed.", environment: ["All"], tags: ["context", "setup"], tip: "Run `docker context inspect <name>` to verify the socket path and TLS settings." },
+      { id: "foundation-docker-version", section: "Foundation", title: "Check Docker client & server versions", command: "docker version", description: "Displays both client and server versions so you can confirm Windows, WSL, and Desktop are in sync.", environment: ["All"], tags: ["debug", "setup"], tip: "Add `--format '{{json .}}'` to script version checks in CI." },
+      { id: "foundation-docker-info", section: "Foundation", title: "Inspect Docker engine configuration", command: "docker info", description: "Summarizes core settings — storage driver, default runtime, resource limits, and connected registries.", environment: ["All"], tags: ["debug", "setup"], tip: "If BuildKit is disabled, set `DOCKER_BUILDKIT=1` to speed up builds." },
+      { id: "containers-ps-friendly", section: "Containers", title: "List running containers with friendly columns", command: "docker ps --format \"table {{.Names}}\\t{{.Status}}\\t{{.Ports}}\"", description: "Provides an at-a-glance table of active containers, their status, and exposed ports.", environment: ["All"], tags: ["containers", "debug"], tip: "Append `--filter status=running` to target only healthy workloads." },
+      { id: "containers-ps-exited", section: "Containers", title: "Find stopped containers", command: "docker ps -a --filter status=exited", description: "Surfaces containers safe to prune, reducing clutter from throwaway runs.", environment: ["All"], tags: ["containers", "cleanup"], tip: "Combine with `docker rm $(docker ps -qa --filter status=exited)` for bulk cleanup." },
+      { id: "containers-run-hello", section: "Containers", title: "Smoke test Docker engine", command: "docker run --rm hello-world", description: "Pulls and runs Docker's hello-world image to validate networking, DNS, and permissions.", environment: ["All"], tags: ["containers", "debug", "setup"], tip: "Add `--platform linux/amd64` when building on ARM-based Windows hardware." },
+      { id: "containers-run-shell", section: "Containers", title: "Launch an interactive Ubuntu shell", command: "docker run -it --rm ubuntu bash", description: "Spins up a temporary container so you can test commands in a clean Linux environment.", environment: ["All"], tags: ["containers", "productivity"], tip: "Use `--mount type=bind,src=\"${PWD}\",target=/workspace` to experiment against local code.", followUp: ["exit"] },
+      { id: "containers-exec", section: "Containers", title: "Exec into a running container", command: "docker exec -it <container> sh", description: "Attach an interactive shell to a container without restarting it — perfect for live debugging.", environment: ["All"], tags: ["containers", "debug"], tip: "Switch `sh` for `/bin/bash` or `powershell` depending on the image." },
+      { id: "containers-logs-follow", section: "Containers", title: "Stream container logs", command: "docker logs -f --tail 100 <container>", description: "Streams the latest container output, keeping you close to runtime behaviour.", environment: ["All"], tags: ["containers", "debug"], tip: "Use `--since 10m` during incident response to focus on recent events." },
+      { id: "containers-stop", section: "Containers", title: "Gracefully stop a container", command: "docker stop <container>", description: "Sends SIGTERM followed by SIGKILL after the timeout to halt a container cleanly.", environment: ["All"], tags: ["containers"], tip: "Adjust the timeout with `--time 30` for workloads that need extra shutdown time." },
+      { id: "containers-start", section: "Containers", title: "Restart a stopped container", command: "docker start <container>", description: "Revives containers without rebuilding images or re-running `docker run`.", environment: ["All"], tags: ["containers"], tip: "Pair with `docker inspect <container> --format '{{.Id}}'` to script restarts." },
+      { id: "containers-rm", section: "Containers", title: "Remove a container", command: "docker rm <container>", description: "Deletes the container filesystem while keeping the image available for future runs.", environment: ["All"], tags: ["containers", "cleanup"], caution: "Use `-f` to remove stubborn containers, but confirm nothing critical is running." },
+      { id: "containers-stats", section: "Containers", title: "Monitor live container resources", command: "docker stats --all", description: "Reports CPU, memory, and I/O metrics for active containers — almost like `top` for Docker.", environment: ["All"], tags: ["containers", "debug"], tip: "Use `--format` to capture metrics in JSON for dashboards." },
+      { id: "containers-cp", section: "Containers", title: "Copy files out of a container", command: "docker cp <container>:/var/log/app.log ./app.log", description: "Extracts files for offline inspection without needing shell access inside the container.", environment: ["All"], tags: ["containers", "debug", "productivity"], tip: "Reverse the order to copy files into a running container." },
+      { id: "images-ls", section: "Images & Registry", title: "List local images with size", command: "docker image ls --format \"table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}\"", description: "Displays repository, tag, and size so you can spot outdated or heavyweight images.", environment: ["All"], tags: ["images", "cleanup"], tip: "Add `--digests` to include image digests for supply-chain verification." },
+      { id: "images-pull", section: "Images & Registry", title: "Pull an image", command: "docker pull <image>:<tag>", description: "Fetches the specified image and tag from the registry, respecting the active Docker context.", environment: ["All"], tags: ["images", "registry"], tip: "Set `DOCKER_DEFAULT_PLATFORM` to pull multi-architecture images predictably." },
+      { id: "images-build", section: "Images & Registry", title: "Build an image from the current directory", command: "docker build -t <repo>:<tag> .", description: "Packages your application into an image using the Dockerfile in the working directory.", environment: ["All"], tags: ["images", "productivity"], tip: "Use `--progress=plain` to surface detailed BuildKit output during troubleshooting." },
+      { id: "images-buildx-multiarch", section: "Images & Registry", title: "Multi-platform BuildKit build", command: "docker buildx build --platform linux/amd64,linux/arm64 -t <repo>:multi .", description: "Leverages BuildKit to produce multi-architecture images from Windows or WSL with a single command.", environment: ["All"], tags: ["images", "registry", "productivity"], tip: "Append `--push` to publish directly to a registry without storing every platform locally." },
+      { id: "images-tag", section: "Images & Registry", title: "Retag an image", command: "docker tag <source-image> <registry>/<repo>:<tag>", description: "Creates a new reference to an existing image so you can push it to another registry or version.", environment: ["All"], tags: ["images", "registry"], tip: "Retag just before release to keep semantic versioning in sync." },
+      { id: "images-push", section: "Images & Registry", title: "Push to a registry", command: "docker push <registry>/<repo>:<tag>", description: "Uploads the tagged image to your registry, using credentials from `docker login`.", environment: ["All"], tags: ["images", "registry"], tip: "For Azure or AWS CLIs, log in via platform tools before pushing." },
+      { id: "images-login", section: "Images & Registry", title: "Authenticate to a registry", command: "docker login --username <user> <registry>", description: "Stores encrypted credentials locally so pushes and pulls to private registries succeed.", environment: ["All"], tags: ["images", "registry", "security"], tip: "Use access tokens instead of passwords wherever the registry supports them." },
+      { id: "images-prune", section: "Images & Registry", title: "Prune dangling images", command: "docker image prune -a --filter \"until=72h\"", description: "Frees disk space by removing images that have not been used in the last 72 hours.", environment: ["All"], tags: ["images", "cleanup"], caution: "Double-check before pruning on CI agents that share caches across builds." },
+      { id: "images-history", section: "Images & Registry", title: "See image layer history", command: "docker history --no-trunc <image>", description: "Shows each layer's size and command so you can optimize Dockerfiles.", environment: ["All"], tags: ["images", "debug"], tip: "Pipe through `grep` to identify layers that install build-only dependencies." },
+      { id: "volumes-ls", section: "Volumes & Files", title: "List volumes", command: "docker volume ls", description: "Displays named volumes so you can audit persistent storage attached to your containers.", environment: ["All"], tags: ["volumes"], tip: "Use labels when creating volumes to track ownership across teams." },
+      { id: "volumes-inspect", section: "Volumes & Files", title: "Inspect a volume", command: "docker volume inspect <name>", description: "Outputs mount points and driver details — essential when debugging bind mounts between Windows and WSL.", environment: ["All"], tags: ["volumes", "debug"], tip: "Add `--format '{{ .Mountpoint }}'` to quickly open the host folder." },
+      { id: "volumes-probe", section: "Volumes & Files", title: "Browse data inside a volume", command: "docker run --rm -v <name>:/data busybox ls -al /data", description: "Launches a disposable BusyBox container to inspect files stored in a named volume.", environment: ["All"], tags: ["volumes", "debug"], tip: "Swap `ls` for `sh` to open an interactive shell inside the volume." },
+      { id: "volumes-bind", section: "Volumes & Files", title: "Bind mount the current folder", command: "docker run --rm -v \"${PWD}:/workspace\" -w /workspace node:20 npm test", description: "Mounts your project into a container so you can run Node tooling without installing it locally.", environment: ["All"], tags: ["volumes", "productivity"], tip: "In Windows Command Prompt, replace `${PWD}` with `%cd%`; in WSL use `$(pwd)`." },
+      { id: "volumes-prune", section: "Volumes & Files", title: "Remove unused volumes", command: "docker volume prune --force", description: "Deletes dangling volumes, reclaiming disk space consumed by old compose projects.", environment: ["All"], tags: ["volumes", "cleanup"], caution: "Volumes referenced by stopped containers will be deleted; back up data first." },
+      { id: "network-ls", section: "Networking", title: "List Docker networks", command: "docker network ls", description: "Shows bridge, host, and custom networks so you can reason about container connectivity.", environment: ["All"], tags: ["network"], tip: "Use labels to distinguish ephemeral dev networks from shared infrastructure." },
+      { id: "network-create", section: "Networking", title: "Create a project-specific network", command: "docker network create --driver bridge devnet", description: "Sets up an isolated bridge network that keeps container traffic scoped to your project.", environment: ["All"], tags: ["network", "productivity"], tip: "Compose stacks join automatically — keep names consistent across environments." },
+      { id: "network-run", section: "Networking", title: "Attach a container to a network", command: "docker run --rm --network devnet --name api-scratch curlimages/curl curl http://db:5432", description: "Tests connectivity between services on a custom network without editing compose files.", environment: ["All"], tags: ["network", "debug"], tip: "Swap `curl` for `psql` or other client tools to validate protocols." },
+      { id: "network-inspect", section: "Networking", title: "Inspect a network", command: "docker network inspect devnet", description: "Reveals container attachments, IP ranges, and DNS aliases for a Docker network.", environment: ["All"], tags: ["network", "debug"], tip: "Combine with `--format '{{json .Containers}}'` to include in incident reports." },
+      { id: "network-port", section: "Networking", title: "Check published ports", command: "docker port <container>", description: "Shows the host-to-container port mappings so you know which port to hit from Windows or WSL.", environment: ["All"], tags: ["network", "debug"], tip: "Run from Windows Terminal to confirm the host port is exposed outside WSL." },
+      { id: "network-windows-firewall", section: "Networking", title: "Allow Docker 2375 (lab use only)", command: "netsh advfirewall firewall add rule name=\"Docker 2375\" dir=in action=allow protocol=TCP localport=2375", description: "Opens port 2375 so Windows-native tools can talk to an unsecured Docker socket.", environment: ["Windows"], tags: ["network", "debug", "windows"], caution: "Only use on isolated networks — exposing 2375 without TLS grants full control to anyone on the host." },
+      { id: "network-wsl-docker-host", section: "Networking", title: "Point WSL CLI to Docker Desktop", command: "export DOCKER_HOST=tcp://localhost:2375", description: "Lets WSL-based CLI tools talk to Docker Desktop's engine when the Unix socket is unavailable.", environment: ["WSL"], tags: ["network", "wsl", "context"], caution: "Enable the insecure 2375 option in Docker Desktop first; prefer `docker context` for production." },
+      { id: "compose-init", section: "Compose & Orchestration", title: "Bootstrap a Compose file", command: "docker compose init", description: "Starts an interactive wizard to create a Docker Compose file with sensible defaults.", environment: ["All"], tags: ["compose", "setup", "productivity"], tip: "Answer the prompts from Windows or WSL — the file lands in the current directory." },
+      { id: "compose-up-detached", section: "Compose & Orchestration", title: "Start services in the background", command: "docker compose up -d", description: "Launches the services defined in `docker-compose.yml` in detached mode.", environment: ["All"], tags: ["compose", "containers"], tip: "Add `--remove-orphans` to clean up services dropped from the file." },
+      { id: "compose-up-build", section: "Compose & Orchestration", title: "Rebuild images and start services", command: "docker compose up --build", description: "Forces image rebuilds before starting services, ensuring code changes are included.", environment: ["All"], tags: ["compose", "images"], tip: "Pair with `--no-cache` when testing Dockerfile updates." },
+      { id: "compose-logs", section: "Compose & Orchestration", title: "Tail service logs", command: "docker compose logs -f <service>", description: "Aggregates logs from a single service or all services for fast troubleshooting.", environment: ["All"], tags: ["compose", "debug"], tip: "Add `--since 5m` when chasing down recent regressions." },
+      { id: "compose-exec", section: "Compose & Orchestration", title: "Open a shell in a compose service", command: "docker compose exec <service> sh", description: "Executes commands inside a service container without rebuilding or restarting the stack.", environment: ["All"], tags: ["compose", "debug", "productivity"], tip: "Use `-e NODE_ENV=development` to override environment variables for diagnostics." },
+      { id: "compose-config", section: "Compose & Orchestration", title: "Render the full Compose configuration", command: "docker compose config", description: "Flattens your Compose files into the final configuration Docker will apply.", environment: ["All"], tags: ["compose", "debug"], tip: "Great for validating overrides before pushing changes to teammates." },
+      { id: "compose-down-volumes", section: "Compose & Orchestration", title: "Stop and clean up a stack", command: "docker compose down --volumes --remove-orphans", description: "Tears down services, networks, and volumes created by the current project.", environment: ["All"], tags: ["compose", "cleanup"], caution: "Removing volumes deletes databases; export data first." },
+      { id: "compose-watch", section: "Compose & Orchestration", title: "Enable file watch rebuilds", command: "docker compose watch", description: "Auto-rebuilds and restarts services when source files change — perfect for iterative development.", environment: ["All"], tags: ["compose", "productivity"], tip: "Mark hot-reload services with `watch` rules in Compose for granular control." },
+      { id: "diagnostics-system-df", section: "Diagnostics & Cleanup", title: "Summarize Docker disk usage", command: "docker system df", description: "Breaks down space used by images, containers, and volumes to spot runaway growth.", environment: ["All"], tags: ["cleanup", "debug"], tip: "Run before and after cleanup tasks to quantify wins." },
+      { id: "diagnostics-system-prune", section: "Diagnostics & Cleanup", title: "Aggressively clean Docker resources", command: "docker system prune -a --volumes", description: "Removes stopped containers, dangling images, networks, and volumes for a fresh slate.", environment: ["All"], tags: ["cleanup"], caution: "Irreversible — avoid on shared runners or when caches speed up builds." },
+      { id: "diagnostics-builder-prune", section: "Diagnostics & Cleanup", title: "Prune old BuildKit caches", command: "docker builder prune --filter \"until=24h\"", description: "Clears stale BuildKit cache entries so disk usage stays predictable.", environment: ["All"], tags: ["cleanup", "images"], tip: "Use `--keep-storage 5GB` to leave hot layers untouched." },
+      { id: "diagnostics-inspect", section: "Diagnostics & Cleanup", title: "Inspect any Docker resource", command: "docker inspect <resource>", description: "Returns full JSON describing containers, images, networks, or volumes.", environment: ["All"], tags: ["debug"], tip: "Pipe through `jq` or `ConvertFrom-Json` in PowerShell to extract specific fields." },
+      { id: "diagnostics-events", section: "Diagnostics & Cleanup", title: "Stream Docker events", command: "docker events --since 1h", description: "Watches Docker's event bus to capture container lifecycle changes and warnings.", environment: ["All"], tags: ["debug"], tip: "Filter by `--filter type=container --filter event=restart` when chasing flapping services." },
+      { id: "diagnostics-wsl-status", section: "Diagnostics & Cleanup", title: "Check WSL health", command: "wsl --status", description: "Reports the default distribution, running state, and WSL version to spot configuration drift.", environment: ["WSL"], tags: ["wsl", "debug"], tip: "If `Default Version` is 1, rerun `wsl --set-default-version 2`." },
+      { id: "diagnostics-wsl-terminate-docker", section: "Diagnostics & Cleanup", title: "Restart Docker Desktop's WSL distro", command: "wsl --terminate docker-desktop", description: "Force quits the hidden `docker-desktop` distro so Docker Desktop can relaunch it cleanly.", environment: ["Windows"], tags: ["windows", "debug"], caution: "Interrupts running containers momentarily; pair with `wsl --shutdown` for a full reset." },
+      { id: "diagnostics-context-inspect", section: "Diagnostics & Cleanup", title: "Inspect Docker Desktop context", command: "docker context inspect desktop-linux", description: "Shows the socket path and credentials Docker Desktop exposes to WSL and Windows terminals.", environment: ["All"], tags: ["context", "debug"], tip: "Use the `Endpoints.docker.Host` value to configure remote Docker tools." },
+      { id: "productivity-scan", section: "Productivity Boosters", title: "Scan images for vulnerabilities", command: "docker scan <image>", description: "Runs Snyk-powered security scans directly from the CLI.", environment: ["All"], tags: ["security", "productivity"], tip: "Authenticate with `docker scan --login` once to reuse credentials." },
+      { id: "productivity-update-resources", section: "Productivity Boosters", title: "Tune container resource limits", command: "docker update --memory 2g --cpus 1.5 <container>", description: "Applies new resource limits to a running container without recreating it.", environment: ["All"], tags: ["productivity", "containers"], caution: "The container may restart if you set limits below current usage." },
+      { id: "productivity-compose-cp", section: "Productivity Boosters", title: "Copy files with Docker Compose", command: "docker compose cp <service>:/src/report.txt ./report.txt", description: "Transfers files between services and your host without needing container IDs.", environment: ["All"], tags: ["compose", "productivity"], tip: "Add `-a` to preserve file permissions on Linux-bound projects." },
+      { id: "productivity-buildx-bake", section: "Productivity Boosters", title: "Orchestrate builds with bake", command: "docker buildx bake --set *.platform=linux/amd64,linux/arm64", description: "Applies a build matrix defined in bake files for repeatable multi-platform builds.", environment: ["All"], tags: ["images", "productivity"], tip: "Combine with `--load` locally or `--push` in CI pipelines." },
+      { id: "productivity-context-create", section: "Productivity Boosters", title: "Create a custom WSL context", command: "docker context create wsl --docker \"host=unix:///var/run/docker.sock\"", description: "Builds a named context that targets the native WSL socket, making it easy to switch between Desktop and distro engines.", environment: ["WSL"], tags: ["context", "wsl", "productivity"], tip: "Use `docker context use wsl` before running heavy builds to stay inside Linux." },
+      { id: "productivity-windows-env", section: "Productivity Boosters", title: "Point Windows CLI to Linux engine", command: "setx DOCKER_HOST npipe:////./pipe/dockerDesktopLinuxEngine", description: "Persists the Docker host path so Windows-native terminals talk to Docker Desktop's Linux engine by default.", environment: ["Windows"], tags: ["windows", "context", "productivity"], caution: "Restart terminals after running `setx`; the change does not affect current sessions." },
+      { id: "productivity-compose-ls", section: "Productivity Boosters", title: "List active compose projects", command: "docker compose ls", description: "Shows every compose project running on the current Docker engine, including ones launched by Docker Desktop.", environment: ["All"], tags: ["compose", "productivity"], tip: "Use `--format '{{.Name}}\\t{{.Status}}'` for status dashboards." }
+    ];
+
+    const playbookData = [
+      {
+        id: "playbook-wsl-liftoff",
+        title: "WSL Docker Liftoff",
+        summary: "Provision WSL 2, install the Docker engine, and ship your first container without surprises.",
+        tags: ["setup", "wsl", "containers"],
+        environment: "WSL",
+        steps: [
+          {
+            title: "Install and upgrade WSL 2",
+            description: "From Windows Terminal run `wsl --install -d Ubuntu`, reboot, then confirm WSL 2 with `wsl --set-default-version 2`."
+          },
+          {
+            title: "Patch the kernel",
+            description: "Keep networking and filesystem smooth by executing `wsl --update` followed by `wsl --shutdown`."
+          },
+          {
+            title: "Install Docker inside WSL",
+            description: "Launch your distro and run `sudo apt update && sudo apt install -y docker.io docker-buildx docker-compose-plugin`."
+          },
+          {
+            title: "Grant access and validate",
+            description: "Add your user with `sudo usermod -aG docker $USER`, reopen the shell, and run `docker run --rm hello-world`."
+          }
+        ]
+      },
+      {
+        id: "playbook-compose-rescue",
+        title: "Compose Rescue Mission",
+        summary: "Diagnose and steady a flaky compose stack with structured triage steps.",
+        tags: ["compose", "debug", "cleanup"],
+        steps: [
+          {
+            title: "Map running projects",
+            description: "Audit active applications with `docker compose ls` to spot zombie stacks."
+          },
+          {
+            title: "Tail the failing service",
+            description: "Use `docker compose logs -f <service>` to capture stack traces as they happen."
+          },
+          {
+            title: "Rebuild with confidence",
+            description: "Trigger `docker compose up --build --remove-orphans` to bake in fixes and drop stale containers."
+          },
+          {
+            title: "Reset state safely",
+            description: "Finish with `docker compose down --volumes` and a targeted `docker volume prune --force` if needed."
+          }
+        ]
+      },
+      {
+        id: "playbook-multi-arch-release",
+        title: "Multi-arch Release Train",
+        summary: "Build, scan, and publish a production-ready multi-platform image in one flow.",
+        tags: ["images", "registry", "productivity", "security"],
+        steps: [
+          {
+            title: "Warm up BuildKit",
+            description: "Verify your builder with `docker buildx ls` and switch contexts if you need Desktop's Linux engine."
+          },
+          {
+            title: "Compile multi-platform artifacts",
+            description: "Run `docker buildx build --platform linux/amd64,linux/arm64 -t <repo>:candidate . --push` to publish both arches."
+          },
+          {
+            title: "Tag the release",
+            description: "Version the image with `docker tag <repo>:candidate <registry>/<repo>:<tag>` before pushing."
+          },
+          {
+            title: "Scan before ship",
+            description: "Execute `docker scan <registry>/<repo>:<tag>` and address critical findings on the spot."
+          }
+        ]
+      },
+      {
+        id: "playbook-cleanroom",
+        title: "Cleanroom Reset",
+        summary: "Reclaim disk space and clear drift across containers, images, and volumes.",
+        tags: ["cleanup", "images", "volumes"],
+        steps: [
+          {
+            title: "Quantify usage",
+            description: "Start with `docker system df` to see where space is going."
+          },
+          {
+            title: "Prune aggressively (with care)",
+            description: "Run `docker system prune -a --volumes` when you're ready for a blank slate."
+          },
+          {
+            title: "Trim build caches",
+            description: "Follow up with `docker builder prune --filter \"until=24h\"` to drop stale layers."
+          },
+          {
+            title: "Review surviving volumes",
+            description: "Finish the sweep via `docker volume ls` and inspect anything unexpected."
+          }
+        ]
+      }
+    ];
+
+    const playbookProgress = new Map();
+
+    const state = {
+      env: "All",
+      search: "",
+      tags: new Set(),
+      playbookId: null
+    };
+
+    let commandGrid;
+    let searchInput;
+    let envButtons = [];
+    let tagButtons = [];
+    let resultCountEl;
+    let activeTagsEl;
+    let clearFiltersButton = null;
+    let toastEl = null;
+    let toastTimer;
+    let playbookListEl = null;
+    let playbookDetailEl = null;
+    let previousEnv = "All";
+
+    initializeCheatSheet();
+
+    function initializeCheatSheet() {
+      const grid = document.querySelector("#command-grid");
+      const search = document.querySelector("#search-input");
+      const count = document.querySelector("#result-count");
+      const active = document.querySelector("#active-tags");
+      const toast = document.querySelector("#toast");
+      const clear = document.querySelector("#clear-filters");
+      const playbookList = document.querySelector("#playbook-list");
+      const playbookDetail = document.querySelector("#playbook-detail");
+
+      if (!grid || !search || !count || !active || !playbookList || !playbookDetail) {
+        throw new Error("Cheatsheet markup is incomplete.");
+      }
+
+      commandGrid = grid;
+      searchInput = search;
+      resultCountEl = count;
+      activeTagsEl = active;
+      toastEl = toast || null;
+      clearFiltersButton = clear || null;
+      playbookListEl = playbookList;
+      playbookDetailEl = playbookDetail;
+
+      envButtons = Array.from(document.querySelectorAll("[data-env]"));
+      tagButtons = Array.from(document.querySelectorAll("[data-tag]"));
+
+      searchInput.addEventListener("input", () => {
+        if (state.playbookId) {
+          invalidateActivePlaybook();
+        }
+        state.search = searchInput.value;
+        render();
+      });
+
+      envButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const env = button.dataset.env || "All";
+          const nextEnv = state.env === env ? "All" : env;
+          if (state.playbookId) {
+            invalidateActivePlaybook();
+          }
+          state.env = nextEnv;
+          updateEnvButtons();
+          render();
+        });
+      });
+
+      tagButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const tag = button.dataset.tag;
+          if (!tag) {
+            return;
+          }
+          toggleTag(tag);
+        });
+      });
+
+      if (clearFiltersButton) {
+        clearFiltersButton.addEventListener("click", () => {
+          state.playbookId = null;
+          state.env = "All";
+          state.search = "";
+          state.tags.clear();
+          searchInput.value = "";
+          previousEnv = "All";
+          updateEnvButtons();
+          updateTagButtons();
+          render();
+        });
+      }
+
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function toggleTag(tag) {
+      if (state.playbookId) {
+        invalidateActivePlaybook();
+      }
+      if (state.tags.has(tag)) {
+        state.tags.delete(tag);
+      } else {
+        state.tags.add(tag);
+      }
+      updateTagButtons();
+      render();
+    }
+
+    function updateEnvButtons() {
+      envButtons.forEach((button) => {
+        const env = button.dataset.env || "All";
+        const isActive = state.env === "All" ? env === "All" : state.env === env;
+        button.classList.toggle("is-active", isActive);
+      });
+    }
+
+    function updateTagButtons() {
+      tagButtons.forEach((button) => {
+        const tag = button.dataset.tag;
+        if (!tag) {
+          return;
+        }
+        button.classList.toggle("is-active", state.tags.has(tag));
+      });
+      renderTagSummary();
+    }
+
+    function render() {
+      const filtered = filterCommands(commandData, state);
+      renderCount(filtered.length);
+      renderTagSummary();
+      renderSections(filtered);
+      renderPlaybooks();
+    }
+
+    function renderPlaybooks() {
+      if (!playbookListEl || !playbookDetailEl) {
+        return;
+      }
+
+      playbookListEl.innerHTML = "";
+
+      playbookData.forEach((playbook) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "playbook-card";
+        const isActive = state.playbookId === playbook.id;
+        if (isActive) {
+          card.classList.add("is-active");
+        }
+        card.setAttribute("aria-pressed", String(isActive));
+
+        const title = document.createElement("div");
+        title.className = "playbook-card-title";
+        title.textContent = playbook.title;
+        card.appendChild(title);
+
+        const summary = document.createElement("span");
+        summary.textContent = playbook.summary;
+        card.appendChild(summary);
+
+        const progress = playbookProgress.get(playbook.id);
+        if (progress && progress.size > 0) {
+          const status = document.createElement("span");
+          status.className = "playbook-card-progress";
+          status.textContent = progress.size === playbook.steps.length
+            ? "Mission complete"
+            : `${progress.size}/${playbook.steps.length} checkpoints`;
+          card.appendChild(status);
+        }
+
+        card.addEventListener("click", () => {
+          activatePlaybook(playbook);
+        });
+
+        playbookListEl.appendChild(card);
+      });
+
+      renderPlaybookDetail();
+    }
+
+    function renderPlaybookDetail() {
+      if (!playbookDetailEl) {
+        return;
+      }
+
+      playbookDetailEl.innerHTML = "";
+
+      if (!state.playbookId) {
+        playbookDetailEl.classList.add("empty");
+        const message = document.createElement("p");
+        message.textContent = "Select a mission to see guided checkpoints, live progress, and preloaded focus tags.";
+        playbookDetailEl.appendChild(message);
+        return;
+      }
+
+      const playbook = getPlaybookById(state.playbookId);
+      if (!playbook) {
+        playbookDetailEl.classList.add("empty");
+        const fallback = document.createElement("p");
+        fallback.textContent = "Pick a mission to load curated steps.";
+        playbookDetailEl.appendChild(fallback);
+        return;
+      }
+
+      playbookDetailEl.classList.remove("empty");
+
+      const heading = document.createElement("h3");
+      heading.textContent = playbook.title;
+      playbookDetailEl.appendChild(heading);
+
+      const summary = document.createElement("p");
+      summary.className = "playbook-summary";
+      summary.textContent = playbook.summary;
+      playbookDetailEl.appendChild(summary);
+
+      const meta = document.createElement("div");
+      meta.className = "playbook-meta";
+      if (playbook.environment) {
+        const envChip = document.createElement("span");
+        envChip.className = "meta-chip";
+        envChip.textContent = `Focus: ${ENV_LABELS[playbook.environment]}`;
+        meta.appendChild(envChip);
+      }
+      playbook.tags.forEach((tag) => {
+        const chip = document.createElement("span");
+        chip.className = "meta-chip";
+        chip.textContent = TAG_LABELS[tag];
+        meta.appendChild(chip);
+      });
+      playbookDetailEl.appendChild(meta);
+
+      const progress = getPlaybookProgress(playbook.id);
+      const progressWrap = document.createElement("div");
+      progressWrap.className = "playbook-progress";
+      const progressLabel = document.createElement("span");
+      progressLabel.className = "playbook-progress-label";
+      progressLabel.textContent = `Progress ${progress.size}/${playbook.steps.length}`;
+      const dotsWrap = document.createElement("div");
+      dotsWrap.className = "playbook-progress-dots";
+      playbook.steps.forEach((_, index) => {
+        const dot = document.createElement("span");
+        dot.className = "playbook-dot";
+        if (progress.has(index)) {
+          dot.classList.add("is-complete");
+        }
+        dotsWrap.appendChild(dot);
+      });
+      progressWrap.appendChild(progressLabel);
+      progressWrap.appendChild(dotsWrap);
+      playbookDetailEl.appendChild(progressWrap);
+
+      const list = document.createElement("ul");
+      list.className = "playbook-steps";
+      playbook.steps.forEach((step, index) => {
+        const item = document.createElement("li");
+        item.className = "playbook-step";
+        const isComplete = progress.has(index);
+        if (isComplete) {
+          item.classList.add("is-complete");
+        }
+
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = `${playbook.id}-step-${index}`;
+        checkbox.checked = isComplete;
+        checkbox.addEventListener("change", () => {
+          togglePlaybookStep(playbook.id, index, checkbox.checked);
+        });
+
+        const textWrap = document.createElement("div");
+        const title = document.createElement("div");
+        title.className = "playbook-step-title";
+        title.textContent = step.title;
+        textWrap.appendChild(title);
+        if (step.description) {
+          const desc = document.createElement("p");
+          desc.className = "playbook-step-desc";
+          desc.textContent = step.description;
+          textWrap.appendChild(desc);
+        }
+
+        label.appendChild(checkbox);
+        label.appendChild(textWrap);
+        item.appendChild(label);
+        list.appendChild(item);
+      });
+      playbookDetailEl.appendChild(list);
+
+      const actions = document.createElement("div");
+      actions.className = "playbook-actions";
+      const clearButton = document.createElement("button");
+      clearButton.type = "button";
+      clearButton.className = "playbook-clear";
+      clearButton.textContent = "Clear mission";
+      clearButton.addEventListener("click", () => {
+        clearPlaybook();
+      });
+      actions.appendChild(clearButton);
+      playbookDetailEl.appendChild(actions);
+    }
+
+    function activatePlaybook(playbook) {
+      if (!searchInput) {
+        return;
+      }
+
+      if (state.playbookId === playbook.id) {
+        clearPlaybook();
+        return;
+      }
+
+      previousEnv = state.env;
+      state.playbookId = playbook.id;
+      state.tags = new Set(playbook.tags);
+      state.search = "";
+      searchInput.value = "";
+      if (playbook.environment) {
+        state.env = playbook.environment;
+      }
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function clearPlaybook() {
+      if (!searchInput) {
+        return;
+      }
+      state.playbookId = null;
+      state.tags.clear();
+      state.search = "";
+      searchInput.value = "";
+      state.env = previousEnv;
+      previousEnv = state.env;
+      updateEnvButtons();
+      updateTagButtons();
+      render();
+    }
+
+    function invalidateActivePlaybook() {
+      state.playbookId = null;
+    }
+
+    function togglePlaybookStep(playbookId, index, isComplete) {
+      const progress = getPlaybookProgress(playbookId);
+      if (isComplete) {
+        progress.add(index);
+      } else {
+        progress.delete(index);
+      }
+      renderPlaybooks();
+    }
+
+    function getPlaybookProgress(playbookId) {
+      let progress = playbookProgress.get(playbookId);
+      if (!progress) {
+        progress = new Set();
+        playbookProgress.set(playbookId, progress);
+      }
+      return progress;
+    }
+
+    function getPlaybookById(id) {
+      return playbookData.find((playbook) => playbook.id === id);
+    }
+
+    function renderCount(total) {
+      const phrase = total === 1 ? "command" : "commands";
+      resultCountEl.textContent = `${total} ${phrase} ready`;
+    }
+
+    function renderTagSummary() {
+      if (state.tags.size === 0) {
+        activeTagsEl.textContent = "Tags: All";
+        return;
+      }
+      const labels = Array.from(state.tags).map((tag) => TAG_LABELS[tag]);
+      activeTagsEl.textContent = `Tags: ${labels.join(", ")}`;
+    }
+
+    function renderSections(entries) {
+      commandGrid.innerHTML = "";
+
+      if (entries.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = "<p>No commands match your filters yet. Adjust the environment or tags to widen the net.</p>";
+        commandGrid.appendChild(empty);
+        return;
+      }
+
+      const grouped = groupBySection(entries);
+
+      SECTION_SEQUENCE.forEach((section) => {
+        const group = grouped.get(section);
+        if (!group || group.length === 0) {
+          return;
+        }
+
+        const block = document.createElement("section");
+        block.className = "section-block";
+
+        const heading = document.createElement("div");
+        heading.className = "section-heading";
+
+        const title = document.createElement("h2");
+        title.textContent = section;
+        heading.appendChild(title);
+
+        const count = document.createElement("span");
+        count.className = "section-count";
+        count.textContent = String(group.length);
+        heading.appendChild(count);
+
+        block.appendChild(heading);
+
+        const grid = document.createElement("div");
+        grid.className = "card-grid";
+
+        group.forEach((entry) => {
+          grid.appendChild(createCard(entry));
+        });
+
+        block.appendChild(grid);
+        commandGrid.appendChild(block);
+      });
+    }
+
+    function groupBySection(entries) {
+      const map = new Map();
+      entries.forEach((entry) => {
+        const existing = map.get(entry.section);
+        if (existing) {
+          existing.push(entry);
+        } else {
+          map.set(entry.section, [entry]);
+        }
+      });
+      return map;
+    }
+
+    function filterCommands(entries, current) {
+      const searchTerm = current.search.trim().toLowerCase();
+      return entries.filter((entry) => {
+        if (!matchesEnvironment(entry, current.env)) {
+          return false;
+        }
+        if (current.tags.size > 0) {
+          for (const tag of current.tags) {
+            if (!entry.tags.includes(tag)) {
+              return false;
+            }
+          }
+        }
+        if (searchTerm.length > 0) {
+          const haystack = [
+            entry.title,
+            entry.command,
+            entry.description,
+            entry.tip || "",
+            entry.caution || "",
+            entry.section,
+            entry.tags.map((tag) => TAG_LABELS[tag]).join(" ")
+          ]
+            .join(" ")
+            .toLowerCase();
+          if (!haystack.includes(searchTerm)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+
+    function matchesEnvironment(entry, env) {
+      if (env === "All") {
+        return true;
+      }
+      if (entry.environment.includes("All")) {
+        return true;
+      }
+      return entry.environment.includes(env);
+    }
+
+    function createCard(entry) {
+      const card = document.createElement("article");
+      card.className = "command-card";
+
+      const header = document.createElement("div");
+      header.className = "card-header";
+
+      const title = document.createElement("h3");
+      title.textContent = entry.title;
+      header.appendChild(title);
+
+      const envWrap = document.createElement("div");
+      envWrap.className = "env-badges";
+      resolveEnvironments(entry.environment).forEach((env) => {
+        const badge = document.createElement("span");
+        badge.className = `env-badge env-${env.toLowerCase()}`;
+        badge.textContent = ENV_LABELS[env];
+        envWrap.appendChild(badge);
+      });
+      header.appendChild(envWrap);
+      card.appendChild(header);
+
+      const description = document.createElement("p");
+      description.className = "card-description";
+      description.textContent = entry.description;
+      card.appendChild(description);
+
+      const commandRow = document.createElement("div");
+      commandRow.className = "command-line";
+
+      const pre = document.createElement("pre");
+      pre.className = "command-text";
+      const code = document.createElement("code");
+      code.textContent = entry.command;
+      pre.appendChild(code);
+
+      const copyButton = document.createElement("button");
+      copyButton.type = "button";
+      copyButton.className = "copy-button";
+      copyButton.textContent = "Copy";
+      copyButton.setAttribute("aria-label", "Copy command to clipboard");
+      copyButton.addEventListener("click", () => {
+        handleCopy(entry.command);
+      });
+
+      commandRow.appendChild(pre);
+      commandRow.appendChild(copyButton);
+      card.appendChild(commandRow);
+
+      const tagList = document.createElement("div");
+      tagList.className = "tag-list";
+      entry.tags.forEach((tag) => {
+        const tagChip = document.createElement("span");
+        tagChip.className = "tag";
+        tagChip.textContent = TAG_LABELS[tag];
+        tagChip.dataset.tag = tag;
+        tagChip.addEventListener("click", () => {
+          toggleTag(tag);
+        });
+        tagList.appendChild(tagChip);
+      });
+      card.appendChild(tagList);
+
+      if (entry.tip) {
+        const tip = document.createElement("div");
+        tip.className = "callout tip";
+        tip.textContent = entry.tip;
+        card.appendChild(tip);
+      }
+
+      if (entry.caution) {
+        const caution = document.createElement("div");
+        caution.className = "callout caution";
+        caution.textContent = entry.caution;
+        card.appendChild(caution);
+      }
+
+      if (entry.followUp && entry.followUp.length > 0) {
+        const follow = document.createElement("div");
+        follow.className = "follow-up";
+
+        const label = document.createElement("span");
+        label.className = "follow-label";
+        label.textContent = "Follow with";
+        follow.appendChild(label);
+
+        entry.followUp.forEach((next) => {
+          const chip = document.createElement("code");
+          chip.className = "follow-chip";
+          chip.textContent = next;
+          follow.appendChild(chip);
+        });
+
+        card.appendChild(follow);
+      }
+
+      return card;
+    }
+
+    function resolveEnvironments(envs) {
+      if (envs.includes("All")) {
+        return ["Windows", "WSL"];
+      }
+      const unique = new Set();
+      envs.forEach((env) => unique.add(env));
+      return Array.from(unique);
+    }
+
+    function handleCopy(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(text)
+          .then(() => showToast("Command copied"))
+          .catch(() => {
+            fallbackCopy(text);
+            showToast("Command copied");
+          });
+        return;
+      }
+      fallbackCopy(text);
+      showToast("Command copied");
+    }
+
+    function fallbackCopy(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    function showToast(message) {
+      if (!toastEl) {
+        return;
+      }
+      toastEl.textContent = message;
+      toastEl.classList.add("is-visible");
+      if (toastTimer) {
+        window.clearTimeout(toastTimer);
+      }
+      toastTimer = window.setTimeout(() => {
+        if (toastEl) {
+          toastEl.classList.remove("is-visible");
+        }
+      }, 1800);
+    }
+  </script>
+</body>
+</html>
