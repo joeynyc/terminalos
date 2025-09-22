@@ -2221,7 +2221,7 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 
     openDockerCheatsheet() {
         this.addToOutput('<span class="info">🐳 Opening Docker command cheatsheet...</span>', 'command-output');
-        window.open('../dockercheetsheet/docker-cheatsheet.html', '_blank');
+        window.open('./docker-cheatsheet.html', '_blank');
         this.addToOutput('<span class="success">✅ Docker cheatsheet opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">📦 Complete reference for Docker commands, containers, and workflows.</span>', 'command-output');
     }
