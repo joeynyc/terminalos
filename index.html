@@ -6,13 +6,16 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https: http:;">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>Joey's Terminal - Welcome to the Shell</title>
+    <title>Joey OS // Neon Terminal</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
 </head>
-<body class="boot-active">
+<body class="boot-active glitch-body">
+    <div class="scan-line" aria-hidden="true"></div>
+    <div class="glitch-overlay" aria-hidden="true"></div>
+
     <div class="boot-overlay" id="boot-overlay" aria-hidden="true">
         <div class="boot-noise"></div>
         <div class="boot-shell" role="dialog" aria-modal="true" aria-labelledby="boot-logo" aria-live="polite">
@@ -38,38 +41,109 @@
         </div>
     </div>
 
-    <nav class="floating-nav">
-        <div class="nav-container">
-            <div class="nav-item active" data-command="about_me">About</div>
-            <div class="nav-item" data-command="skills">Skills</div>
-            <div class="nav-item" data-command="projects">Projects</div>
-            <div class="nav-item" data-command="case">Case Studies</div>
-            <div class="nav-item" data-command="contact_joey">Contact</div>
-            <div class="nav-item" data-command="blog">Blog</div>
-            <div class="nav-item" data-command="github">GitHub</div>
-            <div class="nav-item" data-command="rss">News</div>
-        </div>
-    </nav>
+    <main class="glitch-stage" role="main">
+        <header class="glitch-header">
+            <h1 class="main-header">JOEY.OS // HYPERTERMINAL</h1>
+            <h2 class="sub-header">// SYSTEM OVERRIDE //</h2>
+            <button class="sub-header-2" type="button" data-scroll-target="#terminal-zone" aria-pressed="false">ACCESS GRANTED</button>
+        </header>
 
-    <div class="terminal-container">
-        <div class="terminal-header">
-            <div class="terminal-buttons">
-                <span class="btn close"></span>
-                <span class="btn minimize"></span>
-                <span class="btn maximize"></span>
+        <section class="glitch-panels" aria-label="Mission brief">
+            <div class="text-block text-block-1" role="button" tabindex="0" aria-pressed="true">
+                <h4 class="block-title">Experience Overview</h4>
+                <p>The Joey.OS homepage fuses a narrative boot sequence, neon collage, and command-line UI into one award-ready surface. The layout guides visitors from cinematic intro to actionable terminal experiences without losing momentum.</p>
+                <ul class="highlight-list" aria-label="Core story beats">
+                    <li><span class="highlight-key">Boot &amp; Briefing</span> Immersive calibration frames who Joey is, what the mission covers, and why the visitor should lean in.</li>
+                    <li><span class="highlight-key">Terminal Hub</span> A living CLI powers skills, projects, utilities, and games—in real time and with full keyboard flow.</li>
+                    <li><span class="highlight-key">Case Narratives</span> Case module delivers cinematic breakdowns: metrics, timelines, and missions that tell a measurable story.</li>
+                </ul>
             </div>
-            <div class="terminal-title">joey@hacker-terminal:~$</div>
-        </div>
-        
-        <div class="terminal-body">
-            <div class="output" id="output"></div>
-            
-            <div class="input-line">
-                <span class="prompt">joey@terminal:~$ </span>
-                <input type="text" id="command-input" class="command-input" autocomplete="off" spellcheck="false">
-                <span class="cursor" id="cursor">█</span>
+
+            <div class="text-block text-block-2" role="button" tabindex="0" aria-pressed="false">
+                <h4 class="block-title">Interactive Modules</h4>
+                <p>Every button, nav entry, and HUD block ties back to an action. Launch commands directly or explore through the vertical nav to keep the hacker fantasy functional.</p>
+                <ul class="highlight-list" aria-label="Interactive destinations">
+                    <li><span class="highlight-key">Help</span> Prints the manifest of available commands and quick-start shortcuts.</li>
+                    <li><span class="highlight-key">Case</span> Opens a cinematic case-study viewer with timeline, metrics, and CTA.</li>
+                    <li><span class="highlight-key">Projects &amp; Tools</span> Tap into prototypes, games, and utilities right from the nav stack.</li>
+                </ul>
             </div>
-        </div>
+
+            <figure class="glitch-badge" aria-label="Matrix processing hud badge">
+                <img src="images/matrix-processing-icon.svg" alt="Matrix processing neon badge">
+                <figcaption>Live matrix feed monitoring terminal performance.</figcaption>
+            </figure>
+
+            <aside class="floating-panel" aria-label="Live status display">
+                <h4 class="panel-title">Live Diagnostics</h4>
+                <ul class="status-list">
+                    <li class="status-item"><span class="status-label">User</span><span class="status-value">Joey // Creative Technologist</span></li>
+                    <li class="status-item"><span class="status-label">Access</span><span class="status-value">Root · Terminal + Case Viewer</span></li>
+                    <li class="status-item"><span class="status-label">Signal</span><span class="status-value">Stable neon feed · Latency 8ms</span></li>
+                    <li class="status-item"><span class="status-label">Next Move</span><span class="status-value">Trigger <span class="command-hint">help</span> or <span class="command-hint">case</span></span></li>
+                </ul>
+            </aside>
+
+            <div class="cta-stack">
+                <button class="neon-button button-1" type="button" data-command="help" data-scroll-target="#terminal-zone">Launch Terminal Tour</button>
+                <button class="neon-button button-2" type="button" data-command="case" data-scroll-target="#terminal-zone">Open Case Deck</button>
+            </div>
+        </section>
+
+
+        <section class="glitch-terminal-zone" id="terminal-zone" aria-label="Interactive terminal">
+            <nav class="floating-nav glitch-nav" aria-label="Terminal shortcuts">
+                <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Commands Menu</button>
+                <div class="nav-container" id="primary-nav">
+                    <div class="nav-item active" data-command="about_me">About</div>
+                    <div class="nav-item" data-command="skills">Skills</div>
+                    <div class="nav-item" data-command="projects">Projects</div>
+                    <div class="nav-item" data-command="case">Case Studies</div>
+                    <div class="nav-item" data-command="contact_joey">Contact</div>
+                    <div class="nav-item" data-command="blog">Blog</div>
+                    <div class="nav-item" data-command="github">GitHub</div>
+                    <div class="nav-item" data-command="rss">News</div>
+                </div>
+            </nav>
+
+            <div class="terminal-wrapper">
+                <div class="terminal-container">
+            <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="btn close"></span>
+                            <span class="btn minimize"></span>
+                            <span class="btn maximize"></span>
+                        </div>
+                        <div class="terminal-title">joey@hacker-terminal:~$</div>
+                    </div>
+
+                    <div class="terminal-body">
+                        <div class="output" id="output"></div>
+
+                        <div class="input-line">
+                            <span class="prompt">joey@terminal:~$ </span>
+                            <input type="text" id="command-input" class="command-input" autocomplete="off" spellcheck="false">
+                            <span class="cursor" id="cursor">█</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <button class="back-to-top" type="button" data-scroll-target="body" aria-label="Back to top">
+            <span class="back-to-top__text">// BACK TO TOP //</span>
+        </button>
+
+        <div class="arrow arrow-1" aria-hidden="true">→</div>
+        <div class="arrow arrow-2" aria-hidden="true">→</div>
+        <div class="arrow arrow-3" aria-hidden="true">→</div>
+
+        <div class="scribble scribble-1" aria-hidden="true">//X//</div>
+        <div class="scribble scribble-2" aria-hidden="true">//OVERRIDE//</div>
+    </main>
+
+    <div class="status-bar" aria-live="polite">
+        &gt; JOEY.OS GRID ONLINE // EVERY CTA EXECUTES A LIVE COMMAND // TYPE 'HELP' FOR THE FULL MANIFEST
     </div>
 
     <div class="case-overlay" id="case-overlay" aria-hidden="true">
@@ -105,6 +179,93 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        const commandButtons = document.querySelectorAll('[data-command]');
+        const scrollButtons = document.querySelectorAll('[data-scroll-target]');
+        const commandInput = document.getElementById('command-input');
+
+        const triggerCommand = (command) => {
+            const terminalApi = window.joeyTerminal;
+            if (terminalApi && typeof terminalApi.runCommand === 'function') {
+                terminalApi.runCommand(command);
+            } else if (commandInput) {
+                commandInput.value = command;
+                commandInput.focus();
+            }
+        };
+
+        commandButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const command = button.getAttribute('data-command');
+                if (!command) return;
+                triggerCommand(command);
+            });
+        });
+
+        scrollButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const targetSelector = button.getAttribute('data-scroll-target');
+                if (!targetSelector) return;
+
+                if (targetSelector === 'body' || targetSelector === '#top') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+
+                const target = document.querySelector(targetSelector);
+                if (!target) return;
+
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        const textBlocks = document.querySelectorAll('.text-block');
+
+        const setActiveTextBlock = (target) => {
+            textBlocks.forEach((block) => {
+                const isActive = block === target;
+                block.classList.toggle('is-active', isActive);
+                block.classList.toggle('is-dimmed', !isActive);
+                block.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+        };
+
+        if (textBlocks.length) {
+            setActiveTextBlock(textBlocks[0]);
+
+            textBlocks.forEach((block) => {
+                block.addEventListener('click', () => setActiveTextBlock(block));
+                block.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setActiveTextBlock(block);
+                    }
+                });
+            });
+        }
+
+        setInterval(() => {
+            const targets = document.querySelectorAll('.main-header, .sub-header, .neon-button');
+            if (!targets.length || Math.random() <= 0.7) return;
+
+            const element = targets[Math.floor(Math.random() * targets.length)];
+            const offset = Math.random() * 10 - 5;
+            element.style.transform += ` translateX(${offset}px)`;
+            setTimeout(() => {
+                element.style.transform = element.style.transform.replace(/translateX\([^)]+\)/, '');
+            }, 120);
+        }, 2000);
+
+        setInterval(() => {
+            const arrows = document.querySelectorAll('.arrow');
+            if (!arrows.length || Math.random() <= 0.8) return;
+
+            const arrow = arrows[Math.floor(Math.random() * arrows.length)];
+            arrow.style.opacity = '0.2';
+            setTimeout(() => {
+                arrow.style.opacity = '0.7';
+            }, 150);
+        }, 1000);
+    </script>
 </body>
 </html>
-

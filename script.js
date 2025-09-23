@@ -154,7 +154,7 @@ class BootSequence {
     injectWelcome() {
         if (this.welcomeInjected || !this.terminal || !this.terminal.addToOutput) {
             if (this.terminal && this.terminal.input) {
-                this.terminal.input.focus();
+                this.terminal.focusInput();
                 this.terminal.updateCursorPosition();
             }
             return;
@@ -171,7 +171,7 @@ class BootSequence {
 
         if (this.terminal.input) {
             setTimeout(() => {
-                this.terminal.input.focus();
+                this.terminal.focusInput();
                 this.terminal.updateCursorPosition();
             }, 200);
         }
@@ -444,7 +444,7 @@ class CaseStudyViewer {
                 this.focusReturnElement.focus();
             }
         } else if (this.terminal?.input) {
-            this.terminal.input.focus();
+            this.terminal.focusInput();
             this.terminal.updateCursorPosition();
         }
     }
@@ -564,6 +564,7 @@ class Terminal {
         this.isRoot = false;
         this.currentDirectory = '~';
         this.currentTheme = 'green';
+        this.terminalZone = document.getElementById('terminal-zone');
 
         // Mobile detection and device capabilities
         this.deviceInfo = this.detectDevice();
@@ -701,10 +702,59 @@ class Terminal {
         });
     }
 
+    focusInput({ preventScroll = true } = {}) {
+        if (!this.input) return;
+        try {
+            if (preventScroll) {
+                this.input.focus({ preventScroll: true });
+            } else {
+                this.input.focus();
+            }
+        } catch (error) {
+            this.input.focus();
+        }
+    }
+
+    ensureInputVisible({ smooth = true } = {}) {
+        if (!this.input) return;
+        const behavior = smooth ? 'smooth' : 'auto';
+        const block = (this.isMobile || this.hasTouch) ? 'end' : 'nearest';
+
+        try {
+            this.input.scrollIntoView({ behavior, block });
+        } catch (error) {
+            // Fallback for browsers without smooth scrolling support
+            this.input.scrollIntoView(false);
+        }
+    }
+
+    scrollTerminalIntoView({ smooth = true } = {}) {
+        if (!this.terminalZone) return;
+
+        const rect = this.terminalZone.getBoundingClientRect();
+        const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+        if (!isVisible) {
+            const behavior = smooth ? 'smooth' : 'auto';
+            const viewportOffset = this.isMobile || this.hasTouch ? 48 : 80;
+            const target = Math.max(0, window.scrollY + rect.top - viewportOffset);
+            window.scrollTo({ top: target, behavior });
+        }
+    }
+
+    ensureInputReady() {
+        this.scrollTerminalIntoView();
+        this.focusInput({ preventScroll: false });
+        requestAnimationFrame(() => {
+            this.ensureInputVisible({ smooth: false });
+            this.updateCursorPosition();
+        });
+    }
+
     initTouchEvents() {
         let touchStartY = 0;
         let touchEndY = 0;
-        
+
         // Touch events for swipe gestures on terminal body
         this.output.addEventListener('touchstart', (e) => {
             touchStartY = e.changedTouches[0].screenY;
@@ -746,8 +796,9 @@ class Terminal {
     handleOrientationChange() {
         // Adjust terminal size and focus input after orientation change
         setTimeout(() => {
-            this.input.focus();
+            this.focusInput();
             this.scrollToBottom();
+            this.scrollTerminalIntoView({ smooth: false });
             this.updateCursorPosition(); // Recalculate cursor position after orientation change
         }, 300);
         
@@ -779,10 +830,10 @@ class Terminal {
     init() {
         this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
         this.input.addEventListener('input', () => this.updateCursorPosition());
-        this.input.focus();
+        this.focusInput();
         
         // Keep input focused
-        document.addEventListener('click', () => this.input.focus());
+        document.addEventListener('click', () => this.focusInput());
         
         // Initial cursor positioning
         this.updateCursorPosition();
@@ -866,6 +917,7 @@ class Terminal {
             this.handleGameInput(command);
             this.input.value = '';
             this.scrollToBottom();
+            this.ensureInputReady();
             return;
         }
 
@@ -874,6 +926,7 @@ class Terminal {
             this.handleRSSInput(command);
             this.input.value = '';
             this.scrollToBottom();
+            this.ensureInputReady();
             return;
         }
 
@@ -890,6 +943,7 @@ class Terminal {
         }
 
         this.input.value = '';
+        this.ensureInputReady();
     }
 
     runCommand(commandString) {
@@ -2486,21 +2540,57 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
     }
 
     initNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
+        const nav = document.querySelector('.floating-nav');
+        const navToggle = nav ? nav.querySelector('.nav-toggle') : null;
+        const navContainer = nav ? nav.querySelector('.nav-container') : null;
+        const navItems = navContainer ? navContainer.querySelectorAll('.nav-item') : [];
+
+        const setNavOpen = (open) => {
+            if (!nav || !navToggle) return;
+            nav.classList.toggle('nav-open', open);
+            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+
+        const syncNavToViewport = () => {
+            if (!nav || !navToggle) return;
+            const isDesktop = window.innerWidth > 768;
+            setNavOpen(isDesktop);
+            navToggle.disabled = isDesktop;
+            navToggle.setAttribute('aria-hidden', isDesktop ? 'true' : 'false');
+        };
+
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                if (!nav) return;
+                const isOpen = nav.classList.toggle('nav-open');
+                navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+
+                if (isOpen && navContainer) {
+                    const activeItem = navContainer.querySelector('.nav-item.active');
+                    if (activeItem) {
+                        requestAnimationFrame(() => activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('resize', () => syncNavToViewport());
+        syncNavToViewport();
 
         navItems.forEach(item => {
             item.addEventListener('click', () => {
-                // Remove active class from all items
-                navItems.forEach(nav => nav.classList.remove('active'));
-                // Add active class to clicked item
+                navItems.forEach(navItem => navItem.classList.remove('active'));
                 item.classList.add('active');
 
-                // Execute the corresponding command
                 const command = item.getAttribute('data-command');
                 if (command && this.commands[command]) {
                     this.addToOutput(`${this.getPrompt()}${command}`, 'command-line');
                     this.commands[command]();
                     this.scrollToBottom();
+                }
+
+                if (nav && window.innerWidth <= 768) {
+                    setNavOpen(false);
                 }
             });
         });
