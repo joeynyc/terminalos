@@ -2611,12 +2611,58 @@ window.addEventListener('pageshow', (event) => {
     }
 });
 
+// Fix viewport height for mobile browsers (especially iOS Safari)
+function setViewportHeight() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Handle viewport changes and scroll behavior
+function initMobileOptimizations() {
+    // Set initial viewport height
+    setViewportHeight();
+
+    // Update on resize and orientation change
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setViewportHeight, 100);
+    });
+
+    // Prevent body scroll when navigation is open on mobile
+    const navToggle = document.querySelector('.nav-toggle');
+    const floatingNav = document.querySelector('.floating-nav');
+
+    if (navToggle && floatingNav) {
+        navToggle.addEventListener('click', () => {
+            const isOpen = floatingNav.classList.contains('nav-open');
+            if (isOpen) {
+                document.body.style.overflow = '';
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+
+    // Close nav when clicking outside
+    document.addEventListener('click', (e) => {
+        if (floatingNav && floatingNav.classList.contains('nav-open')) {
+            if (!floatingNav.contains(e.target)) {
+                floatingNav.classList.remove('nav-open');
+                document.body.style.overflow = '';
+            }
+        }
+    });
+}
+
 // Initialize terminal when page loads
 document.addEventListener('DOMContentLoaded', () => {
     if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
     }
     window.scrollTo(0, 0);
+
+    // Initialize mobile optimizations
+    initMobileOptimizations();
 
     const terminal = new Terminal();
     const bootSequence = new BootSequence(terminal);

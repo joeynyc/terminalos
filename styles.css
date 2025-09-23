@@ -1,5 +1,8 @@
 /* CSS Custom Properties for Theme System */
 :root {
+    /* Viewport height fix for mobile browsers */
+    --vh: 1vh;
+
     /* Default theme: Matrix Green */
     --bg-primary: #0a0a0a;
     --bg-secondary: #1a1a1a;
@@ -533,7 +536,7 @@ body.case-study-open .terminal-container {
 
     /* Mobile navigation adjustments */
     .floating-nav {
-        position: sticky;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
@@ -541,6 +544,8 @@ body.case-study-open .terminal-container {
         width: 100%;
         padding: 12px;
         z-index: 1200;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
     }
 
     .floating-nav:not(.nav-open) .nav-container {
@@ -554,7 +559,7 @@ body.case-study-open .terminal-container {
         padding: 12px;
         margin-top: 12px;
         width: 100%;
-        max-height: 60vh;
+        max-height: calc(var(--vh, 1vh) * 60);
         overflow-y: auto;
         scrollbar-width: thin;
         -ms-overflow-style: auto;
@@ -579,9 +584,10 @@ body.case-study-open .terminal-container {
     
     .terminal-container {
         width: 100%;
-        height: 95vh;
+        height: calc(var(--vh, 1vh) * 100 - 80px);
         border-radius: 12px;
         box-shadow: 0 0 20px var(--glow-color);
+        margin-top: 80px;
     }
     
     .terminal-header {
@@ -614,12 +620,14 @@ body.case-study-open .terminal-container {
 @media (max-width: 480px) {
     /* Mobile navigation for small screens */
     .floating-nav {
-        position: sticky;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
         width: 100%;
         padding: 10px;
+        background: rgba(10, 10, 10, 0.95);
+        backdrop-filter: blur(10px);
     }
 
     .nav-container {
@@ -635,9 +643,10 @@ body.case-study-open .terminal-container {
 
     .terminal-container {
         width: 100%;
-        height: calc(100vh - 70px);
+        height: calc(var(--vh, 1vh) * 100 - 70px);
         border-radius: 0;
         border: none;
+        box-shadow: none;
         margin-top: 60px;
     }
     
@@ -754,7 +763,7 @@ body.case-study-open .terminal-container {
 
 .has-touch .terminal-body {
     padding-bottom: 80px; /* Extra space for virtual keyboard */
-    min-height: calc(100vh - 140px); /* Ensure content doesn't get cut off */
+    min-height: calc(var(--vh, 1vh) * 100 - 200px); /* Ensure content doesn't get cut off */
 }
 
 /* Virtual keyboard optimization */
@@ -765,11 +774,12 @@ body.case-study-open .terminal-container {
 /* Ensure input stays visible when keyboard appears */
 .device-mobile .input-line {
     position: sticky;
-    bottom: 20px;
+    bottom: 0;
     background: var(--bg-tertiary);
-    padding: 8px 0;
-    margin-top: 10px;
-    border-top: 1px solid var(--border-color);
+    padding: 12px 20px;
+    margin: 0 -20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
 }
 
 .has-touch .cursor {
