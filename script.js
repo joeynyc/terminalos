@@ -2605,8 +2605,19 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
     }
 }
 
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        window.scrollTo(0, 0);
+    }
+});
+
 // Initialize terminal when page loads
 document.addEventListener('DOMContentLoaded', () => {
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     const terminal = new Terminal();
     const bootSequence = new BootSequence(terminal);
     window.joeyTerminal = terminal;
