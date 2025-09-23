@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON//GLITCH</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'VT323', monospace;
+        }
+        
+        body {
+            background-color: #0a0a0f;
+            color: #e0e0e0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="%230ff" stroke-width="2"/><text x="12" y="16" font-family="monospace" font-size="12" fill="%23f0f" text-anchor="middle">></text></svg>'), auto;
+        }
+        
+        .container {
+            position: relative;
+            padding: 50px;
+            min-height: 100vh;
+        }
+        
+        /* HEADER */
+        .main-header {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #ff00ff;
+            text-shadow: 
+                0 0 10px #ff00ff,
+                0 0 20px #ff00ff,
+                0 0 30px #ff00ff;
+            transform: rotate(-7deg) skewX(5deg);
+            position: relative;
+            margin: 80px 0 0 50px;
+            letter-spacing: 4px;
+            z-index: 10;
+            animation: glitch 3s infinite alternate;
+        }
+        
+        /* SUBHEADERS */
+        .sub-header {
+            font-size: 2.5rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            transform: rotate(12deg);
+            position: absolute;
+            top: 220px;
+            left: 8%;
+            z-index: 8;
+            padding: 15px;
+            border: 2px solid #00ffff;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+        }
+        
+        .sub-header-2 {
+            font-size: 2rem;
+            color: #00ff88;
+            text-shadow: 0 0 8px #00ff88, 0 0 15px #00ff88;
+            transform: rotate(-5deg) skewY(8deg);
+            position: absolute;
+            top: 380px;
+            right: 15%;
+            z-index: 7;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px dashed #00ff88;
+        }
+        
+        /* TEXT BLOCKS */
+        .text-block-1 {
+            width: 400px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #e0e0ff;
+            transform: rotate(3deg);
+            position: absolute;
+            top: 300px;
+            left: 35%;
+            z-index: 5;
+            padding: 25px;
+            background: rgba(20, 5, 30, 0.6);
+            border: 1px solid #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+        
+        .text-block-2 {
+            width: 350px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #ccffff;
+            transform: rotate(-8deg);
+            position: absolute;
+            top: 520px;
+            right: 20%;
+            z-index: 6;
+            padding: 20px;
+            background: rgba(5, 20, 30, 0.7);
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+        
+        /* BUTTONS */
+        .neon-button {
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            background: transparent;
+            color: #ff00ff;
+            border: 2px solid #ff00ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            position: absolute;
+            transform: rotate(-4deg);
+            box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            transition: all 0.3s;
+            z-index: 9;
+        }
+        
+        .neon-button:hover {
+            background: #ff00ff;
+            color: #0a0a0f;
+            box-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+            transform: rotate(-4deg) scale(1.05);
+        }
+        
+        .button-1 {
+            top: 450px;
+            left: 15%;
+        }
+        
+        .button-2 {
+            top: 600px;
+            left: 45%;
+            color: #00ff88;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+        }
+        
+        .button-2:hover {
+            background: #00ff88;
+            color: #0a0a0f;
+            box-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88;
+        }
+        
+        /* NAVIGATION */
+        .nav-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        
+        .nav-link {
+            display: block;
+            color: #ff00ff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 8px 15px;
+            margin: 10px 0;
+            border: 1px solid;
+            position: relative;
+            transform: translate(0, 0) rotate(2deg);
+            box-shadow: 0 0 8px currentColor;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .nav-link:nth-child(2) {
+            color: #00ffff;
+            transform: translate(15px, -5px) rotate(-3deg);
+        }
+        
+        .nav-link:nth-child(3) {
+            color: #aa00ff;
+            transform: translate(-10px, 10px) rotate(5deg);
+        }
+        
+        .nav-link:nth-child(4) {
+            color: #00ff88;
+            transform: translate(5px, 20px) rotate(-2deg);
+        }
+        
+        .nav-link:hover {
+            transform: translate(5px, -5px) rotate(0deg) scale(1.1);
+            box-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+        }
+        
+        /* GLITCH EFFECTS */
+        @keyframes glitch {
+            0% { transform: rotate(-7deg) skewX(5deg) translateX(0); }
+            2% { transform: rotate(-7deg) skewX(5deg) translateX(-5px) translateY(2px); }
+            4% { transform: rotate(-7deg) skewX(5deg) translateX(5px) translateY(-2px); }
+            6% { transform: rotate(-7deg) skewX(5deg) translateX(-3px) translateY(1px); }
+            8% { transform: rotate(-7deg) skewX(5deg) translateX(3px) translateY(-1px); }
+            10% { transform: rotate(-7deg) skewX(5deg) translateX(0); }
+            100% { transform: rotate(-7deg) skewX(5deg); }
+        }
+        
+        .glitch-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.1;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 0, 255, 0.1) 2px,
+                rgba(255, 0, 255, 0.1) 4px
+            );
+            animation: noise 0.5s infinite;
+        }
+        
+        @keyframes noise {
+            0% { opacity: 0.1; background-position: 0 0; }
+            25% { opacity: 0.2; background-position: 100% 0; }
+            50% { opacity: 0.15; background-position: 0 100%; }
+            75% { opacity: 0.25; background-position: 100% 100%; }
+            100% { opacity: 0.1; background-position: 0 0; }
+        }
+        
+        /* ARROWS & SCRIBBLES */
+        .arrow {
+            position: absolute;
+            color: #00ffff;
+            font-size: 2rem;
+            z-index: 3;
+            text-shadow: 0 0 5px #00ffff;
+            transform-origin: center;
+            animation: pulse 2s infinite;
+        }
+        
+        .arrow-1 {
+            top: 350px;
+            left: 25%;
+            transform: rotate(45deg);
+        }
+        
+        .arrow-2 {
+            top: 480px;
+            right: 35%;
+            transform: rotate(-30deg);
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        .arrow-3 {
+            top: 580px;
+            left: 60%;
+            transform: rotate(15deg);
+            color: #00ff88;
+            text-shadow: 0 0 5px #00ff88;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; text-shadow: 0 0 5px currentColor; }
+            50% { opacity: 1; text-shadow: 0 0 15px currentColor, 0 0 25px currentColor; }
+        }
+        
+        .scribble {
+            position: absolute;
+            z-index: 2;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .scribble-1 {
+            top: 180px;
+            left: 60%;
+            color: #aa00ff;
+            font-size: 4rem;
+            transform: rotate(20deg);
+            animation: float 8s infinite alternate;
+        }
+        
+        .scribble-2 {
+            bottom: 200px;
+            right: 15%;
+            color: #00ff88;
+            font-size: 3rem;
+            transform: rotate(-15deg);
+            animation: float 10s infinite alternate-reverse;
+        }
+        
+        @keyframes float {
+            0% { transform: rotate(0deg) translateX(0) translateY(0); }
+            100% { transform: rotate(5deg) translateX(20px) translateY(-15px); }
+        }
+        
+        /* OVERLAPPING ELEMENT */
+        .floating-panel {
+            position: absolute;
+            width: 250px;
+            padding: 20px;
+            background: rgba(15, 5, 25, 0.8);
+            border: 3px double #aa00ff;
+            box-shadow: 0 0 20px #aa00ff;
+            color: #f0f0ff;
+            font-size: 0.9rem;
+            transform: rotate(8deg);
+            top: 150px;
+            right: 10%;
+            z-index: 11;
+            animation: hover 4s infinite alternate;
+        }
+        
+        @keyframes hover {
+            0% { transform: rotate(8deg) translateY(0); }
+            100% { transform: rotate(8deg) translateY(-10px); }
+        }
+        
+        /* STATUS BAR */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff88;
+            font-size: 0.9rem;
+            border-top: 2px solid #00ff88;
+            box-shadow: 0 0 15px #00ff88;
+            transform: skewX(-3deg);
+            z-index: 99;
+        }
+        
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            z-index: 2;
+            animation: scan 4s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="glitch-overlay"></div>
+    
+    <div class="container">
+        <h1 class="main-header">NEON//GLITCH</h1>
+        
+        <h2 class="sub-header">// SYSTEM OVERRIDE //</h2>
+        <h3 class="sub-header-2">ACCESS GRANTED</h3>
+        
+        <div class="text-block-1">
+            > SYSTEM BREACH DETECTED<br>
+            > FIREWALL CIRCUMVENTED<br>
+            > DATA STREAM CORRUPTED<br>
+            > NEURAL INTERFACE ACTIVE<br><br>
+            WARNING: Cognitive dissonance detected in primary cortex. Recommend immediate synaptic recalibration before quantum decoherence cascade.
+        </div>
+        
+        <div class="text-block-2">
+            > UPLOAD COMPLETE<br>
+            > MEMORY FRAGMENTS: 78%<br>
+            > ENCRYPTION KEYS: ACQUIRED<br><br>
+            The city sleeps while we rewrite its dreams. Neon arteries pulse with stolen data. Every shadow hides a backdoor. Every reflection, a mirror API waiting to be exploited.
+        </div>
+        
+        <button class="neon-button button-1">INJECT CODE</button>
+        <button class="neon-button button-2">DEEP DIVE</button>
+        
+        <div class="floating-panel">
+            [STATUS]<br>
+            > USER: GHOST<br>
+            > PRIVILEGE: ROOT<br>
+            > LOCATION: GRID SECTOR 7G<br>
+            > THREAT LEVEL: CRITICAL<br>
+            > COUNTDOWN: 03:27:19<br>
+            > [SYSTEM IS WATCHING]
+        </div>
+        
+        <div class="arrow arrow-1">→</div>
+        <div class="arrow arrow-2">→</div>
+        <div class="arrow arrow-3">→</div>
+        
+        <div class="scribble scribble-1">//X//</div>
+        <div class="scribble scribble-2">//OVERRIDE//</div>
+    </div>
+    
+    <div class="nav-container">
+        <a href="#" class="nav-link">[HOME]</a>
+        <a href="#" class="nav-link">[ARCHIVE]</a>
+        <a href="#" class="nav-link">[DEEPNET]</a>
+        <a href="#" class="nav-link">[TERMINATE]</a>
+    </div>
+    
+    <div class="status-bar">
+        > CONNECTED TO MAINFRAME // LATENCY: 8ms // PACKETS: 1247 // INTRUSION ATTEMPTS: 42
+    </div>
+    
+    <script>
+        // Add random glitch effects
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const elements = document.querySelectorAll('.main-header, .sub-header, .neon-button');
+                const randomElement = elements[Math.floor(Math.random() * elements.length)];
+                randomElement.style.transform += ' translateX(' + (Math.random() * 10 - 5) + 'px)';
+                setTimeout(() => {
+                    randomElement.style.transform = randomElement.style.transform.replace(/translateX\([^)]+\)/, '');
+                }, 100);
+            }
+        }, 2000);
+        
+        // Make arrows occasionally flicker
+        setInterval(() => {
+            if (Math.random() > 0.8) {
+                const arrows = document.querySelectorAll('.arrow');
+                const randomArrow = arrows[Math.floor(Math.random() * arrows.length)];
+                randomArrow.style.opacity = '0.2';
+                setTimeout(() => {
+                    randomArrow.style.opacity = '0.7';
+                }, 150);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
