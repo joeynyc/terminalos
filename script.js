@@ -892,6 +892,17 @@ class Terminal {
         this.input.value = '';
     }
 
+    runCommand(commandString) {
+        if (!commandString) return;
+        const parsed = Array.isArray(commandString) ? commandString.join(' ') : commandString;
+        const trimmed = parsed.trim();
+        if (!trimmed) return;
+
+        this.input.value = trimmed;
+        this.executeCommand();
+        this.scrollToBottom();
+    }
+
     addToOutput(content, className = 'command-output') {
         const div = document.createElement('div');
         div.className = className;
@@ -2280,9 +2291,53 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
             this.rssActive = true;
             
         } catch (error) {
-            this.addToOutput('<span class="error">❌ Failed to fetch live Hacker News stories</span>', 'command-output');
-            this.addToOutput('<span class="error">Please check your internet connection and try again</span>', 'command-output');
-            this.addToOutput(`<span class="info">Error: ${error.message}</span>`, 'command-output');
+            const fallbackStories = await this.loadFallbackStories();
+
+            if (fallbackStories.length) {
+                this.addToOutput('<span class="warning">🔌 Live feed unavailable. Switching to Joey.OS mission briefings.</span>', 'command-output');
+                this.rssStories = fallbackStories;
+                this.displayRSSStories({
+                    heading: '📡 Joey.OS Mission Briefings',
+                    offline: true
+                });
+                this.rssActive = true;
+            } else {
+                this.addToOutput('<span class="warning">⚠️ Unable to fetch live stories right now.</span>', 'command-output');
+                this.addToOutput(`<span class="info">${error.message}</span>`, 'command-output');
+            }
+        }
+    }
+
+    async loadFallbackStories() {
+        try {
+            const response = await fetch('posts.json');
+            if (!response.ok) {
+                throw new Error('Fallback posts could not be loaded');
+            }
+
+            const posts = await response.json();
+            if (!Array.isArray(posts) || posts.length === 0) {
+                return [];
+            }
+
+            return posts.map((post, index) => {
+                const safeId = post?.id || `local-${index}`;
+                const date = post?.date ? new Date(post.date) : null;
+                const formattedDate = date && !Number.isNaN(date.valueOf())
+                    ? date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+                    : 'Recently updated';
+
+                return {
+                    id: safeId,
+                    title: post?.title || 'Joey.OS briefing',
+                    url: `blog.html#${safeId}`,
+                    infoLine: `📅 ${formattedDate}`,
+                    isLocal: true
+                };
+            });
+        } catch (fallbackError) {
+            console.warn('Local fallback stories unavailable:', fallbackError.message);
+            return [];
         }
     }
 
@@ -2359,25 +2414,30 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
     }
 
 
-    displayRSSStories() {
-        this.addToOutput('<span class="success">🚀 Top Hacker News Stories</span>', 'command-output');
+    displayRSSStories({ heading = '🚀 Top Hacker News Stories', offline = false } = {}) {
+        this.addToOutput(`<span class="success">${heading}</span>`, 'command-output');
         this.addToOutput('═══════════════════════════════', 'command-output');
         
         this.rssStories.forEach((story, index) => {
             const storyNumber = index + 1;
-            const points = story.score || 0;
-            const comments = story.descendants || 0;
+            const points = story.score ?? 0;
+            const comments = story.descendants ?? 0;
             const title = story.title.length > 60 ? story.title.substring(0, 57) + '...' : story.title;
+            const infoLine = story.infoLine || `↑${points} points | 💬${comments} comments`;
             
             const storyText = `
 <span class="success">${storyNumber.toString().padStart(2, ' ')}.</span> ${title}
-    <span class="info">↑${points} points | 💬${comments} comments</span>`;
+    <span class="info">${infoLine}</span>`;
             
             this.addToOutput(storyText, 'command-output');
         });
         
         this.addToOutput('', 'command-output');
-        this.addToOutput('<span class="warning">Type a number (1-10) to open story, or "quit" to exit RSS mode</span>', 'command-output');
+        const range = this.rssStories.length;
+        this.addToOutput(`<span class="warning">Type a number (1-${range}) to open ${offline ? 'a briefing' : 'a story'}, or "quit" to exit RSS mode</span>`, 'command-output');
+        if (offline) {
+            this.addToOutput('<span class="info">Briefings open the Joey.OS blog in a new tab.</span>', 'command-output');
+        }
     }
 
     handleRSSInput(input) {
@@ -2405,6 +2465,9 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
             // External link
             window.open(story.url, '_blank');
             this.addToOutput('<span class="success">✅ Story opened in new tab</span>', 'command-output');
+            if (story.isLocal) {
+                this.addToOutput('<span class="info">📓 You\'re viewing a Joey.OS blog post.</span>', 'command-output');
+            }
         } else {
             // HN discussion only (Ask HN, Show HN, etc.)
             const hnUrl = `https://news.ycombinator.com/item?id=${story.id}`;
@@ -2456,5 +2519,7 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
 document.addEventListener('DOMContentLoaded', () => {
     const terminal = new Terminal();
     const bootSequence = new BootSequence(terminal);
+    window.joeyTerminal = terminal;
+    document.dispatchEvent(new CustomEvent('joey-terminal-ready', { detail: { terminal } }));
     bootSequence.start();
 });
