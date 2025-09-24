@@ -171,7 +171,8 @@ class BootSequence {
 
         if (this.terminal.input) {
             setTimeout(() => {
-                this.terminal.focusInput();
+                // On mobile, prevent scroll when focusing input to maintain scroll position
+                this.terminal.focusInput({ preventScroll: true });
                 this.terminal.updateCursorPosition();
             }, 200);
         }
@@ -710,8 +711,13 @@ class Terminal {
 
     focusInput({ preventScroll = true } = {}) {
         if (!this.input) return;
+
+        // On mobile, always prevent scroll to keep user at intended position
+        const isMobile = window.innerWidth <= 768;
+        const shouldPreventScroll = isMobile || preventScroll;
+
         try {
-            if (preventScroll) {
+            if (shouldPreventScroll) {
                 this.input.focus({ preventScroll: true });
             } else {
                 this.input.focus();
@@ -737,6 +743,12 @@ class Terminal {
     scrollTerminalIntoView({ smooth = true } = {}) {
         if (!this.terminalZone) return;
 
+        // On mobile, don't auto-scroll to terminal on page load to preserve intended scroll position
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            return; // Skip auto-scroll behavior on mobile
+        }
+
         const rect = this.terminalZone.getBoundingClientRect();
         const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
 
@@ -750,7 +762,8 @@ class Terminal {
 
     ensureInputReady() {
         this.scrollTerminalIntoView();
-        this.focusInput({ preventScroll: false });
+        // Let focusInput() handle mobile scroll prevention automatically
+        this.focusInput();
         requestAnimationFrame(() => {
             this.ensureInputVisible({ smooth: false });
             this.updateCursorPosition();

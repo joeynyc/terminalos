@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Scroll Behavior Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 0;
+            padding: 20px;
+            height: 200vh; /* Make page scrollable */
+            background: linear-gradient(to bottom, #ff6b6b, #4ecdc4);
+        }
+        .header {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .terminal-section {
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 100vh;
+            min-height: 300px;
+        }
+        .test-results {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-width: 200px;
+        }
+        .scroll-indicator {
+            position: fixed;
+            top: 50%;
+            left: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 4px;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-results" id="results">
+        <strong>Mobile Scroll Test</strong><br>
+        <span id="viewport-width"></span><br>
+        <span id="scroll-position"></span><br>
+        <span id="is-mobile"></span>
+    </div>
+
+    <div class="scroll-indicator" id="scroll-indicator">
+        Scroll Position: <span id="scroll-value">0</span>px
+    </div>
+
+    <div class="header">
+        <h1>🔧 Mobile Scroll Behavior Test</h1>
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Load this page on mobile device</li>
+            <li>Scroll down to see the terminal section</li>
+            <li>Refresh the page</li>
+            <li>Check if you stay at the top (✅) or scroll to terminal (❌)</li>
+        </ol>
+        <p><strong>Expected Result:</strong> On mobile refresh, you should stay at the top of the page where the navigation would be visible.</p>
+    </div>
+
+    <div class="terminal-section">
+        <h2>📱 Terminal Section (Bottom)</h2>
+        <p>If you end up here after refresh on mobile, the fix didn't work.</p>
+        <p>You should be at the top with the header visible after refresh.</p>
+        <input type="text" placeholder="Terminal input simulation" id="test-input" style="background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; width: 100%;">
+    </div>
+
+    <script>
+        function updateStatus() {
+            const width = window.innerWidth;
+            const scrollY = window.scrollY;
+            const isMobile = width <= 768;
+
+            document.getElementById('viewport-width').textContent = `Width: ${width}px`;
+            document.getElementById('scroll-position').textContent = `Scroll: ${scrollY}px`;
+            document.getElementById('is-mobile').textContent = `Mobile: ${isMobile}`;
+            document.getElementById('scroll-value').textContent = scrollY;
+        }
+
+        // Update status on load and scroll
+        updateStatus();
+        window.addEventListener('scroll', updateStatus);
+        window.addEventListener('resize', updateStatus);
+
+        // Simulate the mobile scroll behavior from the main site
+        document.addEventListener('DOMContentLoaded', () => {
+            // This mimics the behavior from script.js
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+                console.log('Mobile detected - scrolling to top');
+                window.scrollTo(0, 0);
+            } else {
+                console.log('Desktop detected - preserving scroll position');
+            }
+
+            // Simulate terminal focus without scroll (the fix)
+            setTimeout(() => {
+                const input = document.getElementById('test-input');
+                if (input && isMobile) {
+                    console.log('Focusing input with preventScroll on mobile');
+                    try {
+                        input.focus({ preventScroll: true });
+                    } catch (e) {
+                        input.focus();
+                    }
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>
