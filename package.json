@@ -4,7 +4,9 @@
   "description": "A unique, interactive terminal-style portfolio website that showcases skills and experience through a command-line interface.",
   "main": "blog.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:mobile": "playwright test tests/mobile.spec.js",
+    "test:headed": "playwright test --headed"
   },
   "repository": {
     "type": "git",
