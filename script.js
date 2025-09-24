@@ -187,7 +187,7 @@ class BootSequence {
         this.overlay.classList.add('hidden');
         this.overlay.setAttribute('aria-hidden', 'true');
         this.body.classList.remove('boot-active');
-        sessionStorage.setItem(this.storageKey, '1');
+        localStorage.setItem(this.storageKey, '1');
         document.removeEventListener('keydown', this.handleGlobalKeydown);
         this.injectWelcome();
 
@@ -199,6 +199,12 @@ class BootSequence {
     start() {
         if (!this.overlay) {
             this.injectWelcome();
+            return;
+        }
+
+        // Check if boot sequence has already been played
+        if (localStorage.getItem(this.storageKey)) {
+            this.finish({ skipped: true });
             return;
         }
 
@@ -2628,6 +2634,30 @@ function initMobileOptimizations() {
         setTimeout(setViewportHeight, 100);
     });
 
+    // Move navigation to header on mobile
+    function handleNavigationPosition() {
+        const isMobile = window.innerWidth <= 768;
+        const floatingNav = document.querySelector('.floating-nav');
+        const header = document.querySelector('.glitch-header');
+        const terminalZone = document.querySelector('.glitch-terminal-zone');
+
+        if (floatingNav && header && terminalZone) {
+            if (isMobile && floatingNav.parentElement !== header) {
+                // Move nav to header on mobile
+                header.insertBefore(floatingNav, header.firstChild);
+            } else if (!isMobile && floatingNav.parentElement !== terminalZone) {
+                // Move nav back to terminal zone on desktop
+                terminalZone.insertBefore(floatingNav, terminalZone.firstChild);
+            }
+        }
+    }
+
+    // Initial positioning
+    handleNavigationPosition();
+
+    // Update on resize
+    window.addEventListener('resize', handleNavigationPosition);
+
     // Prevent body scroll when navigation is open on mobile
     const navToggle = document.querySelector('.nav-toggle');
     const floatingNav = document.querySelector('.floating-nav');
@@ -2659,7 +2689,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
     }
-    window.scrollTo(0, 0);
+
+    // Only scroll to top on mobile
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        window.scrollTo(0, 0);
+    }
 
     // Initialize mobile optimizations
     initMobileOptimizations();

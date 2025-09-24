@@ -2127,6 +2127,25 @@ body.glitch-body .terminal-body {
         gap: clamp(26px, 6vw, 44px);
     }
 
+    /* Mobile navigation in header */
+    body.glitch-body .glitch-header {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body.glitch-body .glitch-header .floating-nav {
+        order: -1; /* Move nav to top of header */
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        bottom: auto;
+        margin-bottom: clamp(20px, 4vw, 28px);
+        transform: none;
+        width: 100%;
+        z-index: 9;
+    }
+
     .glitch-header {
         display: flex;
         flex-direction: column;
