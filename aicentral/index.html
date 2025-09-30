@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Central - Dashboard</title>
+    <script>
+        // Suppress Tailwind CDN production warning
+        window.process = { env: { NODE_ENV: 'production' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(59, 130, 246, 0.1)), 
+                        url('resources/hero-ai-dashboard.png') center/cover;
+            position: relative;
+        }
+        
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(59, 130, 246, 0.25);
+        }
+        
+        .company-filter {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .company-filter.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .news-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .news-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .floating-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .bookmark-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .bookmark-btn:hover {
+            color: #f59e0b;
+            transform: scale(1.1);
+        }
+        
+        .bookmark-btn.bookmarked {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold text-white">AI Central</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="text-blue-400 font-medium">Dashboard</a>
+                    <a href="companies.html" class="text-gray-300 hover:text-white transition-colors">Companies</a>
+                    <a href="analytics.html" class="text-gray-300 hover:text-white transition-colors">Analytics</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search AI updates..." 
+                           class="search-input w-64 px-4 py-2 rounded-lg text-white placeholder-gray-400 focus:outline-none">
+                    <div id="searchResults" class="absolute top-full mt-2 w-full bg-gray-800 rounded-lg shadow-xl hidden z-10">
+                        <!-- Search results will be populated here -->
+                    </div>
+                </div>
+                <button class="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center justify-center relative pt-20">
+        <div class="floating-particles">
+            <!-- Particles will be generated by JS -->
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
+            <div class="reveal">
+                <h1 class="text-6xl md:text-8xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    AI Intelligence Hub
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                    Centralizing AI developments from Google, OpenAI, Microsoft, Meta, Anthropic, and xAI. 
+                    Stay informed without the noise of social media.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <div class="metric-card px-6 py-4 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-400">24/7</div>
+                        <div class="text-sm text-gray-400">Live Updates</div>
+                    </div>
+                    <div class="metric-card px-6 py-4 rounded-lg">
+                        <div class="text-3xl font-bold text-green-400">6</div>
+                        <div class="text-sm text-gray-400">AI Companies</div>
+                    </div>
+                    <div class="metric-card px-6 py-4 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-400">150+</div>
+                        <div class="text-sm text-gray-400">Daily Updates</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar Filters -->
+            <aside class="lg:w-80">
+                <div class="sticky top-24">
+                    <div class="bg-gray-800 rounded-xl p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Filter by Company</h3>
+                        <div class="space-y-3">
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="all" checked>
+                                <span class="ml-3">All Companies</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="google">
+                                <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/ea635a7bbade06d41544eba63db5fd5cd5edc82f.png" alt="Google" class="w-6 h-6 ml-3">
+                                <span class="ml-3">Google</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="openai">
+                                <img src="https://kimi-web-img.moonshot.cn/img/sickboat.com/633559291181e0e1e58000d486f870e15c057318.jpg" alt="OpenAI" class="w-6 h-6 ml-3">
+                                <span class="ml-3">OpenAI</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="microsoft">
+                                <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Microsoft" class="w-6 h-6 ml-3">
+                                <span class="ml-3">Microsoft</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="meta">
+                                <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Meta" class="w-6 h-6 ml-3">
+                                <span class="ml-3">Meta</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="anthropic">
+                                <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Anthropic" class="w-6 h-6 ml-3">
+                                <span class="ml-3">Anthropic</span>
+                            </label>
+                            <label class="company-filter flex items-center p-3 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="company-checkbox" value="xai">
+                                <img src="https://kimi-web-img.moonshot.cn/img/thumbs.dreamstime.com/00ba938fff81084a8405e59201d37dc8d9a9768d.jpg" alt="xAI" class="w-6 h-6 ml-3">
+                                <span class="ml-3">xAI</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Time Range</h3>
+                        <select id="timeFilter" class="w-full bg-gray-700 text-white p-3 rounded-lg">
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="flex-1">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="metric-card p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-400">47</div>
+                        <div class="text-sm text-gray-400">New Updates</div>
+                    </div>
+                    <div class="metric-card p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-400">12</div>
+                        <div class="text-sm text-gray-400">Research Papers</div>
+                    </div>
+                    <div class="metric-card p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-400">8</div>
+                        <div class="text-sm text-gray-400">Product Launches</div>
+                    </div>
+                    <div class="metric-card p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-yellow-400">5</div>
+                        <div class="text-sm text-gray-400">Partnerships</div>
+                    </div>
+                </div>
+
+                <!-- News Feed -->
+                <div id="newsFeed" class="space-y-4">
+                    <!-- News items will be populated by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <div class="text-center mt-8">
+                    <button id="loadMoreBtn" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors">
+                        Load More Updates
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bookmarked Items Modal -->
+    <div id="bookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Bookmarked Updates</h3>
+                <button id="closeBookmarkModal" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="bookmarkedContent">
+                <!-- Bookmarked items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-400">© 2025 AI Central. Centralizing AI intelligence for informed decision-making.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

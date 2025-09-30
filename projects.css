@@ -520,6 +520,41 @@ body {
     font-style: italic;
 }
 
+.aicentral-mockup {
+    padding: 20px;
+    text-align: center;
+}
+
+.aicentral-header {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(59, 130, 246, 0.9);
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+}
+
+.aicentral-companies {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.company-badge {
+    font-size: 9px;
+    padding: 4px 8px;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.aicentral-feed {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
 .clock-mockup {
     padding: 20px;
     text-align: center;

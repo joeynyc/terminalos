@@ -640,6 +640,7 @@ class Terminal {
             svgviewer: () => this.openSVGViewer(),
             musicfactory: () => this.openMusicFactory(),
             worldclock: () => this.openWorldClock(),
+            aicentral: () => this.openAICentral(),
             roadmap: () => this.showRoadmap(),
             case: (args) => this.openCaseStudy(args)
         };
@@ -1071,6 +1072,7 @@ Available Commands:
 <span class="success">svgviewer</span>    - Launch SVG gallery viewer
 <span class="success">musicfactory</span>  - Launch music production interface
 <span class="success">worldclock</span>    - Launch global time zones viewer
+<span class="success">aicentral</span>     - Launch AI company news aggregator
 
 <span class="info">System Commands:</span>
 <span class="success">clear</span>        - Clear the terminal
@@ -1305,6 +1307,11 @@ technical discussions, project collaborations, and automation consulting.
    ├── Tech: Python, MCP Protocol
    ├── Features: Control Govee lights with natural language
    └── Status: Open Source (type 'github')
+
+<span class="success">13. AI Central</span>
+   ├── Tech: HTML, CSS, JavaScript
+   ├── Features: AI company news aggregator with analytics dashboard
+   └── Status: Integrated tool (type 'aicentral')
 
 <span class="warning">Development Tools:</span>
 • Terminal-based development environment
@@ -2343,6 +2350,13 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         window.open('worldclock/index.html', '_blank');
         this.addToOutput('<span class="success">✅ World Clock opened! Check your browser tabs.</span>', 'command-output');
         this.addToOutput('<span class="info">⏰ Global time zones viewer with real-time clock display.</span>', 'command-output');
+    }
+
+    openAICentral() {
+        this.addToOutput('<span class="info">🤖 Launching AI Central...</span>', 'command-output');
+        window.open('aicentral/index.html', '_blank');
+        this.addToOutput('<span class="success">✅ AI Central opened! Check your browser tabs.</span>', 'command-output');
+        this.addToOutput('<span class="info">📊 AI company news aggregator with analytics dashboard tracking Google, OpenAI, Microsoft, Meta, Anthropic, and xAI.</span>', 'command-output');
     }
 
     // ========================

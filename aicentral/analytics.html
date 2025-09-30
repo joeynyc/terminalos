@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Central - Analytics</title>
+    <script>
+        // Suppress Tailwind CDN production warning
+        window.process = { env: { NODE_ENV: 'production' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .trend-up {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        
+        .trend-down {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .trend-neutral {
+            background: rgba(156, 163, 175, 0.2);
+            color: #9ca3af;
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .heatmap-cell {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            position: relative;
+        }
+        
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .comparison-table th {
+            background: rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .comparison-table td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold text-white">AI Central</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                    <a href="companies.html" class="text-gray-300 hover:text-white transition-colors">Companies</a>
+                    <a href="analytics.html" class="text-blue-400 font-medium">Analytics</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <select id="timeRangeSelector" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="30d">Last 30 Days</option>
+                    <option value="90d">Last 90 Days</option>
+                    <option value="1y">Last Year</option>
+                    <option value="all">All Time</option>
+                </select>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    AI Analytics & Trends
+                </h1>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Data-driven insights into AI industry trends, company performance, and market dynamics
+                </p>
+            </div>
+            
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="metric-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-blue-400 mb-2">2,847</div>
+                    <div class="text-gray-400 mb-2">Total Updates</div>
+                    <div class="trend-indicator trend-up">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        +12.5%
+                    </div>
+                </div>
+                <div class="metric-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-green-400 mb-2">$89.2B</div>
+                    <div class="text-gray-400 mb-2">Market Investment</div>
+                    <div class="trend-indicator trend-up">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        +8.3%
+                    </div>
+                </div>
+                <div class="metric-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-purple-400 mb-2">156</div>
+                    <div class="text-gray-400 mb-2">Research Papers</div>
+                    <div class="trend-indicator trend-up">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        +15.7%
+                    </div>
+                </div>
+                <div class="metric-card p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-yellow-400 mb-2">23</div>
+                    <div class="text-gray-400 mb-2">Product Launches</div>
+                    <div class="trend-indicator trend-neutral">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        +2.1%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Analytics Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Sentiment Analysis -->
+            <div class="chart-card p-6 rounded-xl reveal">
+                <h3 class="text-xl font-semibold mb-4">Sentiment Analysis</h3>
+                <div id="sentimentChart" style="height: 300px;"></div>
+            </div>
+            
+            <!-- Activity Heatmap -->
+            <div class="chart-card p-6 rounded-xl reveal">
+                <h3 class="text-xl font-semibold mb-4">Activity Heatmap</h3>
+                <div id="heatmapChart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+            <!-- Topic Trends -->
+            <div class="chart-card p-6 rounded-xl reveal">
+                <h3 class="text-xl font-semibold mb-4">Trending Topics</h3>
+                <div id="topicChart" style="height: 350px;"></div>
+            </div>
+            
+            <!-- Company Comparison -->
+            <div class="chart-card p-6 rounded-xl reveal">
+                <h3 class="text-xl font-semibold mb-4">Company Performance</h3>
+                <div id="comparisonChart" style="height: 350px;"></div>
+            </div>
+        </div>
+
+        <!-- Detailed Comparison Table -->
+        <div class="chart-card p-6 rounded-xl reveal mb-12">
+            <h3 class="text-2xl font-bold mb-6">Company Comparison Matrix</h3>
+            <div class="overflow-x-auto">
+                <table class="comparison-table w-full rounded-lg overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-4 text-left">Company</th>
+                            <th class="px-6 py-4 text-center">Updates</th>
+                            <th class="px-6 py-4 text-center">Research</th>
+                            <th class="px-6 py-4 text-center">Products</th>
+                            <th class="px-6 py-4 text-center">Partnerships</th>
+                            <th class="px-6 py-4 text-center">Market Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTableBody">
+                        <!-- Table content will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Predictive Insights -->
+        <div class="chart-card p-6 rounded-xl reveal">
+            <h3 class="text-2xl font-bold mb-6">Predictive Insights</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="metric-card p-4 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Next Major Release</h4>
+                        <span class="trend-indicator trend-up">High Confidence</span>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-2">GPT-5 expected within 3 months</p>
+                    <div class="text-xs text-gray-400">Based on historical patterns and current development activity</div>
+                </div>
+                
+                <div class="metric-card p-4 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Market Trend</h4>
+                        <span class="trend-indicator trend-up">Bullish</span>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-2">AI investment to grow 25% in Q1 2025</p>
+                    <div class="text-xs text-gray-400">Driven by enterprise adoption and new use cases</div>
+                </div>
+                
+                <div class="metric-card p-4 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-semibold">Technology Focus</h4>
+                        <span class="trend-indicator trend-neutral">Emerging</span>
+                    </div>
+                    <p class="text-gray-300 text-sm mb-2">Multimodal AI gaining momentum</p>
+                    <div class="text-xs text-gray-400">Companies investing heavily in vision + language models</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-400">© 2025 AI Central. Centralizing AI intelligence for informed decision-making.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Analytics data
+        const analyticsData = {
+            sentiment: {
+                positive: 45,
+                neutral: 35,
+                negative: 20
+            },
+            topics: [
+                { name: 'LLMs', value: 892 },
+                { name: 'Multimodal AI', value: 634 },
+                { name: 'AI Safety', value: 521 },
+                { name: 'Enterprise AI', value: 478 },
+                { name: 'Open Source', value: 423 },
+                { name: 'AI Hardware', value: 312 },
+                { name: 'Regulation', value: 287 },
+                { name: 'AI Ethics', value: 245 }
+            ],
+            companies: {
+                google: { updates: 156, research: 47, products: 23, partnerships: 12, impact: 92 },
+                openai: { updates: 203, research: 34, products: 28, partnerships: 8, impact: 95 },
+                microsoft: { updates: 178, research: 41, products: 31, partnerships: 19, impact: 88 },
+                meta: { updates: 134, research: 52, products: 18, partnerships: 15, impact: 85 },
+                anthropic: { updates: 89, research: 28, products: 12, partnerships: 7, impact: 78 },
+                xai: { updates: 67, research: 19, products: 9, partnerships: 5, impact: 72 }
+            }
+        };
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScrollAnimations();
+            initializeCharts();
+            populateComparisonTable();
+        });
+
+        // Scroll animations
+        function initializeScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Initialize all charts
+        function initializeCharts() {
+            initializeSentimentChart();
+            initializeHeatmapChart();
+            initializeTopicChart();
+            initializeComparisonChart();
+        }
+
+        // Sentiment Analysis Chart
+        function initializeSentimentChart() {
+            const chartDom = document.getElementById('sentimentChart');
+            const myChart = echarts.init(chartDom);
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                series: [
+                    {
+                        name: 'Sentiment',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: {
+                            borderRadius: 10,
+                            borderColor: '#1a1a1a',
+                            borderWidth: 2
+                        },
+                        label: {
+                            show: false,
+                            position: 'center'
+                        },
+                        emphasis: {
+                            label: {
+                                show: true,
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                color: '#fff'
+                            }
+                        },
+                        labelLine: {
+                            show: false
+                        },
+                        data: [
+                            {
+                                value: analyticsData.sentiment.positive,
+                                name: 'Positive',
+                                itemStyle: { color: '#10b981' }
+                            },
+                            {
+                                value: analyticsData.sentiment.neutral,
+                                name: 'Neutral',
+                                itemStyle: { color: '#6b7280' }
+                            },
+                            {
+                                value: analyticsData.sentiment.negative,
+                                name: 'Negative',
+                                itemStyle: { color: '#ef4444' }
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        }
+
+        // Activity Heatmap Chart
+        function initializeHeatmapChart() {
+            const chartDom = document.getElementById('heatmapChart');
+            const myChart = echarts.init(chartDom);
+
+            // Generate heatmap data
+            const companies = ['Google', 'OpenAI', 'Microsoft', 'Meta', 'Anthropic', 'xAI'];
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const data = [];
+
+            for (let i = 0; i < companies.length; i++) {
+                for (let j = 0; j < days.length; j++) {
+                    data.push([j, i, Math.floor(Math.random() * 50) + 10]);
+                }
+            }
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    position: 'top',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                grid: {
+                    height: '50%',
+                    top: '10%'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: days,
+                    splitArea: {
+                        show: true
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: companies,
+                    splitArea: {
+                        show: true
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    }
+                },
+                visualMap: {
+                    min: 0,
+                    max: 60,
+                    calculable: true,
+                    orient: 'horizontal',
+                    left: 'center',
+                    bottom: '15%',
+                    inRange: {
+                        color: ['#1f2937', '#374151', '#6b7280', '#9ca3af', '#d1d5db']
+                    },
+                    textStyle: {
+                        color: '#9ca3af'
+                    }
+                },
+                series: [
+                    {
+                        name: 'Activity',
+                        type: 'heatmap',
+                        data: data,
+                        label: {
+                            show: false
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        }
+
+        // Topic Trends Chart
+        function initializeTopicChart() {
+            const chartDom = document.getElementById('topicChart');
+            const myChart = echarts.init(chartDom);
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: analyticsData.topics.map(item => item.name),
+                    axisLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    }
+                },
+                series: [
+                    {
+                        name: 'Mentions',
+                        type: 'bar',
+                        data: analyticsData.topics.map(item => item.value),
+                        itemStyle: {
+                            color: function(params) {
+                                const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444'];
+                                return colors[params.dataIndex % colors.length];
+                            }
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        }
+
+        // Company Comparison Chart
+        function initializeComparisonChart() {
+            const chartDom = document.getElementById('comparisonChart');
+            const myChart = echarts.init(chartDom);
+
+            const companies = Object.keys(analyticsData.companies);
+            const data = companies.map(company => ({
+                name: company.charAt(0).toUpperCase() + company.slice(1),
+                value: analyticsData.companies[company].impact
+            }));
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                radar: {
+                    indicator: [
+                        { name: 'Updates', max: 250 },
+                        { name: 'Research', max: 60 },
+                        { name: 'Products', max: 35 },
+                        { name: 'Partnerships', max: 20 },
+                        { name: 'Market Impact', max: 100 }
+                    ],
+                    axisName: {
+                        color: '#9ca3af'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    },
+                    splitArea: {
+                        show: false
+                    }
+                },
+                series: [
+                    {
+                        name: 'Company Performance',
+                        type: 'radar',
+                        data: [
+                            {
+                                value: [203, 34, 28, 8, 95],
+                                name: 'OpenAI',
+                                itemStyle: { color: '#10a37f' }
+                            },
+                            {
+                                value: [156, 47, 23, 12, 92],
+                                name: 'Google',
+                                itemStyle: { color: '#4285f4' }
+                            },
+                            {
+                                value: [178, 41, 31, 19, 88],
+                                name: 'Microsoft',
+                                itemStyle: { color: '#0078d4' }
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+        }
+
+        // Populate comparison table
+        function populateComparisonTable() {
+            const tableBody = document.getElementById('comparisonTableBody');
+            const companies = Object.entries(analyticsData.companies);
+
+            tableBody.innerHTML = companies.map(([companyKey, data]) => {
+                const companyName = companyKey.charAt(0).toUpperCase() + companyKey.slice(1);
+                const totalScore = data.updates + data.research + data.products + data.partnerships + data.impact;
+                
+                return `
+                    <tr class="hover:bg-gray-800 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-3"></div>
+                                <span class="font-medium">${companyName}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center">${data.updates}</td>
+                        <td class="px-6 py-4 text-center">${data.research}</td>
+                        <td class="px-6 py-4 text-center">${data.products}</td>
+                        <td class="px-6 py-4 text-center">${data.partnerships}</td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center">
+                                <div class="w-16 h-2 bg-gray-700 rounded-full mr-2">
+                                    <div class="h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full" 
+                                         style="width: ${data.impact}%"></div>
+                                </div>
+                                <span class="text-sm">${data.impact}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Time range selector
+        document.getElementById('timeRangeSelector').addEventListener('change', function() {
+            // In a real application, this would fetch new data based on the selected time range
+            console.log('Time range changed to:', this.value);
+            
+            // Animate charts update
+            anime({
+                targets: '.chart-card',
+                scale: [1, 0.98, 1],
+                duration: 300,
+                delay: anime.stagger(100),
+                easing: 'easeOutQuart'
+            });
+        });
+
+        // Make charts responsive
+        window.addEventListener('resize', function() {
+            const charts = ['sentimentChart', 'heatmapChart', 'topicChart', 'comparisonChart'];
+            charts.forEach(chartId => {
+                const chartDom = document.getElementById(chartId);
+                if (chartDom) {
+                    const chart = echarts.getInstanceByDom(chartDom);
+                    if (chart) {
+                        chart.resize();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

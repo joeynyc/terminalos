@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Central - Companies</title>
+    <script>
+        // Suppress Tailwind CDN production warning
+        window.process = { env: { NODE_ENV: 'production' } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .company-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .company-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-4px);
+        }
+        
+        .company-card.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: #3b82f6;
+            border-radius: 50%;
+            border: 3px solid #1a1a1a;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% - 1rem);
+            background: rgba(59, 130, 246, 0.3);
+        }
+        
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .personnel-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .personnel-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold text-white">AI Central</h1>
+                <div class="hidden md:flex space-x-6">
+                    <a href="index.html" class="text-gray-300 hover:text-white transition-colors">Dashboard</a>
+                    <a href="companies.html" class="text-blue-400 font-medium">Companies</a>
+                    <a href="analytics.html" class="text-gray-300 hover:text-white transition-colors">Analytics</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <select id="companySelector" class="bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="google">Google</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="microsoft">Microsoft</option>
+                        <option value="meta">Meta</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="xai">xAI</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Company Intelligence
+                </h1>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Deep dive into AI companies' developments, leadership, and strategic initiatives
+                </p>
+            </div>
+            
+            <!-- Company Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="google">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/ea635a7bbade06d41544eba63db5fd5cd5edc82f.png" alt="Google" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">Google</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="openai">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/sickboat.com/633559291181e0e1e58000d486f870e15c057318.jpg" alt="OpenAI" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">OpenAI</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="microsoft">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Microsoft" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">Microsoft</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="meta">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Meta" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">Meta</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="anthropic">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png" alt="Anthropic" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">Anthropic</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+                <div class="company-card p-4 rounded-xl cursor-pointer" data-company="xai">
+                    <div class="text-center">
+                        <img src="https://kimi-web-img.moonshot.cn/img/thumbs.dreamstime.com/00ba938fff81084a8405e59201d37dc8d9a9768d.jpg" alt="xAI" class="w-12 h-12 mx-auto mb-2">
+                        <div class="font-medium">xAI</div>
+                        <div class="text-xs text-gray-400 mt-1">3 updates</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div id="companyDetails" class="reveal">
+            <!-- Company details will be populated by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-gray-400">© 2025 AI Central. Centralizing AI intelligence for informed decision-making.</p>
+        </div>
+    </footer>
+
+    <script>
+        // GNews API Configuration (same as main.js)
+        const NEWS_API_KEY = 'f3156c16725fa6ea9f9cbbdc2dc63198'; // Get free API key from https://gnews.io/
+        const NEWS_API_BASE_URL = 'https://gnews.io/api/v4';
+        const useAPI = NEWS_API_KEY !== 'YOUR_API_KEY_HERE';
+
+        // Company search terms for API queries
+        const companySearchTerms = {
+            google: ['Google AI', 'DeepMind', 'Gemini AI', 'Bard'],
+            openai: ['OpenAI', 'ChatGPT', 'GPT', 'DALL-E'],
+            microsoft: ['Microsoft AI', 'Copilot', 'Azure AI'],
+            meta: ['Meta AI', 'Llama', 'Facebook AI'],
+            anthropic: ['Anthropic', 'Claude AI'],
+            xai: ['xAI', 'Grok', 'Elon Musk AI']
+        };
+
+        // Extended company data with detailed information
+        const detailedCompaniesData = {
+            google: {
+                name: "Google",
+                logo: "https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/ea635a7bbade06d41544eba63db5fd5cd5edc82f.png",
+                color: "#4285f4",
+                founded: "1998",
+                employees: "190,234",
+                marketCap: "$1.7T",
+                description: "Google is a multinational technology company specializing in Internet-related services and products, including online advertising technologies, search, cloud computing, and AI.",
+                keyMetrics: {
+                    "AI Research Papers": "847",
+                    "AI Patents": "2,103",
+                    "AI Products": "12",
+                    "AI Investments": "$15.2B"
+                },
+                keyPersonnel: [
+                    { name: "Sundar Pichai", role: "CEO", tenure: "2019-Present" },
+                    { name: "Jeff Dean", role: "Chief Scientist", tenure: "2018-Present" },
+                    { name: "Demis Hassabis", role: "CEO DeepMind", tenure: "2010-Present" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "Gemini 2.0 released with multimodal capabilities", type: "product" },
+                    { date: "Dec 2024", event: "DeepMind partners with NHS for healthcare AI", type: "partnership" },
+                    { date: "Nov 2024", event: "Bard integration expands to Google Workspace", type: "integration" },
+                    { date: "Oct 2024", event: "New AI research lab opened in Zurich", type: "expansion" },
+                    { date: "Sep 2024", event: "Quantum AI breakthrough published", type: "research" }
+                ],
+                recentProducts: [
+                    { name: "Gemini 2.0", launchDate: "Jan 2025", category: "AI Model" },
+                    { name: "Bard Advanced", launchDate: "Dec 2024", category: "AI Assistant" },
+                    { name: "Vertex AI Updates", launchDate: "Nov 2024", category: "Cloud Platform" }
+                ]
+            },
+            openai: {
+                name: "OpenAI",
+                logo: "https://kimi-web-img.moonshot.cn/img/sickboat.com/633559291181e0e1e58000d486f870e15c057318.jpg",
+                color: "#10a37f",
+                founded: "2015",
+                employees: "1,500",
+                marketCap: "$157B",
+                description: "OpenAI is an AI research and deployment company dedicated to ensuring that artificial general intelligence benefits all of humanity.",
+                keyMetrics: {
+                    "GPT Users": "200M+",
+                    "API Calls/Day": "2B+",
+                    "Research Papers": "156",
+                    "Valuation": "$157B"
+                },
+                keyPersonnel: [
+                    { name: "Sam Altman", role: "CEO", tenure: "2019-Present" },
+                    { name: "Greg Brockman", role: "President", tenure: "2015-Present" },
+                    { name: "Ilya Sutskever", role: "Chief Scientist", tenure: "2015-2024" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "GPT-5 training reaches new milestones", type: "research" },
+                    { date: "Dec 2024", event: "DALL-E 3 API launches for developers", type: "product" },
+                    { date: "Nov 2024", event: "ChatGPT Enterprise hits 1M users", type: "milestone" },
+                    { date: "Oct 2024", event: "OpenAI DevDay conference announcements", type: "event" },
+                    { date: "Sep 2024", event: "Custom GPTs platform launched", type: "platform" }
+                ],
+                recentProducts: [
+                    { name: "GPT-4 Turbo", launchDate: "Jan 2025", category: "AI Model" },
+                    { name: "DALL-E 3 API", launchDate: "Dec 2024", category: "Image Generation" },
+                    { name: "ChatGPT Enterprise", launchDate: "Nov 2024", category: "Business AI" }
+                ]
+            },
+            microsoft: {
+                name: "Microsoft",
+                logo: "https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png",
+                color: "#0078d4",
+                founded: "1975",
+                employees: "228,000",
+                marketCap: "$2.8T",
+                description: "Microsoft is a multinational technology corporation that develops, manufactures, licenses, supports, and sells computer software, consumer electronics, and related services.",
+                keyMetrics: {
+                    "Azure AI Revenue": "$18B",
+                    "Copilot Users": "100M+",
+                    "AI Partnerships": "45",
+                    "R&D Investment": "$27B"
+                },
+                keyPersonnel: [
+                    { name: "Satya Nadella", role: "CEO", tenure: "2014-Present" },
+                    { name: "Kevin Scott", role: "CTO", tenure: "2017-Present" },
+                    { name: "Mustafa Suleyman", role: "CEO AI", tenure: "2024-Present" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "Copilot Pro launches with advanced features", type: "product" },
+                    { date: "Dec 2024", event: "Azure AI Studio major update released", type: "platform" },
+                    { date: "Nov 2024", event: "Microsoft Research open-sources AI framework", type: "research" },
+                    { date: "Oct 2024", event: "Partnership with OpenAI expanded", type: "partnership" },
+                    { date: "Sep 2024", event: "AI-powered Office 365 updates", type: "integration" }
+                ],
+                recentProducts: [
+                    { name: "Copilot Pro", launchDate: "Jan 2025", category: "AI Assistant" },
+                    { name: "Azure AI Studio", launchDate: "Dec 2024", category: "Development Platform" },
+                    { name: "Bing Chat Enterprise", launchDate: "Nov 2024", category: "Search AI" }
+                ]
+            },
+            meta: {
+                name: "Meta",
+                logo: "https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png",
+                color: "#1877f2",
+                founded: "2004",
+                employees: "67,317",
+                marketCap: "$1.2T",
+                description: "Meta Platforms is an American multinational technology conglomerate that focuses on social media, virtual reality, and AI technologies.",
+                keyMetrics: {
+                    "Llama Downloads": "50M+",
+                    "AI Research Budget": "$20B",
+                    "Reality Labs Revenue": "$1.9B",
+                    "AI Talent Hired": "10,000+"
+                },
+                keyPersonnel: [
+                    { name: "Mark Zuckerberg", role: "CEO", tenure: "2004-Present" },
+                    { name: "Yann LeCun", role: "Chief AI Scientist", tenure: "2013-Present" },
+                    { name: "Joelle Pineau", role: "VP AI Research", tenure: "2017-Present" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "Llama 3 shows impressive performance gains", type: "research" },
+                    { date: "Dec 2024", event: "Meta AI assistant rolls out to Instagram", type: "product" },
+                    { date: "Nov 2024", event: "Reality Labs unveils AR/AI integration", type: "technology" },
+                    { date: "Oct 2024", event: "Open-source AI tools released", type: "open-source" },
+                    { date: "Sep 2024", event: "Metaverse AI capabilities enhanced", type: "platform" }
+                ],
+                recentProducts: [
+                    { name: "Llama 3", launchDate: "Jan 2025", category: "AI Model" },
+                    { name: "Meta AI Assistant", launchDate: "Dec 2024", category: "AI Assistant" },
+                    { name: "Ray-Ban Meta Glasses", launchDate: "Nov 2024", category: "AI Hardware" }
+                ]
+            },
+            anthropic: {
+                name: "Anthropic",
+                logo: "https://kimi-web-img.moonshot.cn/img/upload.wikimedia.org/2166b33a335fe6f5382a08d0dd7601676db7e263.png",
+                color: "#d4a574",
+                founded: "2021",
+                employees: "300",
+                marketCap: "$18.5B",
+                description: "Anthropic is an AI safety and research company that develops general AI systems and large language models with a focus on safety.",
+                keyMetrics: {
+                    "Claude Users": "10M+",
+                    "Safety Research Papers": "89",
+                    "Constitutional AI Patents": "23",
+                    "Funding Raised": "$7.3B"
+                },
+                keyPersonnel: [
+                    { name: "Dario Amodei", role: "CEO", tenure: "2021-Present" },
+                    { name: "Daniela Amodei", role: "President", tenure: "2021-Present" },
+                    { name: "Jared Kaplan", role: "Chief Scientist", tenure: "2021-Present" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "Claude 3.5 demonstrates enhanced reasoning", type: "research" },
+                    { date: "Dec 2024", event: "Constitutional AI research published in Nature", type: "publication" },
+                    { date: "Nov 2024", event: "Enterprise Claude API general availability", type: "business" },
+                    { date: "Oct 2024", event: "AI safety standards initiative launched", type: "safety" },
+                    { date: "Sep 2024", event: "Partnership with major cloud providers", type: "partnership" }
+                ],
+                recentProducts: [
+                    { name: "Claude 3.5", launchDate: "Jan 2025", category: "AI Model" },
+                    { name: "Claude API", launchDate: "Nov 2024", category: "Developer Platform" },
+                    { name: "Constitutional AI Framework", launchDate: "Sep 2024", category: "Safety Tool" }
+                ]
+            },
+            xai: {
+                name: "xAI",
+                logo: "https://kimi-web-img.moonshot.cn/img/thumbs.dreamstime.com/00ba938fff81084a8405e59201d37dc8d9a9768d.jpg",
+                color: "#1d9bf0",
+                founded: "2023",
+                employees: "100",
+                marketCap: "$50B",
+                description: "xAI is an artificial intelligence company founded by Elon Musk, focused on developing AI systems that can understand the universe.",
+                keyMetrics: {
+                    "Grok Users": "5M+",
+                    "Compute Investment": "$1B",
+                    "Research Publications": "12",
+                    "Valuation": "$50B"
+                },
+                keyPersonnel: [
+                    { name: "Elon Musk", role: "CEO", tenure: "2023-Present" },
+                    { name: "Igor Babuschkin", role: "Chief Engineer", tenure: "2023-Present" },
+                    { name: "Christian Szegedy", role: "Research Director", tenure: "2023-Present" }
+                ],
+                timeline: [
+                    { date: "Jan 2025", event: "Grok-2 beta shows improved conversational abilities", type: "research" },
+                    { date: "Dec 2024", event: "Partnership with Tesla for autonomous driving", type: "partnership" },
+                    { date: "Nov 2024", event: "New AI training infrastructure announced", type: "infrastructure" },
+                    { date: "Oct 2024", event: "xAI supercomputer cluster deployment", type: "technology" },
+                    { date: "Sep 2024", event: "Grok API beta release", type: "product" }
+                ],
+                recentProducts: [
+                    { name: "Grok-2", launchDate: "Jan 2025", category: "AI Model" },
+                    { name: "Grok API", launchDate: "Sep 2024", category: "Developer Platform" },
+                    { name: "xAI Supercomputer", launchDate: "Oct 2024", category: "Infrastructure" }
+                ]
+            }
+        };
+
+        let selectedCompany = 'google';
+        let apiCompanyData = {};
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCompanySelection();
+            initializeScrollAnimations();
+
+            if (useAPI) {
+                fetchCompanyNewsData(selectedCompany).then(() => {
+                    renderCompanyDetails();
+                });
+            } else {
+                renderCompanyDetails();
+            }
+        });
+
+        // Fetch news data for company
+        async function fetchCompanyNewsData(companyKey) {
+            const searchTerms = companySearchTerms[companyKey];
+            const query = searchTerms[0]; // Use first term for GNews
+
+            try {
+                // Use CORS proxy for file:// protocol support
+                const apiUrl = `${NEWS_API_BASE_URL}/search?q=${encodeURIComponent(query)}&lang=en&max=10&apikey=${NEWS_API_KEY}`;
+                const corsProxy = 'https://api.allorigins.win/raw?url=';
+                const response = await fetch(corsProxy + encodeURIComponent(apiUrl));
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const articles = data.articles || [];
+
+                // Update timeline with real news
+                apiCompanyData[companyKey] = {
+                    ...detailedCompaniesData[companyKey],
+                    timeline: articles.slice(0, 5).map((article, idx) => ({
+                        date: formatDate(article.publishedAt),
+                        event: article.title,
+                        type: categorizeArticle(article)
+                    })),
+                    recentProducts: articles.filter(a => categorizeArticle(a) === 'product').slice(0, 3).map(article => ({
+                        name: article.title.substring(0, 50) + '...',
+                        launchDate: formatDate(article.publishedAt),
+                        category: article.source?.name || 'News'
+                    }))
+                };
+            } catch (error) {
+                console.error(`Failed to fetch news for ${companyKey}:`, error);
+            }
+        }
+
+        function categorizeArticle(article) {
+            const title = article.title?.toLowerCase() || '';
+            const description = article.description?.toLowerCase() || '';
+            const content = title + ' ' + description;
+
+            if (content.includes('research') || content.includes('paper')) return 'research';
+            if (content.includes('launch') || content.includes('release') || content.includes('product')) return 'product';
+            if (content.includes('partner') || content.includes('collaboration')) return 'partnership';
+            if (content.includes('hire') || content.includes('ceo') || content.includes('leadership')) return 'leadership';
+            if (content.includes('funding') || content.includes('investment')) return 'business';
+            return 'news';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { month: 'short', year: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Company selection functionality
+        function initializeCompanySelection() {
+            const companyCards = document.querySelectorAll('.company-card');
+            const companySelector = document.getElementById('companySelector');
+
+            // Add click handlers to company cards
+            companyCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const company = this.getAttribute('data-company');
+                    selectCompany(company);
+                });
+            });
+
+            // Add change handler to dropdown
+            companySelector.addEventListener('change', function() {
+                selectCompany(this.value);
+            });
+
+            // Initialize with Google selected
+            selectCompany('google');
+        }
+
+        function selectCompany(companyKey) {
+            selectedCompany = companyKey;
+
+            // Update visual selection
+            document.querySelectorAll('.company-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.getAttribute('data-company') === companyKey) {
+                    card.classList.add('selected');
+                }
+            });
+
+            // Update dropdown
+            document.getElementById('companySelector').value = companyKey;
+
+            // Fetch new data if using API
+            if (useAPI && !apiCompanyData[companyKey]) {
+                document.getElementById('companyDetails').innerHTML = '<div class="text-center py-20"><div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div><p class="text-gray-400">Loading...</p></div>';
+                fetchCompanyNewsData(companyKey).then(() => {
+                    renderCompanyDetails();
+                });
+            } else {
+                renderCompanyDetails();
+            }
+        }
+
+        // Scroll animations
+        function initializeScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Render company details
+        function renderCompanyDetails() {
+            // Use API data if available, otherwise use static data
+            const company = apiCompanyData[selectedCompany] || detailedCompaniesData[selectedCompany];
+            const detailsContainer = document.getElementById('companyDetails');
+
+            detailsContainer.innerHTML = `
+                <!-- Company Overview -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                    <div class="lg:col-span-2">
+                        <div class="company-card p-8 rounded-xl">
+                            <div class="flex items-center mb-6">
+                                <img src="${company.logo}" alt="${company.name}" class="w-16 h-16 rounded-xl mr-4">
+                                <div>
+                                    <h2 class="text-3xl font-bold mb-2">${company.name}</h2>
+                                    <p class="text-gray-400">Founded ${company.founded} • ${company.employees} employees</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 leading-relaxed mb-6">${company.description}</p>
+                            <div class="flex items-center space-x-6">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-400">${company.marketCap}</div>
+                                    <div class="text-sm text-gray-400">Market Cap</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-400">${company.keyMetrics['AI Research Papers'] || 'N/A'}</div>
+                                    <div class="text-sm text-gray-400">Research Papers</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="company-card p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-4">Key Metrics</h3>
+                            <div class="space-y-4">
+                                ${Object.entries(company.keyMetrics).map(([key, value]) => `
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-gray-400">${key}</span>
+                                        <span class="font-semibold">${value}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Personnel -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold mb-6">Key Personnel</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${company.keyPersonnel.map(person => `
+                            <div class="personnel-card p-6 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mb-4"></div>
+                                <h4 class="font-semibold mb-1">${person.name}</h4>
+                                <p class="text-blue-400 text-sm mb-2">${person.role}</p>
+                                <p class="text-gray-400 text-xs">${person.tenure}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6">Recent Timeline</h3>
+                        <div class="space-y-6">
+                            ${company.timeline.map(item => `
+                                <div class="timeline-item">
+                                    <div class="flex items-start">
+                                        <div class="flex-1">
+                                            <div class="text-sm text-gray-400 mb-1">${item.date}</div>
+                                            <p class="text-gray-300">${item.event}</p>
+                                            <span class="inline-block px-2 py-1 bg-blue-600 rounded-full text-xs mt-2">${item.type}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6">Recent Products</h3>
+                        <div class="space-y-4">
+                            ${company.recentProducts.map(product => `
+                                <div class="company-card p-4 rounded-xl">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold">${product.name}</h4>
+                                        <span class="text-xs text-gray-400">${product.launchDate}</span>
+                                    </div>
+                                    <p class="text-gray-400 text-sm">${product.category}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Chart -->
+                <div class="chart-container p-6">
+                    <h3 class="text-2xl font-bold mb-6">Activity Overview</h3>
+                    <div id="activityChart" style="height: 400px;"></div>
+                </div>
+            `;
+
+            // Initialize chart after DOM is updated
+            setTimeout(() => {
+                initializeActivityChart(company);
+            }, 100);
+        }
+
+        // Initialize activity chart
+        function initializeActivityChart(company) {
+            const chartDom = document.getElementById('activityChart');
+            const myChart = echarts.init(chartDom);
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    textStyle: {
+                        color: '#fff'
+                    }
+                },
+                legend: {
+                    data: ['Research', 'Products', 'Partnerships'],
+                    textStyle: {
+                        color: '#9ca3af'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan'],
+                    axisLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    },
+                    axisLabel: {
+                        color: '#9ca3af'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#374151'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: 'Research',
+                        type: 'line',
+                        stack: 'Total',
+                        data: [12, 15, 18, 22, 25],
+                        lineStyle: {
+                            color: '#3b82f6'
+                        },
+                        itemStyle: {
+                            color: '#3b82f6'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(59, 130, 246, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(59, 130, 246, 0.1)'
+                                }]
+                            }
+                        }
+                    },
+                    {
+                        name: 'Products',
+                        type: 'line',
+                        stack: 'Total',
+                        data: [8, 10, 12, 15, 18],
+                        lineStyle: {
+                            color: '#10b981'
+                        },
+                        itemStyle: {
+                            color: '#10b981'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(16, 185, 129, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(16, 185, 129, 0.1)'
+                                }]
+                            }
+                        }
+                    },
+                    {
+                        name: 'Partnerships',
+                        type: 'line',
+                        stack: 'Total',
+                        data: [3, 5, 7, 9, 12],
+                        lineStyle: {
+                            color: '#8b5cf6'
+                        },
+                        itemStyle: {
+                            color: '#8b5cf6'
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(139, 92, 246, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(139, 92, 246, 0.1)'
+                                }]
+                            }
+                        }
+                    }
+                ]
+            };
+
+            myChart.setOption(option);
+
+            // Make chart responsive
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
+        }
+    </script>
+</body>
+</html>
