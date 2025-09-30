@@ -3,31 +3,547 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="description" content="Technical articles and insights on AI development, agentic systems, LangChain, RAG, and modern web development by Joey Rodriguez.">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>Joey's Blog</title>
-    <link rel="stylesheet" href="blog.css">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Blog - AI + Web Development</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #FFFFFF;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .blog-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #333333;
+            background: #000000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .blog-card:hover {
+            background: #FFFFFF;
+            color: #000000;
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+            border-color: #FFFFFF;
+        }
+        
+        .blog-card:hover .blog-meta {
+            color: #666666;
+        }
+        
+        .blog-card:hover .blog-tag {
+            background: #000000;
+            color: #FFFFFF;
+        }
+        
+        .blog-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .blog-card:hover::before {
+            left: 100%;
+        }
+        
+        .blog-tag {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #FFFFFF;
+            color: #000000;
+        }
+        
+        .featured-post {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #FFFFFF;
+            position: relative;
+        }
+        
+        .featured-post::after {
+            content: 'FEATURED';
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #FFFFFF;
+            color: #000000;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal-text.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stagger-delay-1 { transition-delay: 0.1s; }
+        .stagger-delay-2 { transition-delay: 0.2s; }
+        .stagger-delay-3 { transition-delay: 0.3s; }
+        .stagger-delay-4 { transition-delay: 0.4s; }
+        .stagger-delay-5 { transition-delay: 0.5s; }
+        .stagger-delay-6 { transition-delay: 0.6s; }
+        
+        .blog-meta {
+            color: #666666;
+            font-size: 0.875rem;
+        }
+        
+        .blog-excerpt {
+            line-height: 1.6;
+            color: #CCCCCC;
+        }
+        
+        .blog-card:hover .blog-excerpt {
+            color: #333333;
+        }
+        
+        .read-more {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .read-more::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+        
+        .read-more:hover::after {
+            width: 100%;
+        }
+        
+        .search-box {
+            background: #000000;
+            border: 2px solid #333333;
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        
+        .search-box:focus {
+            border-color: #FFFFFF;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+        }
+        
+        .filter-btn {
+            transition: all 0.3s ease;
+            border: 1px solid #333333;
+        }
+        
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #FFFFFF;
+            color: #000000;
+            border-color: #FFFFFF;
+        }
+
+        .skip-link {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FFFFFF;
+            color: #000000;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            z-index: 9999;
+            border: 2px solid #000000;
+            border-radius: 4px;
+            transition: top 0.3s ease;
+        }
+
+        .skip-link:focus {
+            top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <header class="site-header">
-        <nav class="nav">
-            <a href="index.html" class="back-link">← Back to Terminal</a>
-            <h1 class="site-title">Joey's Blog</h1>
-            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
-                <span class="theme-toggle-icon">🌙</span>
-            </button>
-        </nav>
-    </header>
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <main class="main-content" id="posts-container">
-        <!-- Posts will be loaded dynamically from posts.json -->
-    </main>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold">
+                    <a href="index.html">Portfolio</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-lg font-semibold">Projects</a>
+                    <a href="about.html" class="nav-link text-lg font-semibold">About</a>
+                    <a href="blog.html" class="nav-link text-lg font-semibold">Blog</a>
+                    <a href="contact.html" class="nav-link text-lg font-semibold">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-2xl">☰</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-    <footer class="site-footer">
-        <p>&copy; 2025 Joey. Built with intention.</p>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300">
+        <div class="flex flex-col items-center justify-center h-full space-y-8">
+            <a href="index.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Projects</a>
+            <a href="about.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">About</a>
+            <a href="blog.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Blog</a>
+            <a href="contact.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Contact</a>
+        </div>
+    </div>
+
+    <!-- Blog Hero -->
+    <section class="min-h-screen flex items-center justify-center pt-20 px-6">
+        <div class="max-w-6xl mx-auto text-center">
+            <h1 class="text-6xl md:text-8xl font-black mb-8 reveal-text">
+                BUILD NOTES
+            </h1>
+            
+            <div class="text-xl md:text-2xl font-medium mb-12 text-gray-300 reveal-text stagger-delay-1">
+                Thoughts on AI, web development, and the future of technology
+            </div>
+            
+            <!-- Search and Filter -->
+            <div class="max-w-2xl mx-auto mb-16 reveal-text stagger-delay-2">
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <input 
+                        type="text" 
+                        placeholder="Search articles..." 
+                        class="search-box flex-1 px-4 py-3 rounded-lg"
+                        id="search-input"
+                    >
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button class="filter-btn px-4 py-2 rounded-full text-sm font-semibold active" data-filter="all">
+                        All Posts
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-sm font-semibold" data-filter="ai">
+                        AI Development
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-sm font-semibold" data-filter="web">
+                        Web Development
+                    </button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-sm font-semibold" data-filter="design">
+                        Design
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Post -->
+    <section class="py-20 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-black mb-12 reveal-text">
+                Featured Post
+            </h2>
+            
+            <div class="featured-post p-8 rounded-lg reveal-text stagger-delay-1">
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">AI Development</span>
+                    <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Featured</span>
+                </div>
+                
+                <h3 class="text-3xl md:text-4xl font-bold mb-4">
+                    Building Autonomous AI Agents with Modern JavaScript
+                </h3>
+                
+                <div class="blog-meta mb-6">
+                    September 15, 2025 • 8 min read • By Joey Rodriguez
+                </div>
+                
+                <div class="blog-excerpt mb-6">
+                    <p class="text-lg leading-relaxed mb-4">
+                        The landscape of AI development has dramatically shifted with the advent of autonomous agents. 
+                        These aren't just simple chatbots or rule-based systems—they're sophisticated entities that can 
+                        understand context, make decisions, and execute complex tasks independently.
+                    </p>
+                    
+                    <p class="leading-relaxed mb-4">
+                        In this deep dive, I'll walk you through my journey of building a multi-agent system using 
+                        LangChain, Node.js, and modern JavaScript patterns. We'll explore how these agents collaborate 
+                        to solve complex problems, from code generation to data analysis, and why this approach represents 
+                        the future of software development.
+                    </p>
+                </div>
+                
+                <a href="#" class="read-more font-bold text-lg inline-block">
+                    Read Full Article →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Posts Grid -->
+    <section id="main-content" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-black mb-16 text-center reveal-text">
+                Recent Posts
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="blog-grid">
+                <!-- Blog Post 1 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-1" data-category="web">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Web Development</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Performance</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Optimizing React Applications for Maximum Performance
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        September 10, 2025 • 6 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            Deep dive into React performance optimization techniques, including code splitting, 
+                            memoization strategies, and advanced rendering patterns that can dramatically improve 
+                            your application's speed and user experience.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+
+                <!-- Blog Post 2 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-2" data-category="ai">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">AI Development</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">RAG</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Advanced RAG Patterns for Enterprise AI Systems
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        September 5, 2025 • 12 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            Explore sophisticated Retrieval-Augmented Generation techniques including hybrid search, 
+                            multi-modal embeddings, and real-time knowledge base updates for building robust 
+                            enterprise AI applications.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+
+                <!-- Blog Post 3 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-3" data-category="design">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Design</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">UX</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Swiss Design Principles in Modern Digital Interfaces
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        August 28, 2025 • 8 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            How Swiss design philosophy influences contemporary web design, from grid systems 
+                            and typography to the principles of clarity and functional beauty in digital products.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+
+                <!-- Blog Post 4 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-4" data-category="web">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Web Development</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Architecture</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Microservices vs Monoliths: Making the Right Choice
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        August 20, 2025 • 10 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            A comprehensive analysis of when to use microservices architecture versus traditional 
+                            monolithic approaches, with real-world examples and decision frameworks for modern 
+                            web applications.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+
+                <!-- Blog Post 5 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-5" data-category="ai">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">AI Development</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Machine Learning</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Fine-tuning LLMs for Specific Domains
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        August 15, 2025 • 15 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            Complete guide to fine-tuning large language models for specialized domains, 
+                            including data preparation, training strategies, and evaluation metrics for 
+                            domain-specific AI applications.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+
+                <!-- Blog Post 6 -->
+                <div class="blog-card p-6 rounded-lg reveal-text stagger-delay-6" data-category="web">
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Web Development</span>
+                        <span class="blog-tag px-3 py-1 text-xs font-semibold rounded">Security</span>
+                    </div>
+                    
+                    <h3 class="text-xl font-bold mb-3">
+                        Modern Web Security: Beyond the Basics
+                    </h3>
+                    
+                    <div class="blog-meta mb-4">
+                        August 10, 2025 • 7 min read
+                    </div>
+                    
+                    <div class="blog-excerpt mb-4">
+                        <p class="text-sm leading-relaxed">
+                            Advanced security practices for modern web applications, including CSP implementation, 
+                            JWT security, API protection strategies, and emerging threats in the AI-powered web era.
+                        </p>
+                    </div>
+                    
+                    <a href="#" class="read-more font-semibold text-sm">
+                        Read More →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-20 px-6 border-t border-gray-800">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black mb-8 reveal-text">
+                Stay Updated
+            </h2>
+            
+            <p class="text-xl text-gray-300 mb-8 reveal-text stagger-delay-1">
+                Get notified about new articles and insights on AI and web development
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-4 max-w-md mx-auto reveal-text stagger-delay-2">
+                <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    class="search-box flex-1 px-4 py-3 rounded-lg"
+                >
+                <button class="bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+                    Subscribe
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400">
+                © <span id="current-year"></span> JOEY RODRIGUEZ. Built with modern web technologies and AI-assisted development.
+            </p>
+        </div>
     </footer>
-    
-    <script src="blog.js"></script>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+    <script src="main.js"></script>
 </body>
 </html>

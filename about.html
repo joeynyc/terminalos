@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learn about Joey Rodriguez's background in AI development, web engineering, and building intelligent agentic systems with modern technologies.">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>About - AI + Web Development</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #FFFFFF;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .layered-text {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .layered-text::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            color: #666666;
+            z-index: -1;
+        }
+        
+        .layered-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            color: #333333;
+            z-index: -2;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid #333333;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 0.5rem;
+            width: 10px;
+            height: 10px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-item:hover {
+            border-left-color: #FFFFFF;
+            padding-left: 2.5rem;
+        }
+        
+        .timeline-item:hover::before {
+            transform: scale(1.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal-text.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stagger-delay-1 { transition-delay: 0.1s; }
+        .stagger-delay-2 { transition-delay: 0.2s; }
+        .stagger-delay-3 { transition-delay: 0.3s; }
+        .stagger-delay-4 { transition-delay: 0.4s; }
+        .stagger-delay-5 { transition-delay: 0.5s; }
+        .stagger-delay-6 { transition-delay: 0.6s; }
+        
+        .philosophy-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
+        }
+        
+        .philosophy-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #FFFFFF;
+            transform: translateY(-2px);
+        }
+        
+        .text-layer {
+            position: absolute;
+            opacity: 0.1;
+            font-size: 8rem;
+            font-weight: 900;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .skip-link {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FFFFFF;
+            color: #000000;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            z-index: 9999;
+            border: 2px solid #000000;
+            border-radius: 4px;
+            transition: top 0.3s ease;
+        }
+
+        .skip-link:focus {
+            top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .text-layer {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold">
+                    <a href="index.html">Portfolio</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-lg font-semibold">Projects</a>
+                    <a href="about.html" class="nav-link text-lg font-semibold">About</a>
+                    <a href="blog.html" class="nav-link text-lg font-semibold">Blog</a>
+                    <a href="contact.html" class="nav-link text-lg font-semibold">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-2xl">☰</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300">
+        <div class="flex flex-col items-center justify-center h-full space-y-8">
+            <a href="index.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Projects</a>
+            <a href="about.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">About</a>
+            <a href="blog.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Blog</a>
+            <a href="contact.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Contact</a>
+        </div>
+    </div>
+
+    <!-- About Hero -->
+    <section class="min-h-screen flex items-center justify-center pt-20 relative overflow-hidden">
+        <!-- Background Text Layers -->
+        <div class="text-layer top-20 left-10" style="color: #111111;">ABOUT</div>
+        <div class="text-layer bottom-20 right-10" style="color: #111111;">CODE</div>
+        
+        <div class="max-w-6xl mx-auto px-6 text-center relative z-10">
+            <h1 class="text-6xl md:text-8xl font-black mb-8 layered-text reveal-text" data-text="ABOUT">
+                ABOUT
+            </h1>
+            
+            <div class="text-xl md:text-2xl font-medium mb-12 text-gray-300 reveal-text stagger-delay-1">
+                I build the future through intelligent systems and elegant code
+            </div>
+        </div>
+    </section>
+
+    <!-- Personal Story -->
+    <section id="main-content" class="py-20 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+                <div class="lg:col-span-1 reveal-text">
+                    <img src="resources/hero-portrait.jpg" alt="About Portrait" class="w-full max-w-sm mx-auto rounded-lg border-2 border-white object-cover">
+                </div>
+                
+                <div class="lg:col-span-2 space-y-6 reveal-text stagger-delay-1">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">
+                        Building Tomorrow's Technology Today
+                    </h2>
+                    
+                    <p class="text-lg leading-relaxed text-gray-300">
+                        I'm a passionate developer specializing in AI agent development and modern web technologies. 
+                        My journey began with a fascination for how intelligent systems can augment human capabilities, 
+                        leading me to explore the intersection of artificial intelligence and web development.
+                    </p>
+                    
+                    <p class="text-lg leading-relaxed text-gray-300">
+                        Through my work, I aim to create tools that don't just execute tasks but truly understand 
+                        context and intent. I believe in the power of AI agents to transform how we interact with 
+                        technology, making complex systems accessible and intuitive.
+                    </p>
+                    
+                    <p class="text-lg leading-relaxed text-gray-300">
+                        When I'm not coding, you'll find me exploring new AI frameworks, contributing to open-source 
+                        projects, or sharing knowledge through technical writing and speaking engagements.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy Cards -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black mb-16 text-center reveal-text">
+                Development Philosophy
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="philosophy-card p-8 rounded-lg reveal-text stagger-delay-1">
+                    <h3 class="text-2xl font-bold mb-4">Intelligent Design</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        Every system should be designed with intelligence at its core. I believe in creating 
+                        solutions that learn, adapt, and improve over time, making technology more intuitive 
+                        and powerful for users.
+                    </p>
+                </div>
+                
+                <div class="philosophy-card p-8 rounded-lg reveal-text stagger-delay-2">
+                    <h3 class="text-2xl font-bold mb-4">Agentic Architecture</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        The future of software lies in autonomous agents that can understand complex requirements 
+                        and execute tasks independently. I specialize in building these intelligent systems.
+                    </p>
+                </div>
+                
+                <div class="philosophy-card p-8 rounded-lg reveal-text stagger-delay-3">
+                    <h3 class="text-2xl font-bold mb-4">Human-Centric AI</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        Technology should enhance human capabilities, not replace them. I focus on creating 
+                        AI systems that work collaboratively with people to achieve better outcomes.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Timeline -->
+    <section class="py-20 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black mb-16 text-center reveal-text">
+                Experience
+            </h2>
+            
+            <div class="space-y-12">
+                <div class="timeline-item reveal-text stagger-delay-1">
+                    <div class="text-sm font-mono text-gray-400 mb-2">2024 - Present</div>
+                    <h3 class="text-2xl font-bold mb-2">Senior AI Developer</h3>
+                    <p class="text-gray-300 mb-4">
+                        Leading development of autonomous AI agents for enterprise automation. 
+                        Built multi-agent systems that reduced manual processing by 80%.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">LangChain</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">React</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">Python</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item reveal-text stagger-delay-2">
+                    <div class="text-sm font-mono text-gray-400 mb-2">2023 - 2024</div>
+                    <h3 class="text-2xl font-bold mb-2">Full-Stack Developer</h3>
+                    <p class="text-gray-300 mb-4">
+                        Developed real-time collaboration tools and AI-powered web applications. 
+                        Specialized in modern JavaScript frameworks and cloud architecture.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">Next.js</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">Node.js</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">AWS</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item reveal-text stagger-delay-3">
+                    <div class="text-sm font-mono text-gray-400 mb-2">2022 - 2023</div>
+                    <h3 class="text-2xl font-bold mb-2">Web Development Consultant</h3>
+                    <p class="text-gray-300 mb-4">
+                        Provided technical consulting for startups and enterprise clients. 
+                        Focused on scalable architecture and modern development practices.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">React</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">GraphQL</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">Docker</span>
+                    </div>
+                </div>
+                
+                <div class="timeline-item reveal-text stagger-delay-4">
+                    <div class="text-sm font-mono text-gray-400 mb-2">2021 - 2022</div>
+                    <h3 class="text-2xl font-bold mb-2">Junior Developer</h3>
+                    <p class="text-gray-300 mb-4">
+                        Started my professional journey building web applications and learning 
+                        modern development practices. Gained experience in full-stack development.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">JavaScript</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">PHP</span>
+                        <span class="bg-gray-800 px-3 py-1 text-xs rounded">MySQL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Focus -->
+    <section class="py-20 px-6">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-black mb-12 reveal-text">
+                Currently Exploring
+            </h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="reveal-text stagger-delay-1">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 class="font-semibold">Multi-Agent Systems</h3>
+                </div>
+                <div class="reveal-text stagger-delay-2">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h3 class="font-semibold">Neural Architecture</h3>
+                </div>
+                <div class="reveal-text stagger-delay-3">
+                    <div class="text-4xl mb-4">⚡</div>
+                    <h3 class="font-semibold">Edge Computing</h3>
+                </div>
+                <div class="reveal-text stagger-delay-4">
+                    <div class="text-4xl mb-4">🌐</div>
+                    <h3 class="font-semibold">WebAssembly</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400">
+                © <span id="current-year"></span> JOEY RODRIGUEZ. Built with modern web technologies and AI-assisted development.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+    <script src="main.js"></script>
+</body>
+</html>

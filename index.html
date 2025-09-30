@@ -3,268 +3,458 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https: http:;">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="description" content="Joey Rodriguez - AI & Web Developer specializing in agentic AI, generative AI tools, and modern web development with React, Next.js, and LangChain.">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <title>Joey OS // Neon Terminal</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>JOEY//DEV - AI + Web Development</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
-</head>
-<body class="boot-active glitch-body">
-    <div class="scan-line" aria-hidden="true"></div>
-    <div class="glitch-overlay" aria-hidden="true"></div>
-
-    <div class="boot-overlay" id="boot-overlay" aria-hidden="true">
-        <div class="boot-noise"></div>
-        <div class="boot-shell" role="dialog" aria-modal="true" aria-labelledby="boot-logo" aria-live="polite">
-            <div class="boot-header">
-                <div class="boot-brand">
-                    <span class="boot-logo" id="boot-logo">JOEY.OS</span>
-                    <span class="boot-version">v3.0 • Terminal Launch Control</span>
-                </div>
-                <div class="boot-meta">
-                    <span class="boot-location">New York • UTC-05:00</span>
-                    <span class="boot-status" id="boot-status">Calibrating sensors…</span>
-                </div>
-            </div>
-
-            <div class="boot-feed" id="boot-lines"></div>
-
-            <div class="boot-timeline" id="boot-timeline" aria-hidden="true"></div>
-
-            <div class="boot-actions">
-                <button class="boot-skip" id="boot-skip" type="button">Skip Intro</button>
-                <span class="boot-hint">Press space or enter to skip • Sequence lasts ~10s</span>
-            </div>
-        </div>
-    </div>
-
-    <main class="glitch-stage" role="main">
-        <header class="glitch-header">
-            <h1 class="main-header">JOEY.OS // HYPERTERMINAL</h1>
-            <h2 class="sub-header">// SYSTEM OVERRIDE //</h2>
-            <button class="sub-header-2" type="button" data-scroll-target="#terminal-zone" aria-pressed="false">ACCESS GRANTED</button>
-        </header>
-
-        <section class="glitch-panels" aria-label="Mission brief">
-            <div class="text-block text-block-1" role="button" tabindex="0" aria-pressed="true">
-                <h4 class="block-title">Experience Overview</h4>
-                <p>The Joey.OS homepage fuses a narrative boot sequence, neon collage, and command-line UI into one award-ready surface. The layout guides visitors from cinematic intro to actionable terminal experiences without losing momentum.</p>
-                <ul class="highlight-list" aria-label="Core story beats">
-                    <li><span class="highlight-key">Boot &amp; Briefing</span> Immersive calibration frames who Joey is, what the mission covers, and why the visitor should lean in.</li>
-                    <li><span class="highlight-key">Terminal Hub</span> A living CLI powers skills, projects, utilities, and games—in real time and with full keyboard flow.</li>
-                    <li><span class="highlight-key">Case Narratives</span> Case module delivers cinematic breakdowns: metrics, timelines, and missions that tell a measurable story.</li>
-                </ul>
-            </div>
-
-            <div class="text-block text-block-2" role="button" tabindex="0" aria-pressed="false">
-                <h4 class="block-title">Interactive Modules</h4>
-                <p>Every button, nav entry, and HUD block ties back to an action. Launch commands directly or explore through the vertical nav to keep the hacker fantasy functional.</p>
-                <ul class="highlight-list" aria-label="Interactive destinations">
-                    <li><span class="highlight-key">Help</span> Prints the manifest of available commands and quick-start shortcuts.</li>
-                    <li><span class="highlight-key">Case</span> Opens a cinematic case-study viewer with timeline, metrics, and CTA.</li>
-                    <li><span class="highlight-key">Projects &amp; Tools</span> Tap into prototypes, games, and utilities right from the nav stack.</li>
-                </ul>
-            </div>
-
-            <figure class="glitch-badge" aria-label="Matrix processing hud badge">
-                <img src="images/matrix-processing-icon.svg" alt="Matrix processing neon badge">
-                <figcaption>Live matrix feed monitoring terminal performance.</figcaption>
-            </figure>
-
-            <aside class="floating-panel" aria-label="Live status display">
-                <h4 class="panel-title">Live Diagnostics</h4>
-                <ul class="status-list">
-                    <li class="status-item"><span class="status-label">User</span><span class="status-value">Joey // Creative Technologist</span></li>
-                    <li class="status-item"><span class="status-label">Access</span><span class="status-value">Root · Terminal + Case Viewer</span></li>
-                    <li class="status-item"><span class="status-label">Signal</span><span class="status-value">Stable neon feed · Latency 8ms</span></li>
-                    <li class="status-item"><span class="status-label">Next Move</span><span class="status-value">Trigger <span class="command-hint">help</span> or <span class="command-hint">case</span></span></li>
-                </ul>
-            </aside>
-
-            <div class="cta-stack">
-                <button class="neon-button button-1" type="button" data-command="help" data-scroll-target="#terminal-zone">Launch Terminal Tour</button>
-                <button class="neon-button button-2" type="button" data-command="case" data-scroll-target="#terminal-zone">Open Case Deck</button>
-            </div>
-        </section>
-
-
-        <section class="glitch-terminal-zone" id="terminal-zone" aria-label="Interactive terminal">
-            <nav class="floating-nav glitch-nav" aria-label="Terminal shortcuts">
-                <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Commands Menu</button>
-                <div class="nav-container" id="primary-nav">
-                    <div class="nav-item active" data-command="about_me">About</div>
-                    <div class="nav-item" data-command="skills">Skills</div>
-                    <div class="nav-item" data-command="projects">Projects</div>
-                    <div class="nav-item" data-command="case">Case Studies</div>
-                    <div class="nav-item" data-command="contact_joey">Contact</div>
-                    <div class="nav-item" data-command="blog">Blog</div>
-                    <div class="nav-item" data-command="github">GitHub</div>
-                    <div class="nav-item" data-command="rss">News</div>
-                </div>
-            </nav>
-            <div class="terminal-wrapper">
-                <div class="terminal-container">
-            <div class="terminal-header">
-                        <div class="terminal-buttons">
-                            <span class="btn close"></span>
-                            <span class="btn minimize"></span>
-                            <span class="btn maximize"></span>
-                        </div>
-                        <div class="terminal-title">joey@hacker-terminal:~$</div>
-                    </div>
-
-                    <div class="terminal-body">
-                        <div class="output" id="output"></div>
-
-                        <div class="input-line">
-                            <span class="prompt">joey@terminal:~$ </span>
-                            <input type="text" id="command-input" class="command-input" autocomplete="off" spellcheck="false">
-                            <span class="cursor" id="cursor">█</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <button class="back-to-top" type="button" data-scroll-target="body" aria-label="Back to top">
-            <span class="back-to-top__text">// BACK TO TOP //</span>
-        </button>
-
-        <div class="arrow arrow-1" aria-hidden="true">→</div>
-        <div class="arrow arrow-2" aria-hidden="true">→</div>
-        <div class="arrow arrow-3" aria-hidden="true">→</div>
-
-        <div class="scribble scribble-1" aria-hidden="true">//X//</div>
-        <div class="scribble scribble-2" aria-hidden="true">//OVERRIDE//</div>
-    </main>
-
-    <div class="status-bar" aria-live="polite">
-        &gt; JOEY.OS GRID ONLINE // EVERY CTA EXECUTES A LIVE COMMAND // TYPE 'HELP' FOR THE FULL MANIFEST
-    </div>
-
-    <div class="case-overlay" id="case-overlay" aria-hidden="true">
-        <div class="case-backdrop"></div>
-        <div class="case-dialog" role="dialog" aria-modal="true" aria-labelledby="case-title">
-            <button class="case-close" id="case-close" type="button" aria-label="Close case study">
-                <span aria-hidden="true">×</span>
-            </button>
-            <header class="case-header">
-                <p class="case-kicker" id="case-kicker">Case Study</p>
-                <h2 class="case-title" id="case-title"></h2>
-                <p class="case-subtitle" id="case-subtitle"></p>
-            </header>
-            <div class="case-content">
-                <section class="case-metrics" aria-label="Key metrics" id="case-metrics"></section>
-                <section class="case-timeline" aria-label="Project timeline">
-                    <div class="case-timeline-track" id="case-timeline"></div>
-                </section>
-                <section class="case-highlights" aria-label="Highlights">
-                    <h3 class="case-section-title">Mission Highlights</h3>
-                    <ul class="case-highlights-list" id="case-highlights"></ul>
-                </section>
-            </div>
-            <footer class="case-footer">
-                <div class="case-pagination">
-                    <button class="case-nav" id="case-prev" type="button" aria-label="Show previous case study">Prev</button>
-                    <span class="case-index" id="case-index"></span>
-                    <button class="case-nav" id="case-next" type="button" aria-label="Show next case study">Next</button>
-                </div>
-                <a class="case-cta" id="case-cta" href="#" target="_blank" rel="noopener">View Live</a>
-            </footer>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-    <script>
-        const commandButtons = document.querySelectorAll('[data-command]');
-        const scrollButtons = document.querySelectorAll('[data-scroll-target]');
-        const commandInput = document.getElementById('command-input');
-
-        const triggerCommand = (command) => {
-            const terminalApi = window.joeyTerminal;
-            if (terminalApi && typeof terminalApi.runCommand === 'function') {
-                terminalApi.runCommand(command);
-            } else if (commandInput) {
-                commandInput.value = command;
-                commandInput.focus();
-            }
-        };
-
-        commandButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const command = button.getAttribute('data-command');
-                if (!command) return;
-                triggerCommand(command);
-            });
-        });
-
-        scrollButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const targetSelector = button.getAttribute('data-scroll-target');
-                if (!targetSelector) return;
-
-                if (targetSelector === 'body' || targetSelector === '#top') {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                    return;
-                }
-
-                const target = document.querySelector(targetSelector);
-                if (!target) return;
-
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-        });
-
-        const textBlocks = document.querySelectorAll('.text-block');
-
-        const setActiveTextBlock = (target) => {
-            textBlocks.forEach((block) => {
-                const isActive = block === target;
-                block.classList.toggle('is-active', isActive);
-                block.classList.toggle('is-dimmed', !isActive);
-                block.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            });
-        };
-
-        if (textBlocks.length) {
-            setActiveTextBlock(textBlocks[0]);
-
-            textBlocks.forEach((block) => {
-                block.addEventListener('click', () => setActiveTextBlock(block));
-                block.addEventListener('keydown', (event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        setActiveTextBlock(block);
-                    }
-                });
-            });
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        setInterval(() => {
-            const targets = document.querySelectorAll('.main-header, .sub-header, .neon-button');
-            if (!targets.length || Math.random() <= 0.7) return;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+        
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .hero-bg {
+            background: #000000;
+            position: relative;
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .project-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #FFFFFF;
+            background: #000000;
+        }
+        
+        .project-card:hover {
+            background: #FFFFFF;
+            color: #000000;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        .project-card:hover .tech-badge {
+            background: #000000;
+            color: #FFFFFF;
+        }
+        
+        .tech-badge {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #FFFFFF;
+            color: #000000;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #FFFFFF;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .social-link {
+            transition: all 0.3s ease;
+            border: 1px solid #FFFFFF;
+        }
+        
+        .social-link:hover {
+            background: #FFFFFF;
+            color: #000000;
+            transform: translateY(-2px);
+        }
+        
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal-text.revealed {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stagger-delay-1 { transition-delay: 0.1s; }
+        .stagger-delay-2 { transition-delay: 0.2s; }
+        .stagger-delay-3 { transition-delay: 0.3s; }
+        .stagger-delay-4 { transition-delay: 0.4s; }
+        .stagger-delay-5 { transition-delay: 0.5s; }
+        .stagger-delay-6 { transition-delay: 0.6s; }
+        
+        .section-divider {
+            height: 1px;
+            background: #333333;
+            margin: 4rem 0;
+        }
+        
+        .skill-item {
+            transition: all 0.3s ease;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+        }
+        
+        .skill-item:hover {
+            border-left-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 1.5rem;
+        }
+        
+        .skip-link {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #FFFFFF;
+            color: #000000;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            z-index: 9999;
+            border: 2px solid #000000;
+            border-radius: 4px;
+            transition: top 0.3s ease;
+        }
 
-            const element = targets[Math.floor(Math.random() * targets.length)];
-            const offset = Math.random() * 10 - 5;
-            element.style.transform += ` translateX(${offset}px)`;
-            setTimeout(() => {
-                element.style.transform = element.style.transform.replace(/translateX\([^)]+\)/, '');
-            }, 120);
-        }, 2000);
+        .skip-link:focus {
+            top: 20px;
+        }
 
-        setInterval(() => {
-            const arrows = document.querySelectorAll('.arrow');
-            if (!arrows.length || Math.random() <= 0.8) return;
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 4rem);
+            }
 
-            const arrow = arrows[Math.floor(Math.random() * arrows.length)];
-            arrow.style.opacity = '0.2';
-            setTimeout(() => {
-                arrow.style.opacity = '0.7';
-            }, 150);
-        }, 1000);
+            .section-title {
+                font-size: clamp(1.5rem, 5vw, 2.5rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip Navigation Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold">
+                    JOEY//DEV
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link text-lg font-semibold">Projects</a>
+                    <a href="about.html" class="nav-link text-lg font-semibold">About</a>
+                    <a href="blog.html" class="nav-link text-lg font-semibold">Blog</a>
+                    <a href="contact.html" class="nav-link text-lg font-semibold">Contact</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="text-2xl">☰</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300">
+        <div class="flex flex-col items-center justify-center h-full space-y-8">
+            <a href="index.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Projects</a>
+            <a href="about.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">About</a>
+            <a href="blog.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Blog</a>
+            <a href="contact.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Contact</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center justify-center pt-20">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <div class="mb-8">
+                <img src="resources/hero-portrait.jpg" alt="Portrait" class="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-white object-cover">
+            </div>
+            
+            <h1 class="hero-title text-6xl md:text-8xl font-black mb-6 leading-tight">
+                <span class="reveal-text">HI IM JOEY</span>
+            </h1>
+            
+            <div class="text-xl md:text-2xl font-medium mb-8 text-gray-300">
+                <span id="typed-tagline"></span>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <a href="https://github.com/joeynyc/Govee-MCP" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                    GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/joey-rodriguez-489496ab/" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                    LinkedIn
+                </a>
+                <a href="https://x.com/socialwithjoey" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                    X
+                </a>
+                <a href="#" data-email-user="info" data-email-domain="socialwithjoey.com" class="social-link px-6 py-3 font-semibold">
+                    Email
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="main-content" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="section-title text-4xl md:text-6xl font-black mb-16 text-center reveal-text">
+                Projects
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1: AI Agent Dashboard -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-1">
+                    <img src="resources/project-1.jpg" alt="AI Agent Dashboard" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">AI Agent Dashboard</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        Multi-agent system for task automation with collaborative AI agents handling code generation, data analysis, and content creation in real-time.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">React</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Node.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">OpenAI</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">LangChain</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+
+                <!-- Project 2: Financial Analysis Tool -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-2">
+                    <img src="resources/project-2.jpg" alt="Financial Analysis Tool" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">Financial Analysis Tool</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        Real-time market insights with AI-powered analysis, automated trading recommendations, and risk assessment for financial markets.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Next.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Python</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">YFinance</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">WebSocket</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+
+                <!-- Project 3: Real-time Collaboration App -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-3">
+                    <img src="resources/project-3.jpg" alt="Real-time Collaboration App" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">Real-time Collaboration App</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        Google Docs-style editor supporting multiple users with real-time synchronization, conflict resolution, and collaborative features.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">React</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Socket.IO</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">MongoDB</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">CRDT</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+
+                <!-- Project 4: Generative AI Platform -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-4">
+                    <img src="resources/project-4.jpg" alt="Generative AI Platform" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">Generative AI Platform</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        Content generation and management platform with AI-powered text, image, and code creation tools with prompt engineering interface.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Vue.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">FastAPI</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Claude API</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">PostgreSQL</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+
+                <!-- Project 5: Web Development Portfolio -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-5">
+                    <img src="resources/project-5.jpg" alt="Web Development Portfolio" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">Advanced Portfolio Site</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        Personal website with Swiss/Brutalist design, advanced animations, and interactive elements showcasing modern web development skills.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Next.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Tailwind</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Anime.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Framer Motion</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+
+                <!-- Project 6: System Architecture Tool -->
+                <div class="project-card p-6 rounded-lg reveal-text stagger-delay-6">
+                    <img src="resources/project-6.jpg" alt="System Architecture Tool" class="w-full h-48 object-cover mb-4 rounded">
+                    <h3 class="text-2xl font-bold mb-3">System Architecture Tool</h3>
+                    <p class="text-gray-400 mb-4 text-sm leading-relaxed">
+                        AI-powered system design assistant with visual diagramming, architecture templates, and intelligent component recommendations.
+                    </p>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">React</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">D3.js</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">GraphQL</span>
+                        <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Redis</span>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="font-semibold hover:underline">Live Demo</a>
+                        <a href="#" class="font-semibold hover:underline">GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider max-w-7xl mx-auto px-6"></div>
+
+    <!-- Skills Section -->
+    <section class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="section-title text-4xl md:text-6xl font-black mb-16 text-center reveal-text">
+                Skills
+            </h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Agentic + GenAI Tools -->
+                <div class="reveal-text">
+                    <h3 class="text-3xl font-bold mb-8 border-b-2 border-white pb-4">
+                        Agentic + GenAI Tools
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">LangChain & LlamaIndex</div>
+                            <div class="text-gray-400 text-sm">Agent orchestration and document processing</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">OpenAI & Claude APIs</div>
+                            <div class="text-gray-400 text-sm">Large language model integration</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">Vector Databases</div>
+                            <div class="text-gray-400 text-sm">Pinecone, Weaviate, ChromaDB</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">Embedding Models</div>
+                            <div class="text-gray-400 text-sm">Text and image embeddings for RAG</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">AutoGPT & BabyAGI</div>
+                            <div class="text-gray-400 text-sm">Autonomous agent frameworks</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">Generative AI Platforms</div>
+                            <div class="text-gray-400 text-sm">Custom model training and deployment</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Web Development -->
+                <div class="reveal-text">
+                    <h3 class="text-3xl font-bold mb-8 border-b-2 border-white pb-4">
+                        Web Development
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">React & Next.js</div>
+                            <div class="text-gray-400 text-sm">Modern frontend frameworks and SSR</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">TypeScript</div>
+                            <div class="text-gray-400 text-sm">Type-safe JavaScript development</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">Node.js & Express</div>
+                            <div class="text-gray-400 text-sm">Backend API development</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">PostgreSQL & MongoDB</div>
+                            <div class="text-gray-400 text-sm">Database design and optimization</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">WebRTC & Socket.IO</div>
+                            <div class="text-gray-400 text-sm">Real-time communication</div>
+                        </div>
+                        <div class="skill-item py-2">
+                            <div class="font-semibold text-lg">Tailwind CSS & Framer Motion</div>
+                            <div class="text-gray-400 text-sm">Styling and animations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto text-center">
+            <p class="text-gray-400">
+                © <span id="current-year"></span> JOEY RODRIGUEZ. Built with modern web technologies and AI-assisted development.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
     </script>
+    <script src="main.js"></script>
 </body>
 </html>
