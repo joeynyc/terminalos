@@ -862,8 +862,40 @@
                     });
                 });
 
+                // Make entire card clickable
+                this.makeCardsClickable();
+
                 // Initialize counts
                 this.updateCounts();
+            }
+
+            makeCardsClickable() {
+                this.projectCards.forEach(card => {
+                    // Find the link inside the card
+                    const link = card.querySelector('.view-project');
+
+                    if (link && link.tagName === 'A') {
+                        // Make entire card clickable
+                        card.style.cursor = 'pointer';
+
+                        card.addEventListener('click', (e) => {
+                            // Don't trigger if clicking directly on the link (to allow normal behavior)
+                            if (e.target.closest('.view-project')) {
+                                return;
+                            }
+
+                            // Open the link
+                            const url = link.getAttribute('href');
+                            const target = link.getAttribute('target');
+
+                            if (target === '_blank') {
+                                window.open(url, '_blank');
+                            } else {
+                                window.location.href = url;
+                            }
+                        });
+                    }
+                });
             }
 
             setActiveFilter(activeBtn) {
