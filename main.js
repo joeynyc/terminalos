@@ -220,18 +220,32 @@ function validateContactForm(data) {
     return true;
 }
 
-// Simulate form submission
+// Submit form via EmailJS
 function submitContactForm(data) {
     return new Promise((resolve, reject) => {
-        // Simulate API call delay
-        setTimeout(() => {
-            // Simulate success (90% success rate)
-            if (Math.random() > 0.1) {
+        // EmailJS configuration
+        const serviceID = 'service_zhabk3t';
+        const templateID = 'template_fmyj74w';
+
+        // Prepare template parameters
+        const templateParams = {
+            name: data.name,
+            email: data.email,
+            subject: data.subject,
+            message: data.message,
+            budget: data.budget || 'Not specified'
+        };
+
+        // Send email via EmailJS
+        emailjs.send(serviceID, templateID, templateParams)
+            .then((response) => {
+                console.log('Email sent successfully!', response.status, response.text);
                 resolve({ success: true, data });
-            } else {
-                reject(new Error('Submission failed'));
-            }
-        }, 1500);
+            })
+            .catch((error) => {
+                console.error('Failed to send email:', error);
+                reject(error);
+            });
     });
 }
 
