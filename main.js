@@ -223,6 +223,11 @@ function validateContactForm(data) {
 // Submit form via EmailJS
 function submitContactForm(data) {
     return new Promise((resolve, reject) => {
+        // ⚠️ SECURITY WARNING: Service and Template IDs are exposed client-side
+        // This is acceptable for EmailJS but consider:
+        // - Monitoring dashboard for abuse
+        // - Implementing server-side rate limiting
+        // - Adding reCAPTCHA for production
         // EmailJS configuration
         const serviceID = 'service_zhabk3t';
         const templateID = 'template_fmyj74w';

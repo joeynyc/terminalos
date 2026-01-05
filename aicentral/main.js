@@ -1,7 +1,11 @@
 // AI Central Dashboard - Main JavaScript
 
+// ⚠️ SECURITY WARNING: Never commit API keys to source control!
 // GNews API Configuration
-const NEWS_API_KEY = 'f3156c16725fa6ea9f9cbbdc2dc63198'; // Get free API key from https://gnews.io/
+// IMPORTANT: Replace 'YOUR_API_KEY_HERE' with your actual API key
+// Get a free API key from https://gnews.io/
+// For production, use environment variables or a backend proxy
+const NEWS_API_KEY = 'YOUR_API_KEY_HERE'; // TODO: Add your GNews API key here
 const NEWS_API_BASE_URL = 'https://gnews.io/api/v4';
 
 // Company search terms for API queries
