@@ -1,0 +1,145 @@
+/* =========================================================================
+   Design Tokens - CSS Custom Properties
+   Single source of truth for all design values
+   ========================================================================= */
+
+:root {
+    /* ===== Viewport ===== */
+    --vh: 1vh; /* Mobile viewport height fix */
+
+    /* ===== Base Colors ===== */
+    --color-black: #000;
+    --color-white: #fff;
+    --color-dark-gray: #0a0a0a;
+    --color-medium-gray: #1a1a1a;
+    --color-light-gray: #2d2d2d;
+    --color-border-gray: #333;
+
+    /* ===== Theme Colors (Default: Matrix Green) ===== */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #000;
+    --bg-header: #2d2d2d;
+    --border-color: #333;
+    --text-primary: #00ff00;
+    --text-secondary: #ccc;
+    --accent-color: #00ff00;
+    --glow-color: rgba(0, 255, 0, 0.3);
+    --glow-color-intense: rgba(0, 255, 0, 0.5);
+    --scrollbar-thumb: #00ff00;
+    --scrollbar-thumb-hover: #00cc00;
+    --matrix-color: #00ff41;
+
+    /* ===== Status Colors ===== */
+    --error-color: #ff6b6b;
+    --success-color: #51cf66;
+    --info-color: #74c0fc;
+    --warning-color: #ffd43b;
+    --hidden-content-color: #ff6b6b;
+
+    /* ===== Glitch Effect Colors (Magenta) ===== */
+    --glitch-magenta: rgb(255, 0, 255);
+    --glitch-magenta-05: rgba(255, 0, 255, 0.05);
+    --glitch-magenta-35: rgba(255, 0, 255, 0.35);
+    --glitch-magenta-40: rgba(255, 0, 255, 0.4);
+    --glitch-magenta-45: rgba(255, 0, 255, 0.45);
+    --glitch-magenta-60: rgba(255, 0, 255, 0.6);
+    --glitch-magenta-70: rgba(255, 0, 255, 0.7);
+
+    /* ===== Accent Green Variations ===== */
+    --green-15: rgba(0, 255, 0, 0.15);
+    --green-18: rgba(0, 255, 0, 0.18);
+    --green-50: rgba(0, 255, 0, 0.5);
+    --green-60: rgba(0, 255, 0, 0.6);
+    --green-70: rgba(0, 255, 0, 0.7);
+
+    /* ===== Cyan Accent ===== */
+    --cyan-accent: rgba(0, 255, 136, 0.35);
+
+    /* ===== White Overlays ===== */
+    --white-05: rgba(255, 255, 255, 0.05);
+    --white-10: rgba(255, 255, 255, 0.1);
+    --white-72: rgba(255, 255, 255, 0.72);
+    --white-78: rgba(255, 255, 255, 0.78);
+
+    /* ===== Black Overlays ===== */
+    --black-70: rgba(0, 0, 0, 0.7);
+    --black-85: rgba(0, 0, 0, 0.85);
+    --black-90: rgba(0, 0, 0, 0.9);
+    --black-95: rgba(0, 0, 0, 0.95);
+
+    /* ===== Dark Overlays ===== */
+    --dark-60: rgba(10, 10, 10, 0.6);
+    --dark-95: rgba(10, 10, 10, 0.95);
+
+    /* ===== Spacing Scale ===== */
+    --space-xs: 0.25rem;   /* 4px */
+    --space-sm: 0.5rem;    /* 8px */
+    --space-md: 1rem;      /* 16px */
+    --space-lg: 1.5rem;    /* 24px */
+    --space-xl: 2rem;      /* 32px */
+    --space-2xl: 3rem;     /* 48px */
+    --space-3xl: 4rem;     /* 64px */
+
+    /* ===== Typography ===== */
+    --font-mono: 'Source Code Pro', 'Courier New', monospace;
+    --font-display: 'VT323', monospace;
+
+    --font-size-xs: 0.75rem;   /* 12px */
+    --font-size-sm: 0.875rem;  /* 14px */
+    --font-size-md: 1rem;      /* 16px */
+    --font-size-lg: 1.125rem;  /* 18px */
+    --font-size-xl: 1.25rem;   /* 20px */
+    --font-size-2xl: 1.5rem;   /* 24px */
+    --font-size-3xl: 2rem;     /* 32px */
+    --font-size-4xl: 2.5rem;   /* 40px */
+
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+
+    /* ===== Border Radius ===== */
+    --radius-sm: 3px;
+    --radius-md: 5px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+
+    /* ===== Transitions ===== */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    --transition-glitch: 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* ===== Shadows ===== */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 10px var(--glow-color);
+    --shadow-glow-intense: 0 0 20px var(--glow-color-intense);
+
+    /* ===== Backdrop Filters ===== */
+    --backdrop-blur-sm: blur(4px);
+    --backdrop-blur-md: blur(10px);
+    --backdrop-blur-lg: blur(20px);
+
+    /* ===== Z-Index Scale ===== */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-popover: 600;
+    --z-tooltip: 700;
+
+    /* ===== Animation Timings ===== */
+    --anim-glitch-duration: 0.4s;
+    --anim-scan-duration: 8s;
+    --anim-flicker-duration: 0.03s;
+    --anim-boot-duration: 0.6s;
+
+    /* ===== Breakpoints (for reference in JS/media queries) ===== */
+    --breakpoint-mobile: 768px;
+    --breakpoint-tablet: 1024px;
+    --breakpoint-desktop: 1280px;
+}

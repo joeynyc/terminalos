@@ -49,3 +49,15 @@ build/
 # Temporary files
 *.tmp
 *.temp
+
+# Backup files
+*.backup
+*-backup.html
+*-backup.js
+*-backup.css
+blog-old.html
+
+# Test artifacts
+playwright-report/
+test-results/
+.claude/

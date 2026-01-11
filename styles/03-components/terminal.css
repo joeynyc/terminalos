@@ -1,0 +1,211 @@
+/* =========================================================================
+   Terminal Component
+   Main terminal UI with header, body, input/output, and animations
+   ========================================================================= */
+
+/* ===== Terminal Container ===== */
+.terminal-container {
+    width: min(90%, 1000px);
+    max-width: clamp(300px, 90vw, 1000px);
+    height: clamp(400px, 80vh, 800px);
+    background: var(--dark-60);
+    backdrop-filter: var(--backdrop-blur-lg);
+    -webkit-backdrop-filter: var(--backdrop-blur-lg);
+    border-radius: var(--radius-xl);
+    box-shadow:
+        0 8px 32px var(--black-85),
+        0 0 30px var(--glow-color),
+        inset 0 1px 0 var(--white-05);
+    border: 1px solid var(--white-10);
+    display: flex;
+    flex-direction: column;
+    animation: terminalGlow 2s ease-in-out infinite alternate;
+    transition: all var(--transition-base);
+    overflow: hidden;
+}
+
+@keyframes terminalGlow {
+    0% { box-shadow: 0 0 30px var(--glow-color); }
+    100% { box-shadow: 0 0 40px var(--glow-color-intense); }
+}
+
+/* ===== Terminal Header ===== */
+.terminal-header {
+    background: rgba(45, 45, 45, 0.4);
+    backdrop-filter: var(--backdrop-blur-md);
+    -webkit-backdrop-filter: var(--backdrop-blur-md);
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    border-bottom: 1px solid var(--white-10);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    transition: all var(--transition-base);
+}
+
+.terminal-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.close { background: #ff5f57; }
+.minimize { background: #ffbd2e; }
+.maximize { background: #28ca42; }
+
+.terminal-title {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    margin-left: 20px;
+    font-weight: 500;
+    transition: color var(--transition-base);
+}
+
+/* ===== Terminal Body ===== */
+.terminal-body {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 20px;
+    overflow-y: auto;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    transition: all var(--transition-base);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+/* ===== Output Styling ===== */
+.output {
+    margin-bottom: 10px;
+}
+
+.boot-sequence {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.boot-line {
+    margin-bottom: 5px;
+    animation: typewriter 1s steps(40) forwards;
+}
+
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+.command-line {
+    margin-bottom: 5px;
+    color: var(--text-primary);
+    transition: color var(--transition-base);
+}
+
+.command-output {
+    margin-bottom: 10px;
+    padding-left: 0;
+    white-space: pre-wrap;
+    animation: fadeIn var(--transition-base) ease-in;
+}
+
+.command-output.error {
+    color: var(--error-color);
+}
+
+.command-output.success {
+    color: var(--success-color);
+}
+
+.command-output.info {
+    color: var(--info-color);
+}
+
+.command-output.warning {
+    color: var(--warning-color);
+}
+
+/* ===== Input Line ===== */
+.input-line {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.prompt {
+    color: var(--accent-color);
+    margin-right: 5px;
+    font-weight: 600;
+    transition: color var(--transition-base);
+}
+
+.command-input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    flex: 1;
+    caret-color: transparent;
+    transition: color var(--transition-base);
+}
+
+.cursor {
+    color: var(--accent-color);
+    animation: blink 1s infinite;
+    position: absolute;
+    pointer-events: none;
+    transition: color var(--transition-base);
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ===== ASCII Art ===== */
+.ascii-art {
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+    margin: 10px 0;
+    white-space: pre;
+    transition: color var(--transition-base);
+}
+
+/* ===== Special Effects ===== */
+.hidden-content {
+    color: var(--hidden-content-color);
+    font-weight: bold;
+    animation: glitch 0.5s ease-in-out;
+}
+
+@keyframes glitch {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-2px); }
+    40% { transform: translateX(2px); }
+    60% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+    100% { transform: translateX(0); }
+}
+
+.matrix-effect {
+    color: var(--matrix-color);
+    animation: matrix 2s linear infinite;
+}
+
+@keyframes matrix {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}

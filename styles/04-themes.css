@@ -1,0 +1,132 @@
+/* =========================================================================
+   Theme System - Color Scheme Variations
+   Override design tokens for different color themes
+   ========================================================================= */
+
+/* ===== Blue Theme ===== */
+[data-theme="blue"] {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #1a1a2a;
+    --bg-tertiary: #000011;
+    --bg-header: #2d2d3d;
+    --border-color: #334;
+    --text-primary: #00aaff;
+    --text-secondary: #ccd;
+    --accent-color: #00aaff;
+    --glow-color: rgba(0, 170, 255, 0.3);
+    --glow-color-intense: rgba(0, 170, 255, 0.5);
+    --scrollbar-thumb: #00aaff;
+    --scrollbar-thumb-hover: #0088cc;
+    --matrix-color: #00ccff;
+}
+
+/* ===== Amber Theme ===== */
+[data-theme="amber"] {
+    --bg-primary: #1a1a0a;
+    --bg-secondary: #2a2a1a;
+    --bg-tertiary: #111100;
+    --bg-header: #3d3d2d;
+    --border-color: #443;
+    --text-primary: #ffaa00;
+    --text-secondary: #ddcc;
+    --accent-color: #ffaa00;
+    --glow-color: rgba(255, 170, 0, 0.3);
+    --glow-color-intense: rgba(255, 170, 0, 0.5);
+    --scrollbar-thumb: #ffaa00;
+    --scrollbar-thumb-hover: #cc8800;
+    --matrix-color: #ffcc41;
+}
+
+/* ===== Purple Theme ===== */
+[data-theme="purple"] {
+    --bg-primary: #1a0a1a;
+    --bg-secondary: #2a1a2a;
+    --bg-tertiary: #110011;
+    --bg-header: #3d2d3d;
+    --border-color: #434;
+    --text-primary: #aa00ff;
+    --text-secondary: #dcd;
+    --accent-color: #aa00ff;
+    --glow-color: rgba(170, 0, 255, 0.3);
+    --glow-color-intense: rgba(170, 0, 255, 0.5);
+    --scrollbar-thumb: #aa00ff;
+    --scrollbar-thumb-hover: #8800cc;
+    --matrix-color: #cc41ff;
+}
+
+/* ===== Red Theme ===== */
+[data-theme="red"] {
+    --bg-primary: #1a0a0a;
+    --bg-secondary: #2a1a1a;
+    --bg-tertiary: #110000;
+    --bg-header: #3d2d2d;
+    --border-color: #434;
+    --text-primary: #ff0044;
+    --text-secondary: #dcc;
+    --accent-color: #ff0044;
+    --glow-color: rgba(255, 0, 68, 0.3);
+    --glow-color-intense: rgba(255, 0, 68, 0.5);
+    --scrollbar-thumb: #ff0044;
+    --scrollbar-thumb-hover: #cc0033;
+    --matrix-color: #ff4177;
+}
+
+/* ===== Cyan Theme ===== */
+[data-theme="cyan"] {
+    --bg-primary: #0a1a1a;
+    --bg-secondary: #1a2a2a;
+    --bg-tertiary: #001111;
+    --bg-header: #2d3d3d;
+    --border-color: #344;
+    --text-primary: #00ffaa;
+    --text-secondary: #cdd;
+    --accent-color: #00ffaa;
+    --glow-color: rgba(0, 255, 170, 0.3);
+    --glow-color-intense: rgba(0, 255, 170, 0.5);
+    --scrollbar-thumb: #00ffaa;
+    --scrollbar-thumb-hover: #00cc88;
+    --matrix-color: #41ffcc;
+}
+
+/* ===== Retro Theme ===== */
+[data-theme="retro"] {
+    --bg-primary: #2a1810;
+    --bg-secondary: #3a2820;
+    --bg-tertiary: #1a1008;
+    --bg-header: #4a3830;
+    --border-color: #544;
+    --text-primary: #ff8800;
+    --text-secondary: #ddc;
+    --accent-color: #ff8800;
+    --glow-color: rgba(255, 136, 0, 0.3);
+    --glow-color-intense: rgba(255, 136, 0, 0.5);
+    --scrollbar-thumb: #ff8800;
+    --scrollbar-thumb-hover: #cc6600;
+    --matrix-color: #ffaa41;
+}
+
+/* ===== Theme Preview Swatches ===== */
+.theme-preview {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    margin-right: 10px;
+    vertical-align: middle;
+    border: 1px solid var(--border-color);
+}
+
+.theme-preview.green { background: #00ff00; }
+.theme-preview.blue { background: #00aaff; }
+.theme-preview.amber { background: #ffaa00; }
+.theme-preview.purple { background: #aa00ff; }
+.theme-preview.red { background: #ff0044; }
+.theme-preview.cyan { background: #00ffaa; }
+.theme-preview.retro { background: #ff8800; }
+
+/* ===== Theme Transition Animation ===== */
+@keyframes themeTransition {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+    100% { filter: brightness(1); }
+}

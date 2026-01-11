@@ -1,0 +1,55 @@
+/* =========================================================================
+   Reset & Base Styles
+   Browser normalization and fundamental element styles
+   ========================================================================= */
+
+/* ===== CSS Reset ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===== Body Base Styles ===== */
+body {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: background var(--transition-base);
+    position: relative;
+    gap: 20px;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* ===== Body State Modifiers ===== */
+body.boot-active {
+    overflow: hidden;
+}
+
+body.boot-active .floating-nav,
+body.boot-active .terminal-container {
+    filter: blur(6px);
+    opacity: 0.25;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity var(--anim-boot-duration) ease, filter var(--anim-boot-duration) ease;
+}
+
+body.case-study-open {
+    overflow: hidden;
+}
+
+body.case-study-open .floating-nav,
+body.case-study-open .terminal-container {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+    transition: opacity var(--anim-boot-duration) ease, filter var(--anim-boot-duration) ease;
+}
