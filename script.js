@@ -435,6 +435,13 @@ class CaseStudyViewer {
         this.activeIndex = safeIndex;
         this.render();
 
+        // Accessibility: Set dialog role and modal attributes
+        this.overlay.setAttribute('role', 'dialog');
+        this.overlay.setAttribute('aria-modal', 'true');
+        if (this.titleElement) {
+            this.overlay.setAttribute('aria-labelledby', 'case-title');
+        }
+
         this.overlay.classList.add('case-overlay--open');
         this.overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('case-study-open');
@@ -585,6 +592,17 @@ class Terminal {
         this.currentDirectory = '~';
         this.currentTheme = 'green';
         this.terminalZone = document.getElementById('terminal-zone');
+
+        // Accessibility: Add aria-live region for terminal output
+        if (this.output) {
+            this.output.setAttribute('role', 'log');
+            this.output.setAttribute('aria-live', 'polite');
+            this.output.setAttribute('aria-atomic', 'false');
+            this.output.setAttribute('aria-relevant', 'additions');
+        }
+
+        // Create screen reader announcer element
+        this.createScreenReaderAnnouncer();
 
         // Mobile detection and device capabilities
         this.deviceInfo = this.detectDevice();
@@ -1120,12 +1138,52 @@ class Terminal {
         this.input.addEventListener('keydown', (e) => this.handleKeydown(e));
         this.input.addEventListener('input', () => this.updateCursorPosition());
         this.focusInput();
-        
+
         // Keep input focused
         document.addEventListener('click', () => this.focusInput());
-        
+
         // Initial cursor positioning
         this.updateCursorPosition();
+    }
+
+    /**
+     * Create a visually hidden element for screen reader announcements
+     */
+    createScreenReaderAnnouncer() {
+        const announcer = document.createElement('div');
+        announcer.id = 'sr-announcer';
+        announcer.setAttribute('role', 'status');
+        announcer.setAttribute('aria-live', 'polite');
+        announcer.setAttribute('aria-atomic', 'true');
+        // Visually hidden but accessible to screen readers
+        announcer.style.cssText = `
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        `;
+        document.body.appendChild(announcer);
+        this.srAnnouncer = announcer;
+    }
+
+    /**
+     * Announce a message to screen readers
+     * @param {string} message - The message to announce
+     */
+    announce(message) {
+        if (!this.srAnnouncer) {
+            this.createScreenReaderAnnouncer();
+        }
+        // Clear and re-set to ensure announcement is read
+        this.srAnnouncer.textContent = '';
+        requestAnimationFrame(() => {
+            this.srAnnouncer.textContent = message;
+        });
     }
 
     updateCursorPosition() {
@@ -2019,11 +2077,23 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
         const navToggle = nav ? nav.querySelector('.nav-toggle') : null;
         const navContainer = nav ? nav.querySelector('.nav-container') : null;
         const navItems = navContainer ? navContainer.querySelectorAll('.nav-item') : [];
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 
         const setNavOpen = (open) => {
             if (!nav || !navToggle) return;
             nav.classList.toggle('nav-open', open);
             navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        };
+
+        // Update mobile menu ARIA attributes
+        const setMobileMenuOpen = (open) => {
+            if (mobileMenu) {
+                mobileMenu.setAttribute('aria-hidden', open ? 'false' : 'true');
+            }
+            if (mobileMenuBtn) {
+                mobileMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
         };
 
         const syncNavToViewport = () => {
@@ -2033,6 +2103,22 @@ ${this.isMobile ? '• Mobile UI adjustments\n• Touch gesture support\n• Mob
             navToggle.disabled = isDesktop;
             navToggle.setAttribute('aria-hidden', isDesktop ? 'true' : 'false');
         };
+
+        // Mobile menu button click handler
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                const isOpen = mobileMenu.classList.contains('translate-x-full');
+                if (isOpen) {
+                    mobileMenu.classList.remove('translate-x-full');
+                    setMobileMenuOpen(true);
+                    this.announce('Navigation menu opened');
+                } else {
+                    mobileMenu.classList.add('translate-x-full');
+                    setMobileMenuOpen(false);
+                    this.announce('Navigation menu closed');
+                }
+            });
+        }
 
         if (navToggle) {
             navToggle.addEventListener('click', () => {

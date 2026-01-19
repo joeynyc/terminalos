@@ -192,14 +192,14 @@
                     <a href="contact.html" class="nav-link text-lg font-semibold">Contact</a>
                 </div>
                 <div class="md:hidden">
-                    <button id="mobile-menu-btn" class="text-2xl">☰</button>
+                    <button id="mobile-menu-btn" class="text-2xl" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300">
+    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300" role="dialog" aria-label="Navigation menu" aria-hidden="true">
         <div class="flex flex-col items-center justify-center h-full space-y-8">
             <a href="projects.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Projects</a>
             <a href="about.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">About</a>
@@ -212,7 +212,7 @@
     <section class="hero-bg min-h-screen flex items-center justify-center pt-20">
         <div class="max-w-6xl mx-auto px-6 text-center">
             <div class="mb-8">
-                <img src="resources/hero-portrait.jpg" alt="Portrait" class="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-white object-cover">
+                <img src="resources/hero-portrait.jpg" alt="Portrait of Joey Rodriguez, AI and Web Developer" class="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-white object-cover">
             </div>
             
             <h1 class="hero-title text-6xl md:text-8xl font-black mb-6 leading-tight">
@@ -224,10 +224,10 @@
             </div>
             
             <div class="flex flex-wrap justify-center gap-4 mb-12">
-                <a href="https://github.com/joeynyc/Govee-MCP" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/joeynyc/Govee-MCP" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer" aria-label="View GitHub profile (opens in new tab)">
                     GitHub
                 </a>
-                <a href="https://x.com/socialwithjoey" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                <a href="https://x.com/socialwithjoey" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer" aria-label="View X profile (opens in new tab)">
                     X
                 </a>
             </div>
@@ -244,7 +244,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Project 1: AI Central -->
                 <div class="project-card p-6 rounded-lg reveal-text stagger-delay-1">
-                    <img src="resources/project-1.jpg" alt="AI Central Dashboard" class="w-full h-48 object-cover mb-4 rounded">
+                    <img src="resources/project-1.jpg" alt="AI Central Dashboard showing news aggregation interface with analytics" class="w-full h-48 object-cover mb-4 rounded">
                     <h3 class="text-2xl font-bold mb-3">AI Central</h3>
                     <p class="text-gray-400 mb-4 text-sm leading-relaxed">
                         AI company news aggregator with analytics dashboard tracking Google, OpenAI, Microsoft, Meta, Anthropic, and xAI with live news feeds.
@@ -262,7 +262,7 @@
 
                 <!-- Project 2: Govee MCP Server -->
                 <div class="project-card p-6 rounded-lg reveal-text stagger-delay-2">
-                    <img src="resources/project-2.jpg" alt="Govee MCP Server" class="w-full h-48 object-cover mb-4 rounded">
+                    <img src="resources/project-2.jpg" alt="Govee MCP Server interface for controlling smart home devices through Claude AI" class="w-full h-48 object-cover mb-4 rounded">
                     <h3 class="text-2xl font-bold mb-3">Govee MCP Server</h3>
                     <p class="text-gray-400 mb-4 text-sm leading-relaxed">
                         Model Context Protocol server for controlling Govee smart home devices through Claude AI, enabling natural language device control.
@@ -274,13 +274,13 @@
                         <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Node.js</span>
                     </div>
                     <div class="flex space-x-4">
-                        <a href="https://github.com/joeynyc/Govee-MCP" class="font-semibold hover:underline">Launch Project</a>
+                        <a href="https://github.com/joeynyc/Govee-MCP" class="font-semibold hover:underline" target="_blank" rel="noopener noreferrer">Launch Project</a>
                     </div>
                 </div>
 
                 <!-- Project 3: WorldClock -->
                 <div class="project-card p-6 rounded-lg reveal-text stagger-delay-3">
-                    <img src="resources/project-3.jpg" alt="WorldClock Time Zone App" class="w-full h-48 object-cover mb-4 rounded">
+                    <img src="resources/project-3.jpg" alt="WorldClock interactive mapping application with real-time location sharing" class="w-full h-48 object-cover mb-4 rounded">
                     <h3 class="text-2xl font-bold mb-3">WorldClock</h3>
                     <p class="text-gray-400 mb-4 text-sm leading-relaxed">
                         Interactive location sharing and mapping application with real-time updates and collaborative features for exploring places.
@@ -292,7 +292,7 @@
                         <span class="tech-badge px-3 py-1 text-xs font-semibold rounded">Geolocation</span>
                     </div>
                     <div class="flex space-x-4">
-                        <a href="https://joeyrodriguez.me/worldclock/" class="font-semibold hover:underline">Launch Project</a>
+                        <a href="https://joeyrodriguez.me/worldclock/" class="font-semibold hover:underline" target="_blank" rel="noopener noreferrer">Launch Project</a>
                     </div>
                 </div>
             </div>
