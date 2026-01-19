@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="Joey Rodriguez - AI & Web Developer specializing in agentic AI, generative AI tools, and modern web development with React, Next.js, and LangChain.">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -12,138 +12,152 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --accent: #00FF88;
+            --accent-dim: rgba(0, 255, 136, 0.15);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Syne', sans-serif;
             background-color: #000000;
             color: #FFFFFF;
-            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        
+
         .font-mono {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Space Mono', monospace;
         }
-        
-        .hero-bg {
-            background: #000000;
-            position: relative;
-        }
-        
-        .hero-bg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+
+        /* Subtle grid background */
+        .grid-bg {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
             pointer-events: none;
+            z-index: 0;
         }
-        
-        .project-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #FFFFFF;
-            background: #000000;
+
+        /* Accent glow in corner */
+        .corner-glow {
+            position: fixed;
+            bottom: -200px;
+            right: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
-        
-        .project-card:hover {
-            background: #FFFFFF;
-            color: #000000;
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
-        }
-        
-        .project-card:hover .tech-badge {
-            background: #000000;
-            color: #FFFFFF;
-        }
-        
-        .tech-badge {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: #FFFFFF;
-            color: #000000;
-        }
-        
+
+        /* Navigation */
         .nav-link {
             position: relative;
-            transition: all 0.3s ease;
+            transition: color 0.2s ease;
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
-            bottom: -4px;
+            bottom: -2px;
             left: 0;
             width: 0;
-            height: 2px;
-            background: #FFFFFF;
+            height: 1px;
+            background: var(--accent);
             transition: width 0.3s ease;
         }
-        
+
+        .nav-link:hover {
+            color: var(--accent);
+        }
+
         .nav-link:hover::after {
             width: 100%;
         }
-        
+
+        /* Social buttons */
         .social-link {
-            transition: all 0.3s ease;
-            border: 1px solid #FFFFFF;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: transparent;
         }
-        
+
         .social-link:hover {
             background: #FFFFFF;
             color: #000000;
-            transform: translateY(-2px);
+            border-color: #FFFFFF;
+            transform: translateY(-1px);
         }
-        
-        .reveal-text {
-            opacity: 0;
-            transform: translateY(20px);
+
+        /* Focus items */
+        .focus-item {
+            transition: all 0.2s ease;
+            border-left: 2px solid rgba(255,255,255,0.1);
         }
-        
-        .reveal-text.revealed {
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .focus-item:hover {
+            border-left-color: var(--accent);
+            background: rgba(255,255,255,0.02);
         }
-        
-        .stagger-delay-1 { transition-delay: 0.1s; }
-        .stagger-delay-2 { transition-delay: 0.2s; }
-        .stagger-delay-3 { transition-delay: 0.3s; }
-        .stagger-delay-4 { transition-delay: 0.4s; }
-        .stagger-delay-5 { transition-delay: 0.5s; }
-        .stagger-delay-6 { transition-delay: 0.6s; }
-        
-        .section-divider {
-            height: 1px;
-            background: #333333;
-            margin: 4rem 0;
+
+        .focus-item:hover .focus-icon {
+            color: var(--accent);
         }
-        
-        .skill-item {
-            transition: all 0.3s ease;
-            border-left: 2px solid transparent;
-            padding-left: 1rem;
+
+        /* Typing cursor */
+        .typed-cursor {
+            color: var(--accent);
         }
-        
-        .skill-item:hover {
-            border-left-color: #FFFFFF;
-            background: rgba(255, 255, 255, 0.05);
-            padding-left: 1.5rem;
+
+        /* Portrait ring animation */
+        .portrait-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            opacity: 0.4;
+            animation: pulse-ring 3s ease-in-out infinite;
         }
-        
+
+        @keyframes pulse-ring {
+            0%, 100% { transform: scale(1); opacity: 0.4; }
+            50% { transform: scale(1.05); opacity: 0.2; }
+        }
+
+        /* Status indicator */
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Skip link */
         .skip-link {
             position: fixed;
             top: -100px;
@@ -151,142 +165,143 @@
             transform: translateX(-50%);
             background: #FFFFFF;
             color: #000000;
-            padding: 0.75rem 1.5rem;
+            padding: 0.5rem 1rem;
             font-weight: 600;
             z-index: 9999;
-            border: 2px solid #000000;
-            border-radius: 4px;
             transition: top 0.3s ease;
         }
 
         .skip-link:focus {
-            top: 20px;
+            top: 10px;
         }
 
+        /* Mobile adjustments */
         @media (max-width: 768px) {
             .hero-title {
-                font-size: clamp(2rem, 8vw, 4rem);
+                font-size: clamp(2.5rem, 12vw, 4rem);
             }
 
-            .section-title {
-                font-size: clamp(1.5rem, 5vw, 2.5rem);
+            .focus-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .portrait-container {
+                width: 80px !important;
+                height: 80px !important;
+            }
+
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 3rem) !important;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Background elements -->
+    <div class="grid-bg"></div>
+    <div class="corner-glow"></div>
+
     <!-- Skip Navigation Link -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#main-content" class="skip-link font-mono text-sm">Skip to main content</a>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="text-xl font-bold">
-                    JOEY//DEV
-                </div>
-                <div class="hidden md:flex space-x-8">
-                    <a href="projects.html" class="nav-link text-lg font-semibold">Projects</a>
-                    <a href="about.html" class="nav-link text-lg font-semibold">About</a>
-                    <a href="contact.html" class="nav-link text-lg font-semibold">Contact</a>
-                </div>
-                <div class="md:hidden">
-                    <button id="mobile-menu-btn" class="text-2xl">☰</button>
-                </div>
-            </div>
+    <nav class="relative z-10 px-6 py-4 flex justify-between items-center border-b border-white/10">
+        <div class="font-mono text-sm tracking-wider text-white/60">
+            JOEY<span class="text-white">//</span>DEV
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="projects.html" class="nav-link font-mono text-sm tracking-wide text-white/70">Projects</a>
+            <a href="about.html" class="nav-link font-mono text-sm tracking-wide text-white/70">About</a>
+            <a href="contact.html" class="nav-link font-mono text-sm tracking-wide text-white/70">Contact</a>
         </div>
     </nav>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="fixed inset-0 bg-black z-40 transform translate-x-full transition-transform duration-300">
-        <div class="flex flex-col items-center justify-center h-full space-y-8">
-            <a href="projects.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Projects</a>
-            <a href="about.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">About</a>
-            <a href="contact.html" class="text-2xl font-bold hover:text-gray-400 transition-colors">Contact</a>
-        </div>
-    </div>
+    <!-- Main Content - Single Viewport -->
+    <main id="main-content" class="relative z-10 flex-1 flex flex-col justify-center items-center px-6 py-8">
+        <div class="w-full max-w-2xl flex flex-col items-center text-center gap-6">
 
-    <!-- Hero Section -->
-    <section class="hero-bg min-h-screen flex items-center justify-center pt-20">
-        <div class="max-w-6xl mx-auto px-6 text-center">
-            <div class="mb-8">
-                <img src="resources/hero-portrait.jpg" alt="Portrait" class="w-32 h-32 rounded-full mx-auto mb-6 border-2 border-white object-cover">
+            <!-- Portrait -->
+            <div class="portrait-container relative w-24 h-24 md:w-28 md:h-28">
+                <div class="portrait-ring"></div>
+                <img src="resources/hero-portrait.jpg" alt="Joey Rodriguez" class="w-full h-full rounded-full object-cover border border-white/20">
             </div>
-            
-            <h1 class="hero-title text-6xl md:text-8xl font-black mb-6 leading-tight">
-                <span class="reveal-text">HI IM JOEY</span>
+
+            <!-- Name -->
+            <h1 class="hero-title text-5xl md:text-7xl font-extrabold tracking-tight leading-none">
+                HI, I'M JOEY
             </h1>
-            
-            <div class="text-xl md:text-2xl font-medium mb-8 text-gray-300">
+
+            <!-- Tagline -->
+            <div class="font-mono text-base md:text-lg text-white/60 h-7">
                 <span id="typed-tagline"></span>
             </div>
-            
-            <div class="flex flex-wrap justify-center gap-4 mb-12">
-                <a href="https://github.com/joeynyc/Govee-MCP" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+
+            <!-- Social Links -->
+            <div class="flex gap-3 mt-2">
+                <a href="https://github.com/joeynyc" class="social-link font-mono text-sm px-5 py-2 rounded-full" target="_blank" rel="noopener noreferrer">
                     GitHub
                 </a>
-                <a href="https://x.com/socialwithjoey" class="social-link px-6 py-3 font-semibold" target="_blank" rel="noopener noreferrer">
+                <a href="https://x.com/socialwithjoey" class="social-link font-mono text-sm px-5 py-2 rounded-full" target="_blank" rel="noopener noreferrer">
                     X
                 </a>
             </div>
-        </div>
-    </section>
 
-    <!-- Currently Exploring Section -->
-    <section class="py-20 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-4xl md:text-5xl font-black mb-12 reveal-text revealed">
-                Currently Exploring
-            </h2>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div class="reveal-text stagger-delay-1 revealed">
-                    <div class="w-12 h-12 mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
-                    </div>
-                    <h3 class="font-semibold">Multi-Agent Systems</h3>
+            <!-- Currently Exploring - Compact -->
+            <div class="w-full mt-6 pt-6 border-t border-white/10">
+                <div class="flex items-center justify-center gap-2 mb-4">
+                    <div class="status-dot"></div>
+                    <span class="font-mono text-xs tracking-widest text-white/40 uppercase">Currently Exploring</span>
                 </div>
-                <div class="reveal-text stagger-delay-2 revealed">
-                    <div class="w-12 h-12 mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                        </svg>
+                <div class="focus-grid grid grid-cols-4 gap-2 md:gap-4">
+                    <div class="focus-item p-3 text-center">
+                        <div class="focus-icon text-white/40 mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5A2.25 2.25 0 006.75 19.5z" />
+                            </svg>
+                        </div>
+                        <span class="font-mono text-xs text-white/50">Multi-Agent</span>
                     </div>
-                    <h3 class="font-semibold">Agent Architecture</h3>
-                </div>
-                <div class="reveal-text stagger-delay-3 revealed">
-                    <div class="w-12 h-12 mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                        </svg>
+                    <div class="focus-item p-3 text-center">
+                        <div class="focus-icon text-white/40 mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                            </svg>
+                        </div>
+                        <span class="font-mono text-xs text-white/50">Architecture</span>
                     </div>
-                    <h3 class="font-semibold">LLM Agents</h3>
-                </div>
-                <div class="reveal-text stagger-delay-4 revealed">
-                    <div class="w-12 h-12 mx-auto mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-full h-full">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
-                        </svg>
+                    <div class="focus-item p-3 text-center">
+                        <div class="focus-icon text-white/40 mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                            </svg>
+                        </div>
+                        <span class="font-mono text-xs text-white/50">LLM Agents</span>
                     </div>
-                    <h3 class="font-semibold">Agent Tools</h3>
+                    <div class="focus-item p-3 text-center">
+                        <div class="focus-icon text-white/40 mb-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+                            </svg>
+                        </div>
+                        <span class="font-mono text-xs text-white/50">Tooling</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </main>
 
-    <!-- Footer -->
-    <footer class="py-12 px-6 border-t border-gray-800">
-        <div class="max-w-7xl mx-auto text-center">
-            <p class="text-gray-400">
-                © <span id="current-year"></span> JOEY RODRIGUEZ. Built with modern web technologies and AI-assisted development.
-            </p>
-        </div>
+    <!-- Minimal Footer -->
+    <footer class="relative z-10 px-6 py-3 text-center border-t border-white/5">
+        <p class="font-mono text-xs text-white/30">
+            © <span id="current-year"></span> JOEY RODRIGUEZ
+        </p>
     </footer>
 
     <script>
         document.getElementById('current-year').textContent = new Date().getFullYear();
+        // Typed.js is initialized in main.js - do not duplicate here
     </script>
     <script src="main.js"></script>
 </body>
